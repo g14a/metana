@@ -10,15 +10,17 @@ import (
 	"time"
 )
 
-func CreateMigrationFile(file string) {
+func CreateMigrationFile(file string) (string, error) {
 	nm := tpl.NewMigration{
 		Name:      strcase.ToCamel(file),
 		Timestamp: strconv.Itoa(int(time.Now().Unix())),
 	}
 
-	mainFile, err := os.Create(fmt.Sprintf("migrations/%s-%s.go", nm.Timestamp, nm.Name))
+	fileName := fmt.Sprintf("migrations/%s-%s.go", nm.Timestamp, nm.Name)
+
+	mainFile, err := os.Create(fileName)
 	if err != nil {
-		fmt.Println(err)
+		return "", err
 	}
 
 	defer mainFile.Close()
@@ -26,8 +28,10 @@ func CreateMigrationFile(file string) {
 	mainTemplate := template.Must(template.New("main").Parse(string(tpl.MainTemplate())))
 	err = mainTemplate.Execute(mainFile, nm)
 	if err != nil {
-		fmt.Println(err)
+		return "", err
 	}
+
+	return fileName, nil
 }
 
 func CreateInitConfig() {

@@ -1,7 +1,8 @@
 package tpl
 
 func MainTemplate() []byte {
-	return []byte(`
+	return []byte(`package migrations
+
 import (
 	"fmt"
 )

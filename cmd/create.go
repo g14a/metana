@@ -16,8 +16,11 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"go-migrate/pkg/file"
+	"log"
+	"os"
 )
 
 // createCmd represents the create command
@@ -26,7 +29,12 @@ var createCmd = &cobra.Command{
 	Short: "create a migration script in Go",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		file.CreateMigrationFile(args[0])
+		fileName, err := file.CreateMigrationFile(args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+		wd, _ := os.Getwd()
+		color.Green("✓ Created " + wd + "/" + fileName)
 	},
 }
 

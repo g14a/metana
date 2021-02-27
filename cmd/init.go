@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"go-migrate/pkg/file"
 	"os"
@@ -29,6 +30,7 @@ var initCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = os.MkdirAll("migrations/interfaces", 0755)
 		file.CreateInitConfig()
+		color.Green("✓ Created migrations/interfaces/interface.go")
 	},
 }
 
