@@ -34,12 +34,14 @@ var upCmd = &cobra.Command{
 		wd, err := os.Getwd()
 		migrationsBuild.Dir = wd + "/migrations"
 
-		err = migrationsBuild.Run()
+		build, err := migrationsBuild.Output()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		migrationsRun := exec.Command("./migrations")
+		fmt.Println(string(build))
+
+		migrationsRun := exec.Command("./migrations","up")
 		migrationsRun.Dir = wd + "/migrations"
 		b, err := migrationsRun.Output()
 		if err != nil {

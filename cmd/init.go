@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"go-migrate/pkg/gen"
+	"log"
 	"os"
 
 	"github.com/fatih/color"
@@ -30,8 +31,11 @@ var initCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = os.MkdirAll("migrations/interfaces", 0755)
-		gen.CreateInitConfig()
-		color.Green("✓ Created migrations/interfaces/interface.go")
+		err := gen.CreateInitConfig()
+		if err != nil {
+			log.Fatal(err)
+		}
+		color.Green(" ✓ Created migrations/interfaces/interface.go")
 	},
 }
 

@@ -26,7 +26,6 @@ func regenerateMain(migrationName string) {
 	var firstCloseBrace bool
 
 	for i, line := range lines {
-		fmt.Println(i, line)
 		if strings.Contains(line, "func MigrateUp() {") {
 			migrateUpStart = i
 		}
@@ -41,9 +40,9 @@ func regenerateMain(migrationName string) {
 		}
 	}
 
-	lines[migrateUpEnd] = "var " + lower + "Migration _interface.Migration = &" + migrationName + "Migration{}\n" + lower + "Migration.Up()\n}"
+	lines[migrateUpEnd] = "\nvar " + lower + "Migration _interface.Migration = &" + migrationName + "Migration{}\n" + lower + "Migration.Up()\n}"
 
-	lines[migrateUpEnd+migrateDownStart-migrateUpStart] = "var " + lower + "Migration _interface.Migration = &" + migrationName + "Migration{}\n" + lower + "Migration.Down()\n}"
+	lines[migrateUpEnd+migrateDownStart-migrateUpStart] = "\nvar " + lower + "Migration _interface.Migration = &" + migrationName + "Migration{}\n" + lower + "Migration.Down()\n}"
 
 	output := strings.Join(lines, "\n")
 
