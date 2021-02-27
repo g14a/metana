@@ -16,18 +16,19 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	"go-migrate/pkg/file"
+	"os"
 )
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "initialize a migrations directory",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("init called")
+		_ = os.MkdirAll("migrations/interfaces", 0755)
+		file.CreateInitConfig()
 	},
 }
 

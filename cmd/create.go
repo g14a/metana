@@ -24,7 +24,7 @@ import (
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create a migration script in Go",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		file.CreateMigrationFile(args[0])
 	},

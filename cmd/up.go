@@ -25,7 +25,7 @@ import (
 var upCmd = &cobra.Command{
 	Use:   "up",
 	Short: "Run the upward migration",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("up called")
 	},
