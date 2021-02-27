@@ -2,7 +2,7 @@
 Copyright © 2021 NAME HERE <EMAIL ADDRESS>
 
 Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
+you may not use this gen except in compliance with the License.
 You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
@@ -16,10 +16,11 @@ limitations under the License.
 package cmd
 
 import (
+	"go-migrate/pkg/gen"
+	"os"
+
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
-	"go-migrate/pkg/file"
-	"os"
 )
 
 // initCmd represents the init command
@@ -29,7 +30,7 @@ var initCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = os.MkdirAll("migrations/interfaces", 0755)
-		file.CreateInitConfig()
+		gen.CreateInitConfig()
 		color.Green("✓ Created migrations/interfaces/interface.go")
 	},
 }

@@ -2,7 +2,7 @@
 Copyright © 2021 NAME HERE <EMAIL ADDRESS>
 
 Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
+you may not use this gen except in compliance with the License.
 You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
@@ -16,11 +16,12 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/fatih/color"
-	"github.com/spf13/cobra"
-	"go-migrate/pkg/file"
+	"go-migrate/pkg/gen"
 	"log"
 	"os"
+
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 )
 
 // createCmd represents the create command
@@ -29,7 +30,7 @@ var createCmd = &cobra.Command{
 	Short: "create a migration script in Go",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fileName, err := file.CreateMigrationFile(args[0])
+		fileName, err := gen.CreateMigrationFile(args[0])
 		if err != nil {
 			log.Fatal(err)
 		}

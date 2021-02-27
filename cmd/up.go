@@ -2,7 +2,7 @@
 Copyright © 2021 NAME HERE <EMAIL ADDRESS>
 
 Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
+you may not use this gen except in compliance with the License.
 You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
@@ -17,8 +17,10 @@ package cmd
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
+	"log"
+	"os"
+	"os/exec"
 )
 
 // upCmd represents the up command
@@ -27,7 +29,23 @@ var upCmd = &cobra.Command{
 	Short: "Run the upward migration",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("up called")
+		migrationsBuild := exec.Command("go", "build")
+		wd, err := os.Getwd()
+		migrationsBuild.Dir = wd + "/migrations"
+
+		err = migrationsBuild.Run()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		migrationsRun := exec.Command("./migrations")
+		migrationsRun.Dir = wd + "/migrations"
+		b, err := migrationsRun.Output()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(string(b))
 	},
 }
 

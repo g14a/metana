@@ -1,13 +1,14 @@
-package file
+package gen
 
 import (
 	"fmt"
-	"github.com/iancoleman/strcase"
 	"go-migrate/pkg/tpl"
 	"os"
 	"strconv"
 	"text/template"
 	"time"
+
+	"github.com/iancoleman/strcase"
 )
 
 func CreateMigrationFile(file string) (string, error) {
@@ -25,8 +26,15 @@ func CreateMigrationFile(file string) (string, error) {
 
 	defer mainFile.Close()
 
-	mainTemplate := template.Must(template.New("main").Parse(string(tpl.MainTemplate())))
+	mainTemplate := template.Must(template.New("main").Parse(string(tpl.MigrationTemplate())))
 	err = mainTemplate.Execute(mainFile, nm)
+	if err != nil {
+		return "", err
+	}
+
+	migrationRunFile, err := os.Create("migrations/main.go")
+	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl.InitMigrationRunTemplate())))
+	err = migrationRunTemplate.Execute(migrationRunFile, nil)
 	if err != nil {
 		return "", err
 	}
@@ -42,7 +50,7 @@ func CreateInitConfig() {
 
 	defer initInterface.Close()
 
-	mainTemplate := template.Must(template.New("init").Parse(string(tpl.InitTemplate())))
+	mainTemplate := template.Must(template.New("init").Parse(string(tpl.InitMigrationTemplate())))
 	err = mainTemplate.Execute(initInterface, nil)
 	if err != nil {
 		fmt.Println(err)
