@@ -26,15 +26,8 @@ func CreateMigrationFile(file string) (string, error) {
 
 	defer mainFile.Close()
 
-	mainTemplate := template.Must(template.New("main").Parse(string(tpl.MigrationTemplate())))
+	mainTemplate := template.Must(template.New("root").Parse(string(tpl.MigrationTemplate())))
 	err = mainTemplate.Execute(mainFile, nm)
-	if err != nil {
-		return "", err
-	}
-
-	migrationRunFile, err := os.Create("migrations/main.go")
-	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl.InitMigrationRunTemplate())))
-	err = migrationRunTemplate.Execute(migrationRunFile, nil)
 	if err != nil {
 		return "", err
 	}
@@ -42,7 +35,7 @@ func CreateMigrationFile(file string) (string, error) {
 	return fileName, nil
 }
 
-func CreateInitConfig() {
+func CreateInitConfig() error {
 	initInterface, err := os.Create("migrations/interfaces/interface.go")
 	if err != nil {
 		fmt.Println(err)
@@ -53,6 +46,21 @@ func CreateInitConfig() {
 	mainTemplate := template.Must(template.New("init").Parse(string(tpl.InitMigrationTemplate())))
 	err = mainTemplate.Execute(initInterface, nil)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
+
+	migrationRunFile, err := os.Create("migrations/main.go")
+	if err != nil {
+		return err
+	}
+
+	defer migrationRunFile.Close()
+
+	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl.InitMigrationRunTemplate())))
+	err = migrationRunTemplate.Execute(migrationRunFile, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

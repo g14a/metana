@@ -22,7 +22,8 @@ func (r *{{ .Name }}Migration) Down()  {
 }
 
 func InitMigrationRunTemplate() []byte {
-	return []byte(`package main
+	return []byte(`// This file is auto generated. DO NOT EDIT!
+package main
 
 import (
 	"os"
