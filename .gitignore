@@ -5,6 +5,8 @@
 *.so
 *.dylib
 migrations
+demo.yml
+demo.gif
 
 # Test binary, built with `go test -c`
 *.test

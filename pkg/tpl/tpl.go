@@ -12,11 +12,11 @@ type {{ .Name }}Migration struct {
 }
 
 func (r *{{ .Name }}Migration) Up()  {
-	fmt.Println("migration up")
+	fmt.Println("{{ .Name }} up")
 }
 
 func (r *{{ .Name }}Migration) Down()  {
-	fmt.Println("migration down")
+	fmt.Println("{{ .Name }} down")
 }
 `)
 }
