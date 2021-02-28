@@ -1,4 +1,4 @@
 # go-migrate
 
-![](/Users/g14a/go-migrate/demo.gif)
+![](https://github.com/g14a/go-migrate/demo.gif)
 
