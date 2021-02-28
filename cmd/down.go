@@ -17,6 +17,9 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
@@ -27,7 +30,25 @@ var downCmd = &cobra.Command{
 	Short: "Run the downward migration",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("down called")
+		migrationsBuild := exec.Command("go", "build")
+		wd, err := os.Getwd()
+		migrationsBuild.Dir = wd + "/migrations"
+
+		build, err := migrationsBuild.Output()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(string(build))
+
+		migrationsRun := exec.Command("./migrations","down")
+		migrationsRun.Dir = wd + "/migrations"
+		b, err := migrationsRun.Output()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(string(b))
 	},
 }
 

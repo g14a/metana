@@ -18,6 +18,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"go-migrate/pkg"
+	"log"
 )
 
 // listCmd represents the list command
@@ -26,7 +27,10 @@ var listCmd = &cobra.Command{
 	Short: "list migrations",
 	Long: ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		pkg.ListMigrations()
+		err := pkg.ListMigrations()
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
