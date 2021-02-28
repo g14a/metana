@@ -35,7 +35,8 @@ var initCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		color.Green(" ✓ Created migrations/interfaces/interface.go")
+		wd, _ := os.Getwd()
+		color.Green(" ✓ Created " + wd + "/migrations/interfaces/interface.go")
 	},
 }
 

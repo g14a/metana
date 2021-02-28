@@ -36,7 +36,7 @@ var createCmd = &cobra.Command{
 		}
 		wd, _ := os.Getwd()
 		color.Green(" ✓ Created " + wd + "/" + fileName)
-		color.Green(" ✓ Generated " + wd + "/main.go")
+		color.Green(" ✓ Generated " + wd + "/migrations/main.go")
 
 		gen.AddMigration(args[0])
 	},
