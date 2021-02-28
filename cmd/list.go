@@ -16,16 +16,17 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"go-migrate/pkg"
 	"log"
+
+	"github.com/spf13/cobra"
 )
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "list migrations",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := pkg.ListMigrations()
 		if err != nil {

@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"go-migrate/pkg/tpl"
 	"os"
+	"os/exec"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
@@ -60,6 +62,11 @@ func CreateInitConfig() error {
 	err = migrationRunTemplate.Execute(migrationRunFile, nil)
 	if err != nil {
 		return err
+	}
+
+	cmd := exec.Command("gofmt", "-w", "migrations/main.go")
+	if errOut, err := cmd.CombinedOutput(); err != nil {
+		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
 	}
 
 	return nil

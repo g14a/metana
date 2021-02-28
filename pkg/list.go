@@ -2,34 +2,22 @@ package pkg
 
 import (
 	"fmt"
-	"github.com/olekukonko/tablewriter"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 func ListMigrations() error {
-	wd, err := os.Getwd()
+	migrations, err := GetMigrations()
 	if err != nil {
-		fmt.Println(err)
-	}
-
-	m, err := filepath.Glob(wd + "/migrations/[^.]*.*")
-	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	var data [][]string
-	for _, f := range m {
-		fi, err := os.Stat(f)
-		if err != nil {
-			return err
-		}
-		if strings.Contains(f, "main.go") {
-			continue
-		}
-
-		data = append(data, []string{filepath.Base(f), fi.ModTime().Format("02-01-2006")})
+	for _, f := range migrations {
+		data = append(data, []string{f.Name, f.ModTime})
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
@@ -42,4 +30,38 @@ func ListMigrations() error {
 	table.Render()
 
 	return nil
+}
+
+func GetMigrations() ([]migration, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	m, err := filepath.Glob(wd + "/migrations/[^.]*.*")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var migrations []migration
+	for _, f := range m {
+		fi, err := os.Stat(f)
+		if err != nil {
+			return nil, err
+		}
+		if strings.Contains(f, "main.go") {
+			continue
+		}
+		migrations = append(migrations, migration{
+			Name:    filepath.Base(f),
+			ModTime: fi.ModTime().Format("02-01-2006 15:04"),
+		})
+	}
+
+	return migrations, nil
+}
+
+type migration struct {
+	Name    string
+	ModTime string
 }

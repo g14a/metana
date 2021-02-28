@@ -31,7 +31,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "go-migrate",
 	Short: "A brief description of your application",
-	Long: `An abstract migration framework for all types of migrations`,
+	Long:  `An abstract migration framework for all types of migrations`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },

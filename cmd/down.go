@@ -41,7 +41,7 @@ var downCmd = &cobra.Command{
 
 		fmt.Println(string(build))
 
-		migrationsRun := exec.Command("./migrations","down")
+		migrationsRun := exec.Command("./migrations", "down")
 		migrationsRun.Dir = wd + "/migrations"
 		b, err := migrationsRun.Output()
 		if err != nil {

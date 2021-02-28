@@ -26,6 +26,7 @@ func InitMigrationRunTemplate() []byte {
 package main
 
 import (
+	_interface "go-migrate/migrations/interfaces"
 	"os"
 )
 
@@ -38,11 +39,11 @@ func MigrateDown() {
 }
 
 func main() {
-	if os.Args[0] == "up" {
+	if os.Args[1] == "up" {
 		MigrateUp()
 	}
 
-	if os.Args[0] == "down" {
+	if os.Args[1] == "down" {
 		MigrateDown()
 	}
 }
