@@ -30,13 +30,13 @@ var initCmd = &cobra.Command{
 	Short: "initialize a migrations directory",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		_ = os.MkdirAll("migrations/interfaces", 0755)
+		_ = os.MkdirAll("migrations/", 0755)
 		err := gen.CreateInitConfig()
 		if err != nil {
 			log.Fatal(err)
 		}
 		wd, _ := os.Getwd()
-		color.Green(" ✓ Created " + wd + "/migrations/interfaces/interface.go")
+		color.Green(" ✓ Created " + wd + "/migrations/main.go")
 	},
 }
 

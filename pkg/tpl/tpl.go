@@ -26,7 +26,6 @@ func InitMigrationRunTemplate() []byte {
 package main
 
 import (
-	_interface "go-migrate/migrations/interfaces"
 	"os"
 )
 

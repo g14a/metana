@@ -40,9 +40,9 @@ func regenerateMain(migrationName string) {
 		}
 	}
 
-	lines[migrateUpEnd] = "\nvar " + lower + "Migration _interface.Migration = &" + migrationName + "Migration{}\n" + lower + "Migration.Up()\n}"
+	lines[migrateUpEnd] = lower + "Migration := &" + migrationName + "Migration{}\n" + lower + "Migration.Up()\n}"
 
-	lines[migrateUpEnd+migrateDownStart-migrateUpStart] = "\nvar " + lower + "Migration _interface.Migration = &" + migrationName + "Migration{}\n" + lower + "Migration.Down()\n}"
+	lines[migrateUpEnd+migrateDownStart-migrateUpStart] = lower + "Migration := &" + migrationName + "Migration{}\n" + lower + "Migration.Down()\n}"
 
 	output := strings.Join(lines, "\n")
 

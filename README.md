@@ -29,7 +29,7 @@ Use "go-migrate [command] --help" for more information about a command.
 ```shell
 # Init migration
 > go-migrate init
-✓ Created migrations/interfaces/interface.go
+ ✓ Created migrations/interfaces/interface.go
 
 # Create a migration
 > go-migrate create sample

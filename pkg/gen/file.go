@@ -38,18 +38,6 @@ func CreateMigrationFile(file string) (string, error) {
 }
 
 func CreateInitConfig() error {
-	initInterface, err := os.Create("migrations/interfaces/interface.go")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	defer initInterface.Close()
-
-	mainTemplate := template.Must(template.New("init").Parse(string(tpl.InitMigrationTemplate())))
-	err = mainTemplate.Execute(initInterface, nil)
-	if err != nil {
-		return err
-	}
 
 	migrationRunFile, err := os.Create("migrations/main.go")
 	if err != nil {
