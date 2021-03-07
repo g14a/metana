@@ -51,12 +51,7 @@ var upCmd = &cobra.Command{
 		migrationsRun.Stderr = &errBuf
 
 		err = migrationsRun.Run()
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		//fmt.Println(outBuf.String())
-		fmt.Println(errBuf.String())
-		fmt.Println(errBuf.Len())
+		fmt.Println(outBuf.String())
 	},
 }
 
