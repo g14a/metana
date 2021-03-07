@@ -41,22 +41,18 @@ func MigrateDown() error {
 
 func main() {
 	if os.Args[1] == "up" {
-		MigrateUp()
+		err := MigrateUp()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 
 	if os.Args[1] == "down" {
-		MigrateDown()
+		err := MigrateDown()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
-}
-`)
-}
-
-func InitMigrationTemplate() []byte {
-	return []byte(`package _interface
-
-type Migration interface {
-	Up()
-	Down()
 }
 `)
 }

@@ -28,7 +28,7 @@ import (
 // upCmd represents the up command
 var upCmd = &cobra.Command{
 	Use:   "up",
-	Short: "Run the upward migration",
+	Short: "Run upward migrations",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		migrationsBuild := exec.Command("go", "build")
@@ -51,7 +51,12 @@ var upCmd = &cobra.Command{
 		migrationsRun.Stderr = &errBuf
 
 		err = migrationsRun.Run()
+
 		fmt.Println(outBuf.String())
+
+		if errBuf.Len() > 0 {
+			fmt.Println(errBuf.String())
+		}
 	},
 }
 
