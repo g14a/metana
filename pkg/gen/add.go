@@ -41,7 +41,7 @@ func regenerateMain(migrationName string) {
 	}
 
 	fmt.Println(migrateUpStart, migrateDownStart)
-	
+
 	lines[migrateUpEnd] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
 		lower + "Migration.Up()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n}"
 
