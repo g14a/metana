@@ -18,6 +18,7 @@ package cmd
 import (
 	"go-migrate/pkg/gen"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -38,7 +39,7 @@ var createCmd = &cobra.Command{
 		color.Green(" ✓ Created " + wd + "/" + fileName)
 		color.Green(" ✓ Generated " + wd + "/migrations/main.go")
 
-		gen.AddMigration(args[0])
+		gen.AddMigration(args[0], strings.TrimPrefix(fileName, "migrations/"))
 	},
 }
 

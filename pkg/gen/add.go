@@ -9,13 +9,13 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func AddMigration(migrationName string) {
+func AddMigration(migrationName, fileName string) {
 	camelCaseMigration := strcase.ToCamel(migrationName)
 
-	regenerateMain(camelCaseMigration)
+	regenerateMain(camelCaseMigration, fileName)
 }
 
-func regenerateMain(migrationName string) {
+func regenerateMain(migrationName, fileName string) {
 	lower := strcase.ToLowerCamel(migrationName)
 
 	input, err := ioutil.ReadFile("migrations/main.go")
@@ -27,12 +27,14 @@ func regenerateMain(migrationName string) {
 	for i, line := range lines {
 		if !firstReturn && strings.Contains(line, "return nil") {
 			lines[i] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
-				lower + "Migration.Up()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n\n return nil"
+				lower + "Migration.Up()\n if err" + migrationName + " != nil {\n return fmt.Errorf(\"" + fileName +
+				", %w\", err" + migrationName + ")}\n\n return nil"
 
 			firstReturn = true
 		} else if strings.Contains(line, "return nil") {
 			lines[i] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
-				lower + "Migration.Down()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n\n return nil"
+				lower + "Migration.Down()\n if err" + migrationName + " != nil {\n return fmt.Errorf(\"" + fileName +
+				", %w\", err" + migrationName + ")}\n\n return nil"
 		}
 	}
 
