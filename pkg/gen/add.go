@@ -23,9 +23,13 @@ func regenerateMain(migrationName string) {
 	lines := strings.Split(string(input), "\n")
 
 	var migrateUpStart, migrateDownStart, migrateUpEnd int
-	var firstCloseBrace bool
+	var firstCloseBrace, notFirstMigration bool
 
 	for i, line := range lines {
+		if strings.Contains(line, "Migration{}") {
+			notFirstMigration = true
+		}
+
 		if strings.Contains(line, "func MigrateUp() {") {
 			migrateUpStart = i
 		}
@@ -35,18 +39,30 @@ func regenerateMain(migrationName string) {
 		}
 
 		if !firstCloseBrace && !strings.Contains(line, "Migration{") && strings.Contains(line, "}") {
+			if strings.Contains(lines[i-1], "return") {
+				continue
+			}
 			firstCloseBrace = true
 			migrateUpEnd = i
 		}
 	}
 
-	fmt.Println(migrateUpStart, migrateDownStart)
+	fmt.Println(migrateUpStart, migrateDownStart, migrateUpEnd)
 
-	lines[migrateUpEnd] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
-		lower + "Migration.Up()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n}"
+	if !notFirstMigration {
+		lines[migrateUpEnd] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
+			lower + "Migration.Up()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n\n return nil\n}"
 
-	//lines[migrateUpEnd+migrateDownStart-migrateUpStart+4] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
-	//	lower + "Migration.Down()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n}"
+		lines[migrateUpEnd+migrateDownStart-migrateUpStart+4] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
+			lower + "Migration.Down()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n\n return nil\n}"
+
+	} else {
+		lines[migrateUpEnd] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
+			lower + "Migration.Up()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n\n}"
+
+		lines[migrateUpEnd+migrateDownStart-migrateUpStart+4] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
+			lower + "Migration.Down()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n}"
+	}
 
 	output := strings.Join(lines, "\n")
 

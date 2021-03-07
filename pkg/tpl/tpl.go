@@ -35,7 +35,7 @@ func MigrateUp() error {
 }
 
 func MigrateDown() error {
-
+	
 }
 
 func main() {
