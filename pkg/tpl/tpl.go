@@ -31,11 +31,11 @@ import (
 )
 
 func MigrateUp() error {
-	
+	return nil
 }
 
 func MigrateDown() error {
-	
+	return nil
 }
 
 func main() {
