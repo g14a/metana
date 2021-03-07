@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"go-migrate/pkg/gen"
-	"log"
 	"os"
 
 	"github.com/fatih/color"
@@ -32,7 +31,8 @@ var createCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fileName, err := gen.CreateMigrationFile(args[0])
 		if err != nil {
-			log.Fatal(err)
+			color.Yellow("\nTry initializing migration using `go-migrate init`\n\n")
+			os.Exit(0)
 		}
 		wd, _ := os.Getwd()
 		color.Green(" ✓ Created " + wd + "/" + fileName)

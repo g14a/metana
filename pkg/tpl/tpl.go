@@ -8,15 +8,16 @@ import (
 )
 
 type {{ .Name }}Migration struct {
-
 }
 
-func (r *{{ .Name }}Migration) Up()  {
+func (r *{{ .Name }}Migration) Up() error {
 	fmt.Println("{{ .Name }} up")
+	return nil
 }
 
-func (r *{{ .Name }}Migration) Down()  {
+func (r *{{ .Name }}Migration) Down() error {
 	fmt.Println("{{ .Name }} down")
+	return nil
 }
 `)
 }
@@ -29,11 +30,11 @@ import (
 	"os"
 )
 
-func MigrateUp() {
+func MigrateUp() error {
 	
 }
 
-func MigrateDown() {
+func MigrateDown() error {
 
 }
 

@@ -40,9 +40,13 @@ func regenerateMain(migrationName string) {
 		}
 	}
 
-	lines[migrateUpEnd] = lower + "Migration := &" + migrationName + "Migration{}\n" + lower + "Migration.Up()\n}"
+	fmt.Println(migrateUpStart, migrateDownStart)
+	
+	lines[migrateUpEnd] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
+		lower + "Migration.Up()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n}"
 
-	lines[migrateUpEnd+migrateDownStart-migrateUpStart] = lower + "Migration := &" + migrationName + "Migration{}\n" + lower + "Migration.Down()\n}"
+	//lines[migrateUpEnd+migrateDownStart-migrateUpStart+4] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
+	//	lower + "Migration.Down()\n if err" + migrationName + " != nil {\n return err" + migrationName + "}\n}"
 
 	output := strings.Join(lines, "\n")
 

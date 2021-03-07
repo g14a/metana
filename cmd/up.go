@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -45,12 +46,17 @@ var upCmd = &cobra.Command{
 
 		migrationsRun := exec.Command("./migrations", "up")
 		migrationsRun.Dir = wd + "/migrations"
-		b, err := migrationsRun.Output()
-		if err != nil {
-			log.Fatal(err)
-		}
+		var outBuf, errBuf bytes.Buffer
+		migrationsRun.Stdout = &outBuf
+		migrationsRun.Stderr = &errBuf
 
-		fmt.Println(string(b))
+		err = migrationsRun.Run()
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		//fmt.Println(outBuf.String())
+		fmt.Println(errBuf.String())
+		fmt.Println(errBuf.Len())
 	},
 }
 
