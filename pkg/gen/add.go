@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"go-migrate/pkg"
 	"io/ioutil"
 	"os/exec"
 	"strings"
@@ -49,4 +50,25 @@ func regenerateMain(migrationName, fileName string) {
 	if errOut, err := cmd.CombinedOutput(); err != nil {
 		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
 	}
+}
+
+func MigrationExists(migrationName string) bool {
+	camelCaseMigration := strcase.ToCamel(migrationName)
+
+	migrations, err := pkg.GetMigrations()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, m := range migrations {
+		mig := strings.TrimSuffix(m.Name, ".go")
+		mig = strings.TrimLeftFunc(mig, func(r rune) bool {
+			return r >= 48 && r <= 57 || r == '-'
+		})
+		if camelCaseMigration == mig {
+			return true
+		}
+	}
+
+	return false
 }

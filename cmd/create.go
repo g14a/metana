@@ -16,12 +16,11 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 	"go-migrate/pkg/gen"
 	"os"
 	"strings"
-
-	"github.com/fatih/color"
-	"github.com/spf13/cobra"
 )
 
 // createCmd represents the create command
@@ -30,11 +29,17 @@ var createCmd = &cobra.Command{
 	Short: "create a migration script in Go",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		if gen.MigrationExists(args[0]) {
+			color.Yellow("Migration already exists")
+			os.Exit(1)
+		}
+
 		fileName, err := gen.CreateMigrationFile(args[0])
 		if err != nil {
 			color.Yellow("\nTry initializing migration using `go-migrate init`\n\n")
 			os.Exit(0)
 		}
+
 		wd, _ := os.Getwd()
 		color.Green(" ✓ Created " + wd + "/" + fileName)
 		color.Green(" ✓ Generated " + wd + "/migrations/main.go")

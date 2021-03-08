@@ -15,6 +15,8 @@ func ListMigrations() error {
 		return err
 	}
 
+	fmt.Println(migrations)
+
 	var data [][]string
 	for _, f := range migrations {
 		data = append(data, []string{f.Name, f.ModTime})
@@ -49,7 +51,7 @@ func GetMigrations() ([]migration, error) {
 		if err != nil {
 			return nil, err
 		}
-		if strings.Contains(f, "main.go") {
+		if strings.Contains(f, "main.go") || strings.Contains(f, "store.go") {
 			continue
 		}
 		migrations = append(migrations, migration{
