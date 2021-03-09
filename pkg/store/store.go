@@ -2,11 +2,6 @@ package store
 
 import "github.com/go-pg/pg/v10"
 
-type Store interface {
-	Set(lastMigration LastMigration) error
-	Load() (LastMigration, error)
-}
-
 type LastMigration struct {
 	TimeStamp string   `json:"time_stamp" bson:"time_stamp" pg:"time_stamp"`
 	tableName struct{} `pg:"migrations"`

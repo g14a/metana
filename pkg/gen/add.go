@@ -18,24 +18,28 @@ func AddMigration(migrationName, fileName string) {
 
 func regenerateMain(migrationName, fileName string) {
 	lower := strcase.ToLowerCamel(migrationName)
-
 	input, err := ioutil.ReadFile("migrations/main.go")
 
 	lines := strings.Split(string(input), "\n")
 
 	var firstReturn bool
+	timeStamp := strings.Split(fileName, "-")
 
 	for i, line := range lines {
 		if !firstReturn && strings.Contains(line, "return nil") {
-			lines[i] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
-				lower + "Migration.Up()\n if err" + migrationName + " != nil {\n return fmt.Errorf(\"" + fileName +
-				", %w\", err" + migrationName + ")}\n\n return nil"
+			lines[i] = lower + "Migration := &" + migrationName + "Migration{}\n" +
+				       lower + "Migration.Timestamp = " + timeStamp[0] + "\n" +
+				       "err" + migrationName + " := " + lower + "Migration.Up()\n" +
+					   "if err" + migrationName + " != nil {\n return fmt.Errorf(\"" +
+						fileName + ", %w\", err" + migrationName + ")}\n\n return nil"
 
 			firstReturn = true
 		} else if strings.Contains(line, "return nil") {
-			lines[i] = lower + "Migration := &" + migrationName + "Migration{}\n err" + migrationName + " := " +
-				lower + "Migration.Down()\n if err" + migrationName + " != nil {\n return fmt.Errorf(\"" + fileName +
-				", %w\", err" + migrationName + ")}\n\n return nil"
+			lines[i] = lower + "Migration := &" + migrationName + "Migration{}\n" +
+				lower + "Migration.Timestamp = " + timeStamp[0] + "\n" +
+				"err" + migrationName + " := " + lower + "Migration.Down()\n" +
+				"if err" + migrationName + " != nil {\n return fmt.Errorf(\"" +
+				fileName + ", %w\", err" + migrationName + ")}\n\n return nil"
 		}
 	}
 

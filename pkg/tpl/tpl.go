@@ -8,6 +8,7 @@ import (
 )
 
 type {{ .Name }}Migration struct {
+	Timestamp int 
 }
 
 func (r *{{ .Name }}Migration) Up() error {
