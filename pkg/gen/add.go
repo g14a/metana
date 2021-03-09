@@ -28,10 +28,10 @@ func regenerateMain(migrationName, fileName string) {
 	for i, line := range lines {
 		if !firstReturn && strings.Contains(line, "return nil") {
 			lines[i] = lower + "Migration := &" + migrationName + "Migration{}\n" +
-				       lower + "Migration.Timestamp = " + timeStamp[0] + "\n" +
-				       "err" + migrationName + " := " + lower + "Migration.Up()\n" +
-					   "if err" + migrationName + " != nil {\n return fmt.Errorf(\"" +
-						fileName + ", %w\", err" + migrationName + ")}\n\n return nil"
+				lower + "Migration.Timestamp = " + timeStamp[0] + "\n" +
+				"err" + migrationName + " := " + lower + "Migration.Up()\n" +
+				"if err" + migrationName + " != nil {\n return fmt.Errorf(\"" +
+				fileName + ", %w\", err" + migrationName + ")}\n\n return nil"
 
 			firstReturn = true
 		} else if strings.Contains(line, "return nil") {
