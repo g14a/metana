@@ -22,7 +22,9 @@ func AddMigration(migrationName, fileName string) error {
 func regenerateMain(migrationName, fileName string) error {
 	lower := strcase.ToLowerCamel(migrationName)
 	input, err := ioutil.ReadFile("migrations/main.go")
-
+	if err != nil {
+		return err
+	}
 	lines := strings.Split(string(input), "\n")
 
 	var firstReturn bool
