@@ -37,6 +37,7 @@ var initCmd = &cobra.Command{
 		}
 		wd, _ := os.Getwd()
 		color.Green(" ✓ Created " + wd + "/migrations/main.go")
+		color.Green(" ✓ Created " + wd + "/migrations/store.go")
 	},
 }
 

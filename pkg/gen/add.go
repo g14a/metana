@@ -13,13 +13,13 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func AddMigration(migrationName, fileName string) {
+func AddMigration(migrationName, fileName string) error {
 	camelCaseMigration := strcase.ToCamel(migrationName)
 
-	regenerateMain(camelCaseMigration, fileName)
+	return regenerateMain(camelCaseMigration, fileName)
 }
 
-func regenerateMain(migrationName, fileName string) {
+func regenerateMain(migrationName, fileName string) error {
 	lower := strcase.ToLowerCamel(migrationName)
 	input, err := ioutil.ReadFile("migrations/main.go")
 
@@ -41,9 +41,12 @@ func regenerateMain(migrationName, fileName string) {
 			var tplBuffer bytes.Buffer
 			addMigrationTemplate, err = addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(true)))
 			if err != nil {
-				fmt.Println(err)
+				return err
 			}
 			err = addMigrationTemplate.Execute(&tplBuffer, nm)
+			if err != nil {
+				return err
+			}
 
 			lines[i] = tplBuffer.String()
 
@@ -52,10 +55,12 @@ func regenerateMain(migrationName, fileName string) {
 			var tplBuffer bytes.Buffer
 			addMigrationTemplate, err = addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(false)))
 			if err != nil {
-				fmt.Println(err)
+				return err
 			}
 			err = addMigrationTemplate.Execute(&tplBuffer, nm)
-
+			if err != nil {
+				return err
+			}
 			lines[i] = tplBuffer.String()
 		}
 	}
@@ -71,6 +76,8 @@ func regenerateMain(migrationName, fileName string) {
 	if errOut, err := cmd.CombinedOutput(); err != nil {
 		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
 	}
+
+	return nil
 }
 
 func MigrationExists(migrationName string) bool {
