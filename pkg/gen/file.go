@@ -15,11 +15,11 @@ import (
 
 func CreateMigrationFile(file string) (string, error) {
 	nm := tpl.NewMigration{
-		Name:      strcase.ToCamel(file),
-		Timestamp: strconv.Itoa(int(time.Now().Unix())),
+		MigrationName: strcase.ToCamel(file),
+		Timestamp:     strconv.Itoa(int(time.Now().Unix())),
 	}
 
-	fileName := fmt.Sprintf("migrations/%s-%s.go", nm.Timestamp, nm.Name)
+	fileName := fmt.Sprintf("migrations/%s-%s.go", nm.Timestamp, nm.MigrationName)
 
 	mainFile, err := os.Create(fileName)
 	if err != nil {
@@ -51,8 +51,19 @@ func CreateInitConfig() error {
 
 	defer migrationRunFile.Close()
 
+	storeFile, err := os.Create("migrations/store.go")
+	if err != nil {
+		return err
+	}
+
 	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl.InitMigrationRunTemplate())))
 	err = migrationRunTemplate.Execute(migrationRunFile, nil)
+	if err != nil {
+		return err
+	}
+
+	storeTemplate := template.Must(template.New("store").Parse(string(tpl.StoreTemplate())))
+	err = storeTemplate.Execute(storeFile, nil)
 	if err != nil {
 		return err
 	}

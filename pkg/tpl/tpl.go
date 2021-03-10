@@ -7,17 +7,17 @@ import (
 	"fmt"
 )
 
-type {{ .Name }}Migration struct {
+type {{ .MigrationName }}Migration struct {
 	Timestamp int 
 }
 
-func (r *{{ .Name }}Migration) Up() error {
-	fmt.Println("{{ .Name }} up")
+func (r *{{ .MigrationName }}Migration) Up() error {
+	fmt.Println("{{ .MigrationName }} up")
 	return nil
 }
 
-func (r *{{ .Name }}Migration) Down() error {
-	fmt.Println("{{ .Name }} down")
+func (r *{{ .MigrationName }}Migration) Down() error {
+	fmt.Println("{{ .MigrationName }} down")
 	return nil
 }
 `)
@@ -58,7 +58,101 @@ func main() {
 `)
 }
 
+func AddMigrationTemplate(up bool) []byte {
+	if up {
+		return []byte(`
+	{{ .Lower }}Migration := &{{ .MigrationName }}Migration{}
+	{{ .Lower }}Migration.Timestamp = {{ .Timestamp }}
+	err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
+
+	if err{{ .MigrationName }} != nil {
+		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+	}
+
+	err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}")
+	if err{{ .MigrationName }} != nil {
+		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+	}
+	return nil
+`)
+	} else {
+		return []byte(`
+	{{ .Lower }}Migration := &{{ .MigrationName }}Migration{}
+	err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
+	{{ .Lower }}Migration.Timestamp = {{ .Timestamp }}
+	if err{{ .MigrationName }} != nil {
+		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+	}
+	err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}")
+	if err{{ .MigrationName }} != nil {
+		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+	}	
+	return nil
+`)
+	}
+}
+
+func StoreTemplate() []byte {
+	return []byte(`package main
+
+import (
+	"encoding/json"
+	"io/ioutil"
+)
+
+func Set(timestamp int, fileName string) error {
+	track, err := Load()
+	if err != nil {
+		return err
+	}
+
+	track.LastRun = fileName
+	track.Migrations = append(track.Migrations, Migration{
+		Title:     fileName,
+		Timestamp: timestamp,
+	})
+
+	bytes, err := json.Marshal(track)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile("migrate.json", bytes, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func Load() (Track, error) {
+	track, err := ioutil.ReadFile("migrate.json")
+	if err != nil {
+		return Track{}, err
+	}
+
+	t := Track{}
+	err = json.Unmarshal(track, &t)
+	if err != nil {
+		return Track{}, err
+	}
+
+	return t, nil
+}
+
+type Track struct {
+	LastRun    string      
+	Migrations []Migration 
+}
+
+type Migration struct {
+	Title     string 
+	Timestamp int   
+}`)
+}
+
 type NewMigration struct {
-	Name      string
-	Timestamp string
+	Lower         string
+	MigrationName string
+	Timestamp     string
+	Filename      string
 }

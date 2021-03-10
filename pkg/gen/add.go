@@ -1,11 +1,14 @@
 package gen
 
 import (
+	"bytes"
 	"fmt"
 	"go-migrate/pkg"
+	"go-migrate/pkg/tpl"
 	"io/ioutil"
 	"os/exec"
 	"strings"
+	"text/template"
 
 	"github.com/iancoleman/strcase"
 )
@@ -25,21 +28,35 @@ func regenerateMain(migrationName, fileName string) {
 	var firstReturn bool
 	timeStamp := strings.Split(fileName, "-")
 
+	addMigrationTemplate := template.New("add")
+	nm := tpl.NewMigration{
+		Lower:         lower,
+		MigrationName: migrationName,
+		Timestamp:     timeStamp[0],
+		Filename:      fileName,
+	}
+
 	for i, line := range lines {
 		if !firstReturn && strings.Contains(line, "return nil") {
-			lines[i] = lower + "Migration := &" + migrationName + "Migration{}\n" +
-				lower + "Migration.Timestamp = " + timeStamp[0] + "\n" +
-				"err" + migrationName + " := " + lower + "Migration.Up()\n" +
-				"if err" + migrationName + " != nil {\n return fmt.Errorf(\"" +
-				fileName + ", %w\", err" + migrationName + ")}\n\n return nil"
+			var tplBuffer bytes.Buffer
+			addMigrationTemplate, err = addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(true)))
+			if err != nil {
+				fmt.Println(err)
+			}
+			err = addMigrationTemplate.Execute(&tplBuffer, nm)
+
+			lines[i] = tplBuffer.String()
 
 			firstReturn = true
 		} else if strings.Contains(line, "return nil") {
-			lines[i] = lower + "Migration := &" + migrationName + "Migration{}\n" +
-				lower + "Migration.Timestamp = " + timeStamp[0] + "\n" +
-				"err" + migrationName + " := " + lower + "Migration.Down()\n" +
-				"if err" + migrationName + " != nil {\n return fmt.Errorf(\"" +
-				fileName + ", %w\", err" + migrationName + ")}\n\n return nil"
+			var tplBuffer bytes.Buffer
+			addMigrationTemplate, err = addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(false)))
+			if err != nil {
+				fmt.Println(err)
+			}
+			err = addMigrationTemplate.Execute(&tplBuffer, nm)
+
+			lines[i] = tplBuffer.String()
 		}
 	}
 
