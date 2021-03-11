@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"go-migrate/pkg"
 	"go-migrate/pkg/tpl"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"strings"
 	"text/template"
@@ -21,7 +21,7 @@ func AddMigration(migrationName, fileName string) error {
 
 func regenerateMain(migrationName, fileName string) error {
 	lower := strcase.ToLowerCamel(migrationName)
-	input, err := ioutil.ReadFile("migrations/main.go")
+	input, err := os.ReadFile("migrations/main.go")
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func regenerateMain(migrationName, fileName string) error {
 
 	output := strings.Join(lines, "\n")
 
-	err = ioutil.WriteFile("migrations/main.go", []byte(output), 0644)
+	err = os.WriteFile("migrations/main.go", []byte(output), 0644)
 	if err != nil {
 		fmt.Println(err)
 	}

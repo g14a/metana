@@ -97,7 +97,7 @@ func StoreTemplate() []byte {
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 )
 
 func Set(timestamp int, fileName string) error {
@@ -117,7 +117,7 @@ func Set(timestamp int, fileName string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile("migrate.json", bytes, 0644)
+	err = os.WriteFile("migrate.json", bytes, 0644)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func Set(timestamp int, fileName string) error {
 }
 
 func Load() (Track, error) {
-	track, err := ioutil.ReadFile("migrate.json")
+	track, err := os	.ReadFile("migrate.json")
 	if err != nil {
 		return Track{}, err
 	}
