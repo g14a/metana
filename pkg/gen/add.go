@@ -28,13 +28,13 @@ func regenerateMain(migrationName, fileName string) error {
 	lines := strings.Split(string(input), "\n")
 
 	var firstReturn bool
-	timeStamp := strings.Split(fileName, "-")
+	timeStamp := strings.TrimLeft(strings.Split(fileName, "-")[0], "scripts/")
 
 	addMigrationTemplate := template.New("add")
 	nm := tpl.NewMigration{
 		Lower:         lower,
 		MigrationName: migrationName,
-		Timestamp:     timeStamp[0],
+		Timestamp:     timeStamp,
 		Filename:      fileName,
 	}
 

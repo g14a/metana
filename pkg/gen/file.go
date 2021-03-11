@@ -19,7 +19,7 @@ func CreateMigrationFile(file string) (string, error) {
 		Timestamp:     strconv.Itoa(int(time.Now().Unix())),
 	}
 
-	fileName := fmt.Sprintf("migrations/%s-%s.go", nm.Timestamp, nm.MigrationName)
+	fileName := fmt.Sprintf("migrations/scripts/%s-%s.go", nm.Timestamp, nm.MigrationName)
 
 	mainFile, err := os.Create(fileName)
 	if err != nil {

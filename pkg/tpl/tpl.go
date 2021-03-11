@@ -1,7 +1,7 @@
 package tpl
 
 func MigrationTemplate() []byte {
-	return []byte(`package main
+	return []byte(`package scripts
 
 import (
 	"fmt"
@@ -61,7 +61,7 @@ func main() {
 func AddMigrationTemplate(up bool) []byte {
 	if up {
 		return []byte(`
-	{{ .Lower }}Migration := &{{ .MigrationName }}Migration{}
+	{{ .Lower }}Migration := &scripts.{{ .MigrationName }}Migration{}
 	{{ .Lower }}Migration.Timestamp = {{ .Timestamp }}
 	err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
 
@@ -77,7 +77,7 @@ func AddMigrationTemplate(up bool) []byte {
 `)
 	} else {
 		return []byte(`
-	{{ .Lower }}Migration := &{{ .MigrationName }}Migration{}
+	{{ .Lower }}Migration := &scripts.{{ .MigrationName }}Migration{}
 	err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
 	{{ .Lower }}Migration.Timestamp = {{ .Timestamp }}
 	if err{{ .MigrationName }} != nil {

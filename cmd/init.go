@@ -30,7 +30,7 @@ var initCmd = &cobra.Command{
 	Short: "initialize a migrations directory",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		_ = os.MkdirAll("migrations/", 0755)
+		_ = os.MkdirAll("migrations/scripts", 0755)
 		err := gen.CreateInitConfig()
 		if err != nil {
 			log.Fatal(err)
