@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"go-migrate/pkg/gen"
@@ -37,7 +36,6 @@ var createCmd = &cobra.Command{
 		}
 
 		fileName, err := gen.CreateMigrationFile(args[0])
-		fmt.Println(err)
 		if err != nil {
 			color.Yellow("\nTry initializing migration using `go-migrate init`\n\n")
 			os.Exit(0)

@@ -19,6 +19,7 @@ import (
 	"go-migrate/pkg/gen"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -31,13 +32,15 @@ var initCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = os.MkdirAll("migrations/scripts", 0755)
-		err := gen.CreateInitConfig()
+		wd, _ := os.Getwd()
+
+		err := gen.CreateInitConfig(filepath.Base(wd))
 		if err != nil {
 			log.Fatal(err)
 		}
-		wd, _ := os.Getwd()
 		color.Green(" ✓ Created " + wd + "/migrations/main.go")
 		color.Green(" ✓ Created " + wd + "/migrations/store.go")
+		color.Green(" ✓ Created " + wd + "/migrations/migrate.json")
 	},
 }
 

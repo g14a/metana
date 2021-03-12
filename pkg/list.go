@@ -15,8 +15,6 @@ func ListMigrations() error {
 		return err
 	}
 
-	fmt.Println(migrations)
-
 	var data [][]string
 	for _, f := range migrations {
 		data = append(data, []string{f.Name, f.ModTime})
@@ -40,7 +38,7 @@ func GetMigrations() ([]migration, error) {
 		fmt.Println(err)
 	}
 
-	m, err := filepath.Glob(wd + "/migrations/[^.]*.*")
+	m, err := filepath.Glob(wd + "/migrations/scripts/[^.]*.*")
 	if err != nil {
 		fmt.Println(err)
 	}

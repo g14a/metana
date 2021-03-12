@@ -42,7 +42,7 @@ func CreateMigrationFile(file string) (string, error) {
 	return fileName, nil
 }
 
-func CreateInitConfig() error {
+func CreateInitConfig(pwd string) error {
 
 	migrationRunFile, err := os.Create("migrations/main.go")
 	if err != nil {
@@ -56,8 +56,20 @@ func CreateInitConfig() error {
 		return err
 	}
 
+	defer storeFile.Close()
+
+	jsonFile, err := os.Create("migrations/migrate.json")
+	if err != nil {
+		return err
+	}
+
+	defer jsonFile.Close()
+
 	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl.InitMigrationRunTemplate())))
-	err = migrationRunTemplate.Execute(migrationRunFile, nil)
+	err = migrationRunTemplate.Execute(migrationRunFile, map[string]interface{}{
+		"pwd": pwd,
+	})
+
 	if err != nil {
 		return err
 	}

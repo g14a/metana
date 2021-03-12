@@ -29,6 +29,7 @@ package main
 
 import (
 	"os"
+	"{{ .pwd }}/migrations/scripts"
 	"fmt"
 )
 
@@ -112,7 +113,7 @@ func Set(timestamp int, fileName string) error {
 		Timestamp: timestamp,
 	})
 
-	bytes, err := json.Marshal(track)
+	bytes, err := json.MarshalIndent(track,"", "	")
 	if err != nil {
 		return err
 	}
@@ -125,15 +126,18 @@ func Set(timestamp int, fileName string) error {
 }
 
 func Load() (Track, error) {
-	track, err := os	.ReadFile("migrate.json")
+	track, err := os.ReadFile("migrate.json")
 	if err != nil {
 		return Track{}, err
 	}
 
 	t := Track{}
-	err = json.Unmarshal(track, &t)
-	if err != nil {
-		return Track{}, err
+
+	if len(track) > 0 {
+		err = json.Unmarshal(track, &t)
+		if err != nil {
+			return Track{}, err
+		}
 	}
 
 	return t, nil
