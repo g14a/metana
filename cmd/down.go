@@ -35,12 +35,13 @@ var downCmd = &cobra.Command{
 		wd, err := os.Getwd()
 		migrationsBuild.Dir = wd + "/migrations"
 
-		err = migrationsBuild.Start()
-		if err != nil {
+		errBuild := migrationsBuild.Start()
+		if errBuild != nil {
 			log.Fatal(err)
 		}
-		err = migrationsBuild.Wait()
-		if err != nil {
+
+		errWait := migrationsBuild.Wait()
+		if errWait != nil {
 			log.Fatal(err)
 		}
 
@@ -50,8 +51,16 @@ var downCmd = &cobra.Command{
 		migrationsRun.Stdout = &outBuf
 		migrationsRun.Stderr = &errBuf
 
-		err = migrationsRun.Run()
+		errRun := migrationsRun.Run()
+		if errRun != nil {
+			log.Fatal(errRun)
+		}
+
 		fmt.Println(outBuf.String())
+
+		if errBuf.Len() > 0 {
+			fmt.Println(errBuf.String())
+		}
 	},
 }
 

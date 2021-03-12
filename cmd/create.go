@@ -34,7 +34,7 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		
+
 		if exists {
 			color.Yellow("Migration already exists")
 			os.Exit(0)
