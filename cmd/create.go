@@ -30,9 +30,14 @@ var createCmd = &cobra.Command{
 	Short: "create a migration script in Go",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		if gen.MigrationExists(args[0]) {
+		exists, err := gen.MigrationExists(args[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+		
+		if exists {
 			color.Yellow("Migration already exists")
-			os.Exit(1)
+			os.Exit(0)
 		}
 
 		fileName, err := gen.CreateMigrationFile(args[0])

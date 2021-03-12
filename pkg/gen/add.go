@@ -31,6 +31,7 @@ func regenerateMain(migrationName, fileName string) error {
 	timeStamp := strings.TrimLeft(strings.Split(fileName, "-")[0], "scripts/")
 
 	addMigrationTemplate := template.New("add")
+
 	nm := tpl.NewMigration{
 		Lower:         lower,
 		MigrationName: migrationName,
@@ -41,8 +42,8 @@ func regenerateMain(migrationName, fileName string) error {
 	for i, line := range lines {
 		if !firstReturn && strings.Contains(line, "return nil") {
 			var tplBuffer bytes.Buffer
-			addMigrationTemplate, err = addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(true)))
-			if err != nil {
+			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(true)))
+			if errAdd != nil {
 				return err
 			}
 			err = addMigrationTemplate.Execute(&tplBuffer, nm)
@@ -55,8 +56,8 @@ func regenerateMain(migrationName, fileName string) error {
 			firstReturn = true
 		} else if strings.Contains(line, "return nil") {
 			var tplBuffer bytes.Buffer
-			addMigrationTemplate, err = addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(false)))
-			if err != nil {
+			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(false)))
+			if errAdd != nil {
 				return err
 			}
 			err = addMigrationTemplate.Execute(&tplBuffer, nm)
@@ -82,12 +83,12 @@ func regenerateMain(migrationName, fileName string) error {
 	return nil
 }
 
-func MigrationExists(migrationName string) bool {
+func MigrationExists(migrationName string) (bool, error) {
 	camelCaseMigration := strcase.ToCamel(migrationName)
 
 	migrations, err := pkg.GetMigrations()
 	if err != nil {
-		fmt.Println(err)
+		return false, err
 	}
 
 	for _, m := range migrations {
@@ -96,9 +97,9 @@ func MigrationExists(migrationName string) bool {
 			return r >= 48 && r <= 57 || r == '-'
 		})
 		if camelCaseMigration == mig {
-			return true
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 }
