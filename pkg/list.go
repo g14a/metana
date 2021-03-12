@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,12 +34,12 @@ func ListMigrations() error {
 func GetMigrations() ([]migration, error) {
 	wd, err := os.Getwd()
 	if err != nil {
-		fmt.Println(err)
+		return []migration{}, err
 	}
 
 	m, err := filepath.Glob(wd + "/migrations/scripts/[^.]*.*")
 	if err != nil {
-		fmt.Println(err)
+		return []migration{}, err
 	}
 
 	var migrations []migration
