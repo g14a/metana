@@ -3,8 +3,8 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	"go-migrate/pkg"
-	"go-migrate/pkg/tpl"
+	"github.com/g14a/go-migrate/pkg"
+	"github.com/g14a/go-migrate/pkg/tpl"
 	"os"
 	"os/exec"
 	"strings"

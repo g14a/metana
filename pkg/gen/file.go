@@ -2,7 +2,7 @@ package gen
 
 import (
 	"fmt"
-	"go-migrate/pkg/tpl"
+	"github.com/g14a/go-migrate/pkg/tpl"
 	"os"
 	"os/exec"
 	"strconv"

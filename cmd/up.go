@@ -41,12 +41,12 @@ var upCmd = &cobra.Command{
 
 		errBuild := migrationsBuild.Start()
 		if errBuild != nil {
-			log.Fatal(err)
+			log.Fatal(errBuild)
 		}
 
 		errWait := migrationsBuild.Wait()
 		if errWait != nil {
-			log.Fatal(err)
+			log.Fatal(errWait)
 		}
 
 		migrationsRun := exec.Command("./migrations", "up")

@@ -16,12 +16,18 @@ limitations under the License.
 package cmd
 
 import (
-	"go-migrate/pkg/gen"
+	"encoding/json"
+	"github.com/fatih/color"
+	"github.com/g14a/go-migrate/pkg/gen"
 	"log"
 	"os"
-	"path/filepath"
+	"os/exec"
+	//"path/filepath"
 
-	"github.com/fatih/color"
+	//"github.com/g14a/go-migrate/pkg/gen"
+	"github.com/itchyny/gojq"
+
+	//"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -34,10 +40,38 @@ var initCmd = &cobra.Command{
 		_ = os.MkdirAll("migrations/scripts", 0755)
 		wd, _ := os.Getwd()
 
-		err := gen.CreateInitConfig(filepath.Base(wd))
+		goModInfo, err := exec.Command("go", "mod", "edit", "-json").Output()
+
+		query, err := gojq.Parse(".Module.Path | ..")
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		goModDetails := make(map[string]interface{})
+
+		errJson := json.Unmarshal(goModInfo, &goModDetails)
+		if errJson != nil {
+			panic(err)
+		}
+		iter := query.Run(goModDetails)
+
+		var goModPath string
+		for {
+			v, ok := iter.Next()
+			if !ok {
+				break
+			}
+			if err, ok := v.(error); ok {
+				log.Fatalln(err)
+			}
+			goModPath = v.(string)
+		}
+
+		err = gen.CreateInitConfig(goModPath)
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		color.Green(" ✓ Created " + wd + "/migrations/main.go")
 		color.Green(" ✓ Created " + wd + "/migrations/store.go")
 		color.Green(" ✓ Created " + wd + "/migrations/migrate.json")

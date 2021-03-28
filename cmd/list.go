@@ -16,7 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"go-migrate/pkg"
+	"github.com/g14a/go-migrate/pkg"
 	"log"
 
 	"github.com/spf13/cobra"
