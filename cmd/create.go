@@ -17,8 +17,8 @@ package cmd
 
 import (
 	"github.com/fatih/color"
-	"github.com/spf13/cobra"
 	"github.com/g14a/go-migrate/pkg/gen"
+	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"strings"
