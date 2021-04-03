@@ -10,6 +10,7 @@ import (
 type {{ .MigrationName }}Migration struct {
 	Timestamp int
 	Filename  string
+	MigrationName string
 }
 
 func (r *{{ .MigrationName }}Migration) Up() error {
@@ -65,8 +66,8 @@ func AddMigrationTemplate(up bool) []byte {
 		return []byte(`
 	{{ .Lower }}Migration := &scripts.{{ .MigrationName }}Migration{}
 	{{ .Lower }}Migration.Timestamp = {{ .Timestamp }}
-	{{ .Lower }}Migration.Filename = {{ .Filename }}
-	{{ .Lower }}Migration.MigrationName = {{ .MigrationName }}
+	{{ .Lower }}Migration.Filename = "{{ .Filename }}"
+	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
 	err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
 
@@ -85,7 +86,8 @@ func AddMigrationTemplate(up bool) []byte {
 		return []byte(`
 	{{ .Lower }}Migration := &scripts.{{ .MigrationName }}Migration{}
 	{{ .Lower }}Migration.Timestamp = {{ .Timestamp }}
-	{{ .Lower }}Migration.Filename = {{ .Filename }}
+	{{ .Lower }}Migration.Filename = "{{ .Filename }}"
+	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
 	err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
 
