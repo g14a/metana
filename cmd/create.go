@@ -50,7 +50,7 @@ var createCmd = &cobra.Command{
 		color.Green(" ✓ Created " + wd + "/" + fileName)
 		color.Green(" ✓ Generated " + wd + "/migrations/main.go")
 
-		err = gen.AddMigration(args[0], strings.TrimPrefix(fileName, "migrations/"))
+		err = gen.AddMigration(args[0], strings.TrimPrefix(fileName, "migrations/scripts/"))
 		if err != nil {
 			log.Fatal(err)
 		}

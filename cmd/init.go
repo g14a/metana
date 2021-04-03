@@ -44,15 +44,16 @@ var initCmd = &cobra.Command{
 
 		query, err := gojq.Parse(".Module.Path | ..")
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatal(err)
 		}
 
 		goModDetails := make(map[string]interface{})
 
 		errJson := json.Unmarshal(goModInfo, &goModDetails)
 		if errJson != nil {
-			panic(err)
+			log.Fatal(errJson)
 		}
+
 		iter := query.Run(goModDetails)
 
 		var goModPath string
@@ -62,7 +63,7 @@ var initCmd = &cobra.Command{
 				break
 			}
 			if err, ok := v.(error); ok {
-				log.Fatalln(err)
+				log.Fatal(err)
 			}
 			goModPath = v.(string)
 		}

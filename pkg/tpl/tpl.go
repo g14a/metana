@@ -8,7 +8,8 @@ import (
 )
 
 type {{ .MigrationName }}Migration struct {
-	Timestamp int 
+	Timestamp int
+	Filename  string
 }
 
 func (r *{{ .MigrationName }}Migration) Up() error {
@@ -64,6 +65,9 @@ func AddMigrationTemplate(up bool) []byte {
 		return []byte(`
 	{{ .Lower }}Migration := &scripts.{{ .MigrationName }}Migration{}
 	{{ .Lower }}Migration.Timestamp = {{ .Timestamp }}
+	{{ .Lower }}Migration.Filename = {{ .Filename }}
+	{{ .Lower }}Migration.MigrationName = {{ .MigrationName }}
+
 	err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
 
 	if err{{ .MigrationName }} != nil {
@@ -74,20 +78,26 @@ func AddMigrationTemplate(up bool) []byte {
 	if err{{ .MigrationName }} != nil {
 		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 	}
+
 	return nil
 `)
 	} else {
 		return []byte(`
 	{{ .Lower }}Migration := &scripts.{{ .MigrationName }}Migration{}
-	err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
 	{{ .Lower }}Migration.Timestamp = {{ .Timestamp }}
+	{{ .Lower }}Migration.Filename = {{ .Filename }}
+
+	err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
+
 	if err{{ .MigrationName }} != nil {
 		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 	}
+
 	err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}")
 	if err{{ .MigrationName }} != nil {
 		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 	}	
+
 	return nil
 `)
 	}
