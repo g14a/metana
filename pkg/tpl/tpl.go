@@ -36,6 +36,8 @@ import (
 )
 
 func MigrateUp() error {
+	track, _ := Load()
+
 	return nil
 }
 
@@ -69,15 +71,17 @@ func AddMigrationTemplate(up bool) []byte {
 	{{ .Lower }}Migration.Filename = "{{ .Filename }}"
 	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
-	err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
+	if track.LastRunTS < {{ .Lower }}Migration.Timestamp {
+		err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
 
-	if err{{ .MigrationName }} != nil {
-		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
-	}
-
-	err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}")
-	if err{{ .MigrationName }} != nil {
-		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+		if err{{ .MigrationName }} != nil {
+			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+		}
+	
+		err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}")
+		if err{{ .MigrationName }} != nil {
+			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+		}
 	}
 
 	return nil
@@ -120,6 +124,7 @@ func Set(timestamp int, fileName string) error {
 	}
 
 	track.LastRun = fileName
+	track.LastRunTS  = timestamp
 	track.Migrations = append(track.Migrations, Migration{
 		Title:     fileName,
 		Timestamp: timestamp,
@@ -156,7 +161,8 @@ func Load() (Track, error) {
 }
 
 type Track struct {
-	LastRun    string      
+	LastRun    string
+	LastRunTS  int
 	Migrations []Migration 
 }
 
