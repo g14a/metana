@@ -1,4 +1,4 @@
-package pkg
+package types
 
 type Migration struct {
 	Timestamp     int
