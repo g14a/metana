@@ -59,6 +59,5 @@ Navigate to the file 1614532908-Sample.go inside
 the migrations directory to update your migration script.
 ```
 
-###Roadmap
-- [ ] Store
+### Roadmap
 - [ ] env config

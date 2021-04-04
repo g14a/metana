@@ -18,11 +18,11 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"os/exec"
-
-	"github.com/spf13/cobra"
 )
 
 // downCmd represents the down command
@@ -33,16 +33,20 @@ var downCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		migrationsBuild := exec.Command("go", "build")
 		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		migrationsBuild.Dir = wd + "/migrations"
 
 		errBuild := migrationsBuild.Start()
 		if errBuild != nil {
-			log.Fatal(err)
+			log.Fatal(errBuild)
 		}
 
 		errWait := migrationsBuild.Wait()
 		if errWait != nil {
-			log.Fatal(err)
+			log.Fatal(errWait)
 		}
 
 		migrationsRun := exec.Command("./migrations", "down")
@@ -56,11 +60,17 @@ var downCmd = &cobra.Command{
 			log.Fatal(errRun)
 		}
 
-		fmt.Println(outBuf.String())
+		if len(outBuf.String()) == 0 {
+			color.Green("  >>> migration : complete")
+			return
+		}
 
 		if errBuf.Len() > 0 {
-			fmt.Println(errBuf.String())
+			log.Fatal(errBuf.String())
 		}
+
+		fmt.Println(outBuf.String())
+
 	},
 }
 
