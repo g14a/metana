@@ -18,6 +18,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"github.com/fatih/color"
 	"log"
 	"os"
 	"os/exec"
@@ -60,11 +61,16 @@ var upCmd = &cobra.Command{
 			log.Fatal(errRun)
 		}
 
-		fmt.Println(outBuf.String())
+		if len(outBuf.String()) == 0 {
+			color.Green("  >>> migration : complete")
+			return
+		}
 
 		if errBuf.Len() > 0 {
-			fmt.Println(errBuf.String())
+			log.Fatal(errBuf.String())
 		}
+
+		fmt.Println(outBuf.String())
 	},
 }
 

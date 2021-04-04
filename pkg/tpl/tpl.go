@@ -37,11 +37,12 @@ import (
 
 func MigrateUp() error {
 	track, _ := Load()
-
+	
 	return nil
 }
 
 func MigrateDown() error {
+	
 	return nil
 }
 
@@ -72,6 +73,7 @@ func AddMigrationTemplate(up bool) []byte {
 	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
 	if track.LastRunTS < {{ .Lower }}Migration.Timestamp {
+		fmt.Printf("  >>> Running up: %s\n\n", {{ .Lower }}Migration.Filename)
 		err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
 
 		if err{{ .MigrationName }} != nil {
@@ -115,6 +117,8 @@ func StoreTemplate() []byte {
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/g14a/go-migrate/pkg/types"
 )
 
 func Set(timestamp int, fileName string) error {
@@ -125,7 +129,7 @@ func Set(timestamp int, fileName string) error {
 
 	track.LastRun = fileName
 	track.LastRunTS  = timestamp
-	track.Migrations = append(track.Migrations, Migration{
+	track.Migrations = append(track.Migrations, types.Migration{
 		Title:     fileName,
 		Timestamp: timestamp,
 	})
@@ -142,33 +146,22 @@ func Set(timestamp int, fileName string) error {
 	return nil
 }
 
-func Load() (Track, error) {
+func Load() (types.Track, error) {
 	track, err := os.ReadFile("migrate.json")
 	if err != nil {
-		return Track{}, err
+		return types.Track{}, err
 	}
 
-	t := Track{}
+	t := types.Track{}
 
 	if len(track) > 0 {
 		err = json.Unmarshal(track, &t)
 		if err != nil {
-			return Track{}, err
+			return types.Track{}, err
 		}
 	}
 
 	return t, nil
-}
-
-type Track struct {
-	LastRun    string
-	LastRunTS  int
-	Migrations []Migration 
-}
-
-type Migration struct {
-	Title     string 
-	Timestamp int   
 }`)
 }
 
