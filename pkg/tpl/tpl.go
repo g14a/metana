@@ -30,6 +30,7 @@ func InitMigrationRunTemplate() []byte {
 package main
 
 import (
+	"flag"
 	"os"
 	"{{ .pwd }}/migrations/scripts"
 	"fmt"
@@ -47,14 +48,34 @@ func MigrateDown() error {
 }
 
 func main() {
-	if os.Args[1] == "up" {
+	upCmd := flag.NewFlagSet("up", flag.ExitOnError)
+	downCmd := flag.NewFlagSet("down", flag.ExitOnError)
+
+	var upUntil, downUntil string
+	upCmd.StringVar(&upUntil, "until", "", "")
+	downCmd.StringVar(&downUntil, "until", "", "")
+
+	switch os.Args[1] {
+	case "up":
+		err := upCmd.Parse(os.Args[2:])
+		if err != nil {
+			return
+		}
+	case "down":
+		err := downCmd.Parse(os.Args[2:])
+		if err != nil {
+			return
+		}
+	}
+
+	if upCmd.Parsed() {
 		err := MigrateUp()
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 
-	if os.Args[1] == "down" {
+	if downCmd.Parsed() {
 		err := MigrateDown()
 		if err != nil {
 			fmt.Println(err)
