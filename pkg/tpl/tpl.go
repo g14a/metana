@@ -80,7 +80,7 @@ func AddMigrationTemplate(up bool) []byte {
 			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 		}
 	
-		err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}")
+		err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}", true)
 		if err{{ .MigrationName }} != nil {
 			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 		}
@@ -101,7 +101,7 @@ func AddMigrationTemplate(up bool) []byte {
 		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 	}
 
-	err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}")
+	err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}", false)
 	if err{{ .MigrationName }} != nil {
 		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 	}	
@@ -121,18 +121,31 @@ import (
 	"github.com/g14a/go-migrate/pkg/types"
 )
 
-func Set(timestamp int, fileName string) error {
+func Set(timestamp int, fileName string, up bool) error {
 	track, err := Load()
 	if err != nil {
 		return err
 	}
 
-	track.LastRun = fileName
-	track.LastRunTS  = timestamp
-	track.Migrations = append(track.Migrations, types.Migration{
-		Title:     fileName,
-		Timestamp: timestamp,
-	})
+	if up {
+		track.LastRun = fileName
+		track.LastRunTS = timestamp
+		track.Migrations = append(track.Migrations, types.Migration{
+			Title:     fileName,
+			Timestamp: timestamp,
+		})
+	} else {
+		track.LastRun = fileName
+		track.LastRunTS = timestamp
+		track.Migrations = track.Migrations[:len(track.Migrations)-1]
+		if len(track.Migrations) == 0 {
+			err = os.WriteFile("migrate.json", nil, 0644)
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+	}
 
 	bytes, err := json.MarshalIndent(track,"", "	")
 	if err != nil {
