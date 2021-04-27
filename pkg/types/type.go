@@ -10,3 +10,6 @@ type Migration struct {
 	Title     string
 	Timestamp int
 }
+
+type UntilOpts struct {
+}

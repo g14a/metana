@@ -1,18 +1,4 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this gen except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Package cmd /*
 package cmd
 
 import (
@@ -31,6 +17,7 @@ var downCmd = &cobra.Command{
 	Short: "Run the downward migration",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		downUntil, _ := cmd.Flags().GetString("until")
 		migrationsBuild := exec.Command("go", "build")
 		wd, err := os.Getwd()
 		if err != nil {
@@ -49,7 +36,12 @@ var downCmd = &cobra.Command{
 			log.Fatal(errWait)
 		}
 
-		migrationsRun := exec.Command("./migrations", "down")
+		migrationArgs := []string{"down"}
+		if downUntil != "" {
+			migrationArgs = append(migrationArgs, "--until", downUntil)
+		}
+
+		migrationsRun := exec.Command("./migrations", migrationArgs...)
 		migrationsRun.Dir = wd + "/migrations"
 		var outBuf, errBuf bytes.Buffer
 		migrationsRun.Stdout = &outBuf
@@ -60,22 +52,18 @@ var downCmd = &cobra.Command{
 			log.Fatal(errRun)
 		}
 
-		if len(outBuf.String()) == 0 {
-			color.Green("  >>> migration : complete")
-			return
-		}
-
 		if errBuf.Len() > 0 {
 			log.Fatal(errBuf.String())
 		}
 
-		fmt.Println(outBuf.String())
-
+		fmt.Printf("%v", outBuf.String())
+		color.Green("\n  >>> migration : complete")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(downCmd)
+	downCmd.Flags().StringP("until", "u", "", "Migrate down until a specific point\n")
 
 	// Here you will define your flags and configuration settings.
 

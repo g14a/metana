@@ -54,7 +54,7 @@ func regenerateMain(migrationName, fileName string) error {
 			lines[i] = tplBuffer.String()
 
 			firstReturn = true
-		} else if strings.Contains(line, "return nil") {
+		} else if strings.Contains(line, "func MigrateDown") {
 			var tplBuffer bytes.Buffer
 			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(false)))
 			if errAdd != nil {
@@ -64,7 +64,7 @@ func regenerateMain(migrationName, fileName string) error {
 			if err != nil {
 				return err
 			}
-			lines[i] = tplBuffer.String()
+			lines[i+1] = tplBuffer.String()
 		}
 	}
 

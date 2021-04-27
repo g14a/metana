@@ -36,13 +36,13 @@ import (
 	"fmt"
 )
 
-func MigrateUp() error {
+func MigrateUp(upUntil string) (err error) {
 	track, _ := Load()
 	
 	return nil
 }
 
-func MigrateDown() error {
+func MigrateDown(downUntil string) (err error) {
 	
 	return nil
 }
@@ -69,14 +69,14 @@ func main() {
 	}
 
 	if upCmd.Parsed() {
-		err := MigrateUp()
+		err := MigrateUp(upUntil)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 
 	if downCmd.Parsed() {
-		err := MigrateDown()
+		err := MigrateDown(downUntil)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -94,7 +94,7 @@ func AddMigrationTemplate(up bool) []byte {
 	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
 	if track.LastRunTS < {{ .Lower }}Migration.Timestamp {
-		fmt.Printf("  >>> Running up: %s\n\n", {{ .Lower }}Migration.Filename)
+		fmt.Printf("\n  >>> Migrating up: %s\n", {{ .Lower }}Migration.Filename)
 		err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
 
 		if err{{ .MigrationName }} != nil {
@@ -105,6 +105,14 @@ func AddMigrationTemplate(up bool) []byte {
 		if err{{ .MigrationName }} != nil {
 			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 		}
+	}
+
+	if upUntil == "{{ .MigrationName }}" {
+		if track.LastRunTS == {{ .Lower }}Migration.Timestamp {
+			return
+		}
+		fmt.Printf("  >>> Migrated up until: %s\n", {{ .Lower }}Migration.Filename)
+		return
 	}
 
 	return nil
@@ -127,7 +135,10 @@ func AddMigrationTemplate(up bool) []byte {
 		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 	}	
 
-	return nil
+	if downUntil == "{{ .MigrationName }}" {
+		fmt.Printf("  >>> Migrated down until: %s\n", {{ .Lower }}Migration.Filename)
+		return
+	}
 `)
 	}
 }
@@ -156,9 +167,6 @@ func Set(timestamp int, fileName string, up bool) error {
 			Timestamp: timestamp,
 		})
 	} else {
-		track.LastRun = fileName
-		track.LastRunTS = timestamp
-		track.Migrations = track.Migrations[:len(track.Migrations)-1]
 		if len(track.Migrations) == 0 {
 			err = os.WriteFile("migrate.json", nil, 0644)
 			if err != nil {
@@ -166,9 +174,12 @@ func Set(timestamp int, fileName string, up bool) error {
 			}
 			return nil
 		}
+		track.LastRun = fileName
+		track.LastRunTS = timestamp
+		track.Migrations = track.Migrations[:len(track.Migrations)-1]
 	}
 
-	bytes, err := json.MarshalIndent(track,"", "	")
+	bytes, err := json.MarshalIndent(track, "", "	")
 	if err != nil {
 		return err
 	}

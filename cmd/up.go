@@ -1,29 +1,14 @@
-/*
-Copyright © 2021 NAME HERE <EMAIL ADDRESS>
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this gen except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Package cmd /*
 package cmd
 
 import (
 	"bytes"
 	"fmt"
 	"github.com/fatih/color"
+	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"os/exec"
-
-	"github.com/spf13/cobra"
 )
 
 // upCmd represents the up command
@@ -32,6 +17,7 @@ var upCmd = &cobra.Command{
 	Short: "Run upward migrations",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		upUntil, _ := cmd.Flags().GetString("until")
 		migrationsBuild := exec.Command("go", "build")
 		wd, err := os.Getwd()
 		if err != nil {
@@ -50,7 +36,12 @@ var upCmd = &cobra.Command{
 			log.Fatal(errWait)
 		}
 
-		migrationsRun := exec.Command("./migrations", "up")
+		migrationArgs := []string{"up"}
+		if upUntil != "" {
+			migrationArgs = append(migrationArgs, "--until", upUntil)
+		}
+
+		migrationsRun := exec.Command("./migrations", migrationArgs...)
 		migrationsRun.Dir = wd + "/migrations"
 		var outBuf, errBuf bytes.Buffer
 		migrationsRun.Stdout = &outBuf
@@ -61,21 +52,18 @@ var upCmd = &cobra.Command{
 			log.Fatal(errRun)
 		}
 
-		if len(outBuf.String()) == 0 {
-			color.Green("  >>> migration : complete")
-			return
-		}
-
 		if errBuf.Len() > 0 {
 			log.Fatal(errBuf.String())
 		}
 
-		fmt.Println(outBuf.String())
+		fmt.Printf("%v", outBuf.String())
+		color.Green("\n  >>> migration : complete")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(upCmd)
+	upCmd.Flags().StringP("until", "u", "", "Migrate up until a specific point\n")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
