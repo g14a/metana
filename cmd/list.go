@@ -14,7 +14,15 @@ var listCmd = &cobra.Command{
 	Short: "list migrations",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := pkg.ListMigrations()
+		dir, err := cmd.Flags().GetString("dir")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if dir == "" {
+			dir = "migrations"
+		}
+
+		err = pkg.ListMigrations(dir)
 		if err != nil {
 			log.Fatal(err)
 		}

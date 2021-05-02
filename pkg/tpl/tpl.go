@@ -32,7 +32,7 @@ package main
 import (
 	"flag"
 	"os"
-	"{{ .pwd }}/migrations/scripts"
+	"{{ .pwd }}/{{ .dir }}/scripts"
 	"fmt"
 )
 
@@ -222,4 +222,5 @@ type NewMigration struct {
 	MigrationName string
 	Timestamp     string
 	Filename      string
+	MigrationsDir string
 }

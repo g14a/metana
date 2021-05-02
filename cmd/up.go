@@ -17,6 +17,14 @@ var upCmd = &cobra.Command{
 	Short: "Run upward migrations",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		dir, err := cmd.Flags().GetString("dir")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if dir == "" {
+			dir = "migrations"
+		}
+
 		upUntil, _ := cmd.Flags().GetString("until")
 		migrationsBuild := exec.Command("go", "build")
 		wd, err := os.Getwd()
@@ -24,7 +32,7 @@ var upCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		migrationsBuild.Dir = wd + "/migrations"
+		migrationsBuild.Dir = wd + "/" + dir
 
 		errBuild := migrationsBuild.Start()
 		if errBuild != nil {
@@ -41,8 +49,8 @@ var upCmd = &cobra.Command{
 			migrationArgs = append(migrationArgs, "--until", upUntil)
 		}
 
-		migrationsRun := exec.Command("./migrations", migrationArgs...)
-		migrationsRun.Dir = wd + "/migrations"
+		migrationsRun := exec.Command("./"+dir, migrationArgs...)
+		migrationsRun.Dir = wd + "/" + dir
 		var outBuf, errBuf bytes.Buffer
 		migrationsRun.Stdout = &outBuf
 		migrationsRun.Stderr = &errBuf
@@ -66,6 +74,7 @@ var upCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(upCmd)
+	upCmd.Flags().StringP("dir", "d", "", "Specify migrations dir")
 	upCmd.Flags().StringP("until", "u", "", "Migrate up until a specific point\n")
 	// Here you will define your flags and configuration settings.
 

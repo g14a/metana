@@ -3,6 +3,7 @@ package gen
 import (
 	"fmt"
 	"github.com/g14a/go-migrate/pkg/tpl"
+	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -13,13 +14,13 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func CreateMigrationFile(file string) (string, error) {
+func CreateMigrationFile(migrationsDir, file string) (string, error) {
 	nm := tpl.NewMigration{
 		MigrationName: strcase.ToCamel(file),
 		Timestamp:     strconv.Itoa(int(time.Now().Unix())),
 	}
 
-	fileName := fmt.Sprintf("migrations/scripts/%s-%s.go", nm.Timestamp, nm.MigrationName)
+	fileName := fmt.Sprintf(migrationsDir+"/scripts/%s-%s.go", nm.Timestamp, nm.MigrationName)
 
 	mainFile, err := os.Create(fileName)
 	if err != nil {
@@ -42,32 +43,48 @@ func CreateMigrationFile(file string) (string, error) {
 	return fileName, nil
 }
 
-func CreateInitConfig(pwd string) error {
+func CreateInitConfig(migrationsDir, pwd string) error {
 
-	migrationRunFile, err := os.Create("migrations/main.go")
+	migrationRunFile, err := os.Create(migrationsDir + "/main.go")
 	if err != nil {
 		return err
 	}
 
-	defer migrationRunFile.Close()
+	defer func(migrationRunFile *os.File) {
+		err := migrationRunFile.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(migrationRunFile)
 
-	storeFile, err := os.Create("migrations/store.go")
+	storeFile, err := os.Create(migrationsDir + "/store.go")
 	if err != nil {
 		return err
 	}
 
-	defer storeFile.Close()
+	defer func(storeFile *os.File) {
+		err := storeFile.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(storeFile)
 
-	jsonFile, err := os.Create("migrations/migrate.json")
+	jsonFile, err := os.Create(migrationsDir + "/migrate.json")
 	if err != nil {
 		return err
 	}
 
-	defer jsonFile.Close()
+	defer func(jsonFile *os.File) {
+		err := jsonFile.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(jsonFile)
 
 	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl.InitMigrationRunTemplate())))
 	err = migrationRunTemplate.Execute(migrationRunFile, map[string]interface{}{
 		"pwd": pwd,
+		"dir": migrationsDir,
 	})
 
 	if err != nil {
@@ -80,12 +97,12 @@ func CreateInitConfig(pwd string) error {
 		return err
 	}
 
-	cmd := exec.Command("gofmt", "-w", "migrations/main.go")
+	cmd := exec.Command("gofmt", "-w", migrationsDir+"/main.go")
 	if errOut, err := cmd.CombinedOutput(); err != nil {
 		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
 	}
 
-	cmd = exec.Command("gofmt", "-w", "migrations/store.go")
+	cmd = exec.Command("gofmt", "-w", migrationsDir+"/store.go")
 	if errOut, err := cmd.CombinedOutput(); err != nil {
 		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
 	}

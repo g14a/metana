@@ -8,8 +8,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func ListMigrations() error {
-	migrations, err := GetMigrations()
+func ListMigrations(migrationsDir string) error {
+	migrations, err := GetMigrations(migrationsDir)
 	if err != nil {
 		return err
 	}
@@ -31,13 +31,13 @@ func ListMigrations() error {
 	return nil
 }
 
-func GetMigrations() ([]migration, error) {
+func GetMigrations(migrationsDir string) ([]migration, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return []migration{}, err
 	}
 
-	m, err := filepath.Glob(wd + "/migrations/scripts/[^.]*.*")
+	m, err := filepath.Glob(wd + "/" + migrationsDir + "/scripts/[^.]*.*")
 	if err != nil {
 		return []migration{}, err
 	}

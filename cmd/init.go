@@ -23,7 +23,15 @@ var initCmd = &cobra.Command{
 	Short: "initialize a migrations directory",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		_ = os.MkdirAll("migrations/scripts", 0755)
+		dir, err := cmd.Flags().GetString("dir")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if dir == "" {
+			dir = "migrations"
+		}
+
+		_ = os.MkdirAll(dir+"/scripts", 0755)
 		wd, _ := os.Getwd()
 
 		goModInfo, err := exec.Command("go", "mod", "edit", "-json").Output()
@@ -54,18 +62,19 @@ var initCmd = &cobra.Command{
 			goModPath = v.(string)
 		}
 
-		err = gen.CreateInitConfig(goModPath)
+		err = gen.CreateInitConfig(dir, goModPath)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		color.Green(" ✓ Created " + wd + "/migrations/main.go")
-		color.Green(" ✓ Created " + wd + "/migrations/store.go")
-		color.Green(" ✓ Created " + wd + "/migrations/migrate.json")
+		color.Green(" ✓ Created " + wd + "/" + dir + "/main.go")
+		color.Green(" ✓ Created " + wd + "/" + dir + "/store.go")
+		color.Green(" ✓ Created " + wd + "/" + dir + "/migrate.json")
 	},
 }
 
 func init() {
+	initCmd.Flags().StringP("dir", "d", "", "Specify migrations dir")
 	rootCmd.AddCommand(initCmd)
 
 	// Here you will define your flags and configuration settings.
