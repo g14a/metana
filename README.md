@@ -4,6 +4,20 @@ An abstract migration tool for all types of migrations
 
 ![demo.gif](https://github.com/g14a/go-migrate/blob/main/demo.gif)
 
+### Install
+
+```shell
+go get github.com/g14a/go-migrate
+```
+
+### Build from source
+Make sure you have Go installed.
+```shell
+git clone https://github.com/g14a/go-migrate.git
+cd go-migrate
+go install
+```
+
 ### Usage
 ```shell
 An abstract migration tool for all types of migrations
