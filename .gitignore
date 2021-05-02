@@ -6,6 +6,7 @@
 *.dylib
 migrations
 demo.yml
+schema-mig
 
 # Test binary, built with `go test -c`
 *.test
