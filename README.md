@@ -1,5 +1,12 @@
 # go-migrate
 
+![OpenSource](https://img.shields.io/badge/Open%20Source-000000?style=for-the-badge&logo=github)
+![go](https://img.shields.io/badge/-Written%20In%20Go-00add8?style=for-the-badge&logo=Go&logoColor=ffffff)
+![cli](https://img.shields.io/badge/-Build%20for%20CLI-000000?style=for-the-badge&logo=Powershell&logoColor=ffffff)
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/g14a/go-migrate)](https://goreportcard.com/report/github.com/g14a/go-migrate)
+[![Go Workflow Status](https://github.com/g14a/go-migrate/workflows/Go/badge.svg)](https://github.com/g14a/go-migrate/workflows/Go/badge.svg)
+
 An abstract migration tool for all types of migrations
 
 ![demo.gif](https://github.com/g14a/go-migrate/blob/main/demo.gif)
@@ -38,7 +45,7 @@ Flags:
   -h, --help            help for go-migrate
   -t, --toggle          Help message for toggle
 
-Use "go-migrate [command] --help" for more information about a command.```
+Use "go-migrate [command] --help" for more information about a command.
 ```
 
 ### Steps to create a migration
@@ -73,11 +80,11 @@ Use "go-migrate [command] --help" for more information about a command.```
 
 # List migrations
 > go-migrate list
-+----------------------+------------------+
-|      MIGRATION       |  LAST MODIFIED   |
-+----------------------+------------------+
-| 1614532908-Sample.go | 28-02-2021 22:51 |
-+----------------------+------------------+
+ +----------------------+------------------+
+ |      MIGRATION       |  LAST MODIFIED   |
+ +----------------------+------------------+
+ | 1614532908-Sample.go | 28-02-2021 22:51 |
+ +----------------------+------------------+
 
 Navigate to the file 1614532908-Sample.go inside
 the migrations directory to update your migration script.
