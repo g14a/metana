@@ -56,8 +56,11 @@ var upCmd = &cobra.Command{
 			log.Fatal(errBuf.String())
 		}
 
-		fmt.Printf("%v", outBuf.String())
-		color.Green("\n  >>> migration : complete")
+		if outBuf.Len() > 0 {
+			fmt.Printf("%v\n", outBuf.String())
+		}
+
+		color.Green("  >>> migration : complete")
 	},
 }
 

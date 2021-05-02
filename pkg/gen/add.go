@@ -64,7 +64,7 @@ func regenerateMain(migrationName, fileName string) error {
 			if err != nil {
 				return err
 			}
-			lines[i+1] = tplBuffer.String()
+			lines[i+2] = tplBuffer.String()
 		}
 	}
 

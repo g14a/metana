@@ -43,7 +43,8 @@ func MigrateUp(upUntil string) (err error) {
 }
 
 func MigrateDown(downUntil string) (err error) {
-	
+	track, _ := Load()
+
 	return nil
 }
 
@@ -101,7 +102,7 @@ func AddMigrationTemplate(up bool) []byte {
 			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 		}
 	
-		err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}", true)
+		err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, {{ .Lower }}Migration.Filename, true)
 		if err{{ .MigrationName }} != nil {
 			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 		}
@@ -111,7 +112,7 @@ func AddMigrationTemplate(up bool) []byte {
 		if track.LastRunTS == {{ .Lower }}Migration.Timestamp {
 			return
 		}
-		fmt.Printf("  >>> Migrated up until: %s\n", {{ .Lower }}Migration.Filename)
+		fmt.Printf("\n  >>> Migrated up until: %s\n", {{ .Lower }}Migration.Filename)
 		return
 	}
 
@@ -124,18 +125,24 @@ func AddMigrationTemplate(up bool) []byte {
 	{{ .Lower }}Migration.Filename = "{{ .Filename }}"
 	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
-	err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
+	if track.LastRunTS >= {{ .Lower }}Migration.Timestamp {
+		fmt.Printf("\n  >>> Migrating down: %s\n", {{ .Lower }}Migration.Filename)
+		err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
 
-	if err{{ .MigrationName }} != nil {
-		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+		if err{{ .MigrationName }} != nil {
+			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+		}
+
+		err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, {{ .Lower }}Migration.Filename, false)
+		if err{{ .MigrationName }} != nil {
+			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+		}	
 	}
 
-	err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, "{{ .Filename }}", false)
-	if err{{ .MigrationName }} != nil {
-		return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
-	}	
-
 	if downUntil == "{{ .MigrationName }}" {
+		if track.LastRunTS == {{ .Lower }}Migration.Timestamp {
+			return
+		}
 		fmt.Printf("  >>> Migrated down until: %s\n", {{ .Lower }}Migration.Filename)
 		return
 	}
