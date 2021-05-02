@@ -97,14 +97,6 @@ InitSchema up
  ✓ Created /Users/g14a/go-migrate/migrations/scripts/1619942687-InitSchema.go
  ✓ Generated /Users/g14a/go-migrate/migrations/main.go
  
-> go-migrate create addIndexes                                                                 
- ✓ Created /Users/g14a/go-migrate/migrations/scripts/1619942704-AddIndexes.go
- ✓ Generated /Users/g14a/go-migrate/migrations/main.go
- 
-> go-migrate create addFKeys                                                                   
- ✓ Created /Users/g14a/go-migrate/migrations/scripts/1619942737-AddFKeys.go
- ✓ Generated /Users/g14a/go-migrate/migrations/main.go 
-
 > Create more migration scripts...
 
 > go-migrate list --dir schema-mig
