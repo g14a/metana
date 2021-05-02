@@ -35,6 +35,7 @@ Use "go-migrate [command] --help" for more information about a command.```
  ✓ Created /Users/g14a/go-migrate/migrations/main.go
  ✓ Created /Users/g14a/go-migrate/migrations/store.go
  ✓ Created /Users/g14a/go-migrate/migrations/migrate.json
+
 # Create a migration
 > go-migrate create sample
  ✓ Created /Users/g14a/go-migrate/migrations/1614532908-Sample.go
@@ -50,7 +51,11 @@ Use "go-migrate [command] --help" for more information about a command.```
 
 # Run downward migration
 > go-migrate down
-Sample down
+  
+  >>> Migrating down: 1614532908-Sample.go
+  Sample down
+
+  >>> migration : complete
 
 # List migrations
 > go-migrate list
@@ -99,7 +104,7 @@ InitSchema up
  
 > Create more migration scripts...
 
-> go-migrate list --dir schema-mig
+> go-migrate list
 
   +----------------------------------+------------------+
   |            MIGRATION             |  LAST MODIFIED   |
