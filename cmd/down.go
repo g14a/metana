@@ -14,7 +14,7 @@ import (
 // downCmd represents the down command
 var downCmd = &cobra.Command{
 	Use:   "down",
-	Short: "Run the downward migration",
+	Short: "Run downward migrations",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir, err := cmd.Flags().GetString("dir")
@@ -74,7 +74,7 @@ var downCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(downCmd)
-	downCmd.Flags().StringP("dir", "d", "", "Specify migrations dir")
+	downCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	downCmd.Flags().StringP("until", "u", "", "Migrate down until a specific point\n")
 
 	// Here you will define your flags and configuration settings.

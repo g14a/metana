@@ -74,7 +74,7 @@ var upCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(upCmd)
-	upCmd.Flags().StringP("dir", "d", "", "Specify migrations dir")
+	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	upCmd.Flags().StringP("until", "u", "", "Migrate up until a specific point\n")
 	// Here you will define your flags and configuration settings.
 

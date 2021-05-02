@@ -11,7 +11,7 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "list migrations",
+	Short: "List existing migrations",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir, err := cmd.Flags().GetString("dir")
@@ -30,6 +30,7 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
+	listCmd.Flags().StringP("dir", "d", "", "Specify migrations dir")
 	rootCmd.AddCommand(listCmd)
 
 	// Here you will define your flags and configuration settings.

@@ -143,7 +143,7 @@ func AddMigrationTemplate(up bool) []byte {
 		if track.LastRunTS == {{ .Lower }}Migration.Timestamp {
 			return
 		}
-		fmt.Printf("  >>> Migrated down until: %s\n", {{ .Lower }}Migration.Filename)
+		fmt.Printf("\n  >>> Migrated down until: %s\n", {{ .Lower }}Migration.Filename)
 		return
 	}
 `)

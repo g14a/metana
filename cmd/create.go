@@ -13,7 +13,7 @@ import (
 // createCmd represents the create command
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "create a migration script in Go",
+	Short: "Create a migration in Go",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir, err := cmd.Flags().GetString("dir")
@@ -52,7 +52,7 @@ var createCmd = &cobra.Command{
 }
 
 func init() {
-	createCmd.Flags().StringP("dir", "d", "", "Specify migrations dir")
+	createCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	rootCmd.AddCommand(createCmd)
 	// Here you will define your flags and configuration settings.
 
