@@ -25,8 +25,17 @@ jobs:
       - name: Get dependencies
         run: |
           go get -v -t -d ./...
+
       - name: Build
         run: |
-          CGO_ENABLED=0 GOOS=linux go build
-          CGO_ENABLED=0 GOOS=windows go build
-          CGO_ENABLED=0 GOOS=darwin go build
+          CGO_ENABLED=0 GOOS=linux go build -v .
+          CGO_ENABLED=0 GOOS=windows go build -v .
+          CGO_ENABLED=0 GOOS=darwin go build -v .
+
+      - name: Build and Push Docker image to Docker Hub
+        uses: docker/build-push-action@v1
+          with:
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+            repository: g14a/go-migrate
+            tags: latest
