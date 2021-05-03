@@ -165,4 +165,4 @@ AddIndexes down
 ```
 
 ### Roadmap
-[ ] Automatic downward migration when corresponding upward migration fails
+[] Automatic downward migration when corresponding upward migration fails

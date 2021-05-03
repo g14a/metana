@@ -2,13 +2,10 @@
 package cmd
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/fatih/color"
+	"github.com/g14a/go-migrate/pkg/migrate"
 	"github.com/spf13/cobra"
 	"log"
-	"os"
-	"os/exec"
 )
 
 // upCmd represents the up command
@@ -26,46 +23,15 @@ var upCmd = &cobra.Command{
 		}
 
 		upUntil, _ := cmd.Flags().GetString("until")
-		migrationsBuild := exec.Command("go", "build")
-		wd, err := os.Getwd()
+
+		output, err := migrate.RunUp(upUntil, dir)
+
 		if err != nil {
-			log.Fatal(err)
+			color.Red("\n  ERROR: %s", err)
 		}
 
-		migrationsBuild.Dir = wd + "/" + dir
-
-		errBuild := migrationsBuild.Start()
-		if errBuild != nil {
-			log.Fatal(errBuild)
-		}
-
-		errWait := migrationsBuild.Wait()
-		if errWait != nil {
-			log.Fatal(errWait)
-		}
-
-		migrationArgs := []string{"up"}
-		if upUntil != "" {
-			migrationArgs = append(migrationArgs, "--until", upUntil)
-		}
-
-		migrationsRun := exec.Command("./"+dir, migrationArgs...)
-		migrationsRun.Dir = wd + "/" + dir
-		var outBuf, errBuf bytes.Buffer
-		migrationsRun.Stdout = &outBuf
-		migrationsRun.Stderr = &errBuf
-
-		errRun := migrationsRun.Run()
-		if errRun != nil {
-			log.Fatal(errRun)
-		}
-
-		if errBuf.Len() > 0 {
-			log.Fatal(errBuf.String())
-		}
-
-		if outBuf.Len() > 0 {
-			fmt.Printf("%v\n", outBuf.String())
+		if output != "" {
+			color.Cyan("%v\n", output)
 		}
 
 		color.Green("  >>> migration : complete")
