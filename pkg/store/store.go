@@ -1,8 +1,12 @@
 package store
 
 import (
+	"context"
 	"github.com/g14a/go-migrate/pkg/types"
 	"github.com/go-pg/pg/v10"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	mconnString "go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
 	"log"
 	"os"
 	"strconv"
@@ -15,15 +19,14 @@ type Store interface {
 }
 
 func GetStoreViaConn(connString string, dir string) Store {
-
 	switch {
 	case strings.Contains(connString, "postgres://"):
-		options, err := pg.ParseURL(connString)
+		pgOptions, err := pg.ParseURL(connString)
 		if err != nil {
 			log.Println("Couldn't parse postgres connection string")
 		}
 
-		db := pg.Connect(options)
+		db := pg.Connect(pgOptions)
 
 		_, err = db.Exec("SELECT 1")
 		if err != nil {
@@ -37,6 +40,19 @@ func GetStoreViaConn(connString string, dir string) Store {
 		}
 
 		return p
+	case strings.Contains(connString, "mongodb"):
+		ctx := context.TODO()
+		cs, err := mconnString.ParseAndValidate(connString)
+		clientOptions := options.Client().ApplyURI(connString)
+		client, err := mongo.Connect(ctx, clientOptions)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = client.Ping(ctx, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return MongoDb{coll: *client.Database(cs.Database).Collection("migrations")}
 	}
 
 	jsonFile, err := os.OpenFile(dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
