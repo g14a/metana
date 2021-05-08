@@ -20,19 +20,20 @@ var upCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		storeConn, err := cmd.Flags().GetString("store")
-		if err != nil {
-			log.Fatal(err)
-		}
 
-		storeHouse := store.GetStoreViaConn(storeConn)
-		existingTrack, err := storeHouse.Load()
+		storeConn, err := cmd.Flags().GetString("store")
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if dir == "" {
 			dir = "migrations"
+		}
+
+		storeHouse := store.GetStoreViaConn(storeConn, dir)
+		existingTrack, err := storeHouse.Load()
+		if err != nil {
+			log.Fatal(err)
 		}
 
 		upUntil, _ := cmd.Flags().GetString("until")
@@ -42,10 +43,14 @@ var upCmd = &cobra.Command{
 			color.Cyan("%v\n", output)
 		}
 
-		track := store.ProcessLogs(errBuf)
+		track, _ := store.ProcessLogs(errBuf)
+
+		existingTrack.LastRun = track.LastRun
+		existingTrack.LastRunTS = track.LastRunTS
+		existingTrack.Migrations = append(existingTrack.Migrations, track.Migrations...)
 
 		if len(track.Migrations) > 0 {
-			err = storeHouse.Set(track)
+			err = storeHouse.Set(existingTrack)
 			if err != nil {
 				fmt.Println(err)
 			}

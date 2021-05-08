@@ -15,6 +15,11 @@ func (p PGDB) Set(track types.Track) error {
 	if err != nil {
 		return err
 	}
+	_, err = p.db.Model(&track).Exec(`TRUNCATE migrations`)
+	if err != nil {
+		return err
+	}
+
 	_, err = p.db.Model(&track).Insert(&track)
 	if err != nil {
 		return err

@@ -68,8 +68,6 @@ var initCmd = &cobra.Command{
 		}
 
 		color.Green(" ✓ Created " + wd + "/" + dir + "/main.go")
-		color.Green(" ✓ Created " + wd + "/" + dir + "/store.go")
-		color.Green(" ✓ Created " + wd + "/" + dir + "/migrate.json")
 	},
 }
 

@@ -31,9 +31,10 @@ func InitMigrationRunTemplate() []byte {
 	
 	import (
 		"flag"
-		"os"
-		"{{ .pwd }}/{{ .dir }}/scripts"
 		"fmt"
+		"os"
+
+		"{{ .pwd }}/{{ .dir }}/scripts"
 	)
 	
 	func MigrateUp(upUntil string, lastRunTS int) (err error) {
@@ -100,7 +101,7 @@ func AddMigrationTemplate(up bool) []byte {
 		if err{{ .MigrationName }} != nil {
 			fmt.Errorf("%w", err{{ .MigrationName }})
 		}
-		fmt.Fprintf(os.Stderr, "{{ .Filename }}")
+		fmt.Fprintf(os.Stderr, "{{ .Filename }}\n")
 	}
 
 	if upUntil == "{{ .MigrationName }}" {
@@ -127,7 +128,7 @@ func AddMigrationTemplate(up bool) []byte {
 		if err{{ .MigrationName }} != nil {
 			fmt.Errorf("%w", err{{ .MigrationName }})
 		}
-		fmt.Fprintf(os.Stderr, "{{ .Filename }}")
+		fmt.Fprintf(os.Stderr, "{{ .Filename }}\n")
 	}
 
 	if downUntil == "{{ .MigrationName }}" {
