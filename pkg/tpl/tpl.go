@@ -174,6 +174,7 @@ func StoreTemplate() []byte {
 				Timestamp: timestamp,
 			})
 		} else {
+			track.Migrations = track.Migrations[:len(track.Migrations)-1]
 			if len(track.Migrations) == 0 {
 				err = os.WriteFile("migrate.json", nil, 0644)
 				if err != nil {
@@ -181,9 +182,8 @@ func StoreTemplate() []byte {
 				}
 				return nil
 			}
-			track.LastRun = fileName
-			track.LastRunTS = timestamp
-			track.Migrations = track.Migrations[:len(track.Migrations)-1]
+			track.LastRun = track.Migrations[len(track.Migrations)-1].Title
+			track.LastRunTS = track.Migrations[len(track.Migrations)-1].Timestamp
 		}
 	
 		bytes, err := json.MarshalIndent(track, "", "	")

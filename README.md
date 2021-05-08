@@ -25,6 +25,12 @@ cd go-migrate
 go install
 ```
 
+### Docker
+```shell
+docker pull g14a/go-migrate
+docker run 
+```
+
 ### Usage
 ```shell
 An abstract migration tool for all types of migrations

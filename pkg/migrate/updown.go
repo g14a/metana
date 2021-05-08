@@ -40,11 +40,11 @@ func RunUp(until, migrationsDir string) (string, error) {
 
 	errRun := migrationsRun.Run()
 	if errRun != nil {
-		return "", errRun
+		return outBuf.String(), errRun
 	}
 
 	if errBuf.Len() > 0 {
-		return "", errors.New(errBuf.String())
+		return outBuf.String(), errors.New(errBuf.String())
 	}
 
 	return outBuf.String(), nil
@@ -82,11 +82,11 @@ func RunDown(until, migrationsDir string) (string, error) {
 
 	errRun := migrationsRun.Run()
 	if errRun != nil {
-		return "", errRun
+		return outBuf.String(), errRun
 	}
 
 	if errBuf.Len() > 0 {
-		return "", errors.New(errBuf.String())
+		return outBuf.String(), errors.New(errBuf.String())
 	}
 
 	return outBuf.String(), nil

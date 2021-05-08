@@ -26,12 +26,12 @@ var upCmd = &cobra.Command{
 
 		output, err := migrate.RunUp(upUntil, dir)
 
-		if err != nil {
-			color.Red("\n  ERROR: %s", err)
-		}
-
 		if output != "" {
 			color.Cyan("%v\n", output)
+		}
+
+		if err != nil {
+			color.Red("  ERROR: %s", err)
 		}
 
 		color.Green("  >>> migration : complete")
