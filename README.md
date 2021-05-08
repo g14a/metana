@@ -173,3 +173,4 @@ Defaults to a ``migrate.json`` if not `url` is provided.
 
 Databases supported for now:
 * PostgreSQL
+* MongoDB
