@@ -98,8 +98,9 @@ func AddMigrationTemplate(up bool) []byte {
 		err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
 
 		if err{{ .MigrationName }} != nil {
-			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+			fmt.Errorf("%w", err{{ .MigrationName }})
 		}
+		fmt.Fprintf(os.Stderr, "{{ .Filename }}")
 	}
 
 	if upUntil == "{{ .MigrationName }}" {
@@ -124,8 +125,9 @@ func AddMigrationTemplate(up bool) []byte {
 		err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
 
 		if err{{ .MigrationName }} != nil {
-			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
+			fmt.Errorf("%w", err{{ .MigrationName }})
 		}
+		fmt.Fprintf(os.Stderr, "{{ .Filename }}")
 	}
 
 	if downUntil == "{{ .MigrationName }}" {

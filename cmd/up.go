@@ -2,8 +2,10 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/fatih/color"
 	"github.com/g14a/go-migrate/pkg/migrate"
+	"github.com/g14a/go-migrate/pkg/store"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -18,29 +20,36 @@ var upCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		//storeConn, err := cmd.Flags().GetString("store")
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
+		storeConn, err := cmd.Flags().GetString("store")
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		//store := store.GetStoreViaConn(storeConn)
+		storeHouse := store.GetStoreViaConn(storeConn)
+		existingTrack, err := storeHouse.Load()
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		if dir == "" {
 			dir = "migrations"
 		}
 
 		upUntil, _ := cmd.Flags().GetString("until")
-
-		output, err := migrate.RunUp(upUntil, dir)
+		output, errBuf := migrate.RunUp(upUntil, dir, existingTrack.LastRunTS)
 
 		if output != "" {
 			color.Cyan("%v\n", output)
 		}
 
-		if err != nil {
-			color.Red("  ERROR: %s", err)
-		}
+		track := store.ProcessLogs(errBuf)
 
+		if len(track.Migrations) > 0 {
+			err = storeHouse.Set(track)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 		color.Green("  >>> migration : complete")
 	},
 }

@@ -3,12 +3,14 @@ package migrate
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 )
 
-func RunUp(until, migrationsDir string) (string, error) {
+func RunUp(until, migrationsDir string, lastRunTS int) (string, string) {
 	migrationsBuild := exec.Command("go", "build")
 	wd, err := os.Getwd()
 	if err != nil {
@@ -31,6 +33,9 @@ func RunUp(until, migrationsDir string) (string, error) {
 	if until != "" {
 		migrationArgs = append(migrationArgs, "--until", until)
 	}
+	lastRunTSString := strconv.Itoa(lastRunTS)
+
+	migrationArgs = append(migrationArgs, "--last-run-ts", lastRunTSString)
 
 	migrationsRun := exec.Command("./"+migrationsDir, migrationArgs...)
 	migrationsRun.Dir = wd + "/" + migrationsDir
@@ -40,14 +45,10 @@ func RunUp(until, migrationsDir string) (string, error) {
 
 	errRun := migrationsRun.Run()
 	if errRun != nil {
-		return outBuf.String(), errRun
+		return outBuf.String(), errRun.Error()
 	}
 
-	if errBuf.Len() > 0 {
-		return outBuf.String(), errors.New(errBuf.String())
-	}
-
-	return outBuf.String(), nil
+	return outBuf.String(), errBuf.String()
 }
 
 func RunDown(until, migrationsDir string) (string, error) {
@@ -84,7 +85,7 @@ func RunDown(until, migrationsDir string) (string, error) {
 	if errRun != nil {
 		return outBuf.String(), errRun
 	}
-
+	fmt.Println(errBuf.String(),"===============")
 	if errBuf.Len() > 0 {
 		return outBuf.String(), errors.New(errBuf.String())
 	}

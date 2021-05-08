@@ -10,16 +10,31 @@ type PGDB struct {
 	db *pg.DB
 }
 
-func (p PGDB) Set(timestamp int, filename string, up bool) error {
+func (p PGDB) Set(track types.Track) error {
+	err := p.CreateTable()
+	if err != nil {
+		return err
+	}
+	_, err = p.db.Model(&track).Insert(&track)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (p PGDB) Load() (types.Track, error) {
-	return nil, nil
+	var track types.Track
+
+	err := p.db.Model(&track).Select(&track)
+	if err == pg.ErrNoRows {
+		return types.Track{}, nil
+	}
+
+	return track, nil
 }
 
 func (p PGDB) CreateTable() error {
-	err := p.db.Model(types.Track{}).CreateTable(&orm.CreateTableOptions{
+	err := p.db.Model(&types.Track{}).CreateTable(&orm.CreateTableOptions{
 		IfNotExists: true,
 	})
 
