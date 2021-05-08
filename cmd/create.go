@@ -3,7 +3,9 @@ package cmd
 
 import (
 	"github.com/fatih/color"
+	"github.com/g14a/go-migrate/pkg"
 	"github.com/g14a/go-migrate/pkg/gen"
+	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -17,6 +19,11 @@ var createCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir, err := cmd.Flags().GetString("dir")
+		if len(args) == 0 || len(args) > 1 {
+			color.Yellow("`create` accepts one argument")
+			os.Exit(0)
+		}
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -34,20 +41,26 @@ var createCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
+		firstMigration := false
+		migrations, err := pkg.GetMigrations(dir)
+		if len(migrations) == 0 {
+			firstMigration = true
+		}
+
 		fileName, err := gen.CreateMigrationFile(dir, args[0])
 		if err != nil {
 			color.Yellow("\nTry initializing migration using `go-migrate init`\n\n")
 			os.Exit(0)
 		}
 
-		wd, _ := os.Getwd()
-		color.Green(" ✓ Created " + wd + "/" + fileName)
-		color.Green(" ✓ Generated " + wd + "/" + dir + "/main.go")
-
-		err = gen.AddMigration(dir, args[0], strings.TrimPrefix(fileName, dir+"/scripts/"))
+		err = gen.Regen(dir, strcase.ToCamel(args[0]), strings.TrimPrefix(fileName, dir+"/scripts/"), firstMigration)
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		wd, _ := os.Getwd()
+		color.Green(" ✓ Created " + wd + "/" + fileName)
+		color.Green(" ✓ Generated " + wd + "/" + dir + "/main.go")
 	},
 }
 

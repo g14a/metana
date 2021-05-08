@@ -57,30 +57,6 @@ func CreateInitConfig(migrationsDir, pwd string) error {
 		}
 	}(migrationRunFile)
 
-	storeFile, err := os.Create(migrationsDir + "/store.go")
-	if err != nil {
-		return err
-	}
-
-	defer func(storeFile *os.File) {
-		err := storeFile.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(storeFile)
-
-	jsonFile, err := os.Create(migrationsDir + "/migrate.json")
-	if err != nil {
-		return err
-	}
-
-	defer func(jsonFile *os.File) {
-		err := jsonFile.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(jsonFile)
-
 	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl.InitMigrationRunTemplate())))
 	err = migrationRunTemplate.Execute(migrationRunFile, map[string]interface{}{
 		"pwd": pwd,
@@ -91,18 +67,7 @@ func CreateInitConfig(migrationsDir, pwd string) error {
 		return err
 	}
 
-	storeTemplate := template.Must(template.New("store").Parse(string(tpl.StoreTemplate())))
-	err = storeTemplate.Execute(storeFile, nil)
-	if err != nil {
-		return err
-	}
-
 	cmd := exec.Command("gofmt", "-w", migrationsDir+"/main.go")
-	if errOut, err := cmd.CombinedOutput(); err != nil {
-		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
-	}
-
-	cmd = exec.Command("gofmt", "-w", migrationsDir+"/store.go")
 	if errOut, err := cmd.CombinedOutput(); err != nil {
 		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
 	}

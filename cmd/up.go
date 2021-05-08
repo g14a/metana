@@ -18,6 +18,13 @@ var upCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+		//storeConn, err := cmd.Flags().GetString("store")
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+
+		//store := store.GetStoreViaConn(storeConn)
+
 		if dir == "" {
 			dir = "migrations"
 		}
@@ -42,6 +49,7 @@ func init() {
 	rootCmd.AddCommand(upCmd)
 	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	upCmd.Flags().StringP("until", "u", "", "Migrate up until a specific point\n")
+	upCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

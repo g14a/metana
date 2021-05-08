@@ -36,15 +36,11 @@ func InitMigrationRunTemplate() []byte {
 		"fmt"
 	)
 	
-	func MigrateUp(upUntil string) (err error) {
-		track, _ := Load()
-		
+	func MigrateUp(upUntil string, lastRunTS int) (err error) {
 		return nil
 	}
 	
-	func MigrateDown(downUntil string) (err error) {
-		track, _ := Load()
-	
+	func MigrateDown(downUntil string, lastRunTS int) (err error) {
 		return nil
 	}
 	
@@ -53,8 +49,11 @@ func InitMigrationRunTemplate() []byte {
 		downCmd := flag.NewFlagSet("down", flag.ExitOnError)
 	
 		var upUntil, downUntil string
+		var lastRunTS int
 		upCmd.StringVar(&upUntil, "until", "", "")
+		upCmd.IntVar(&lastRunTS, "last-run-ts", 0, "")
 		downCmd.StringVar(&downUntil, "until", "", "")
+		downCmd.IntVar(&lastRunTS, "last-run-ts", 0, "")
 	
 		switch os.Args[1] {
 		case "up":
@@ -70,16 +69,16 @@ func InitMigrationRunTemplate() []byte {
 		}
 	
 		if upCmd.Parsed() {
-			err := MigrateUp(upUntil)
+			err := MigrateUp(upUntil, lastRunTS)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Fprintf(os.Stdout, err.Error())
 			}
 		}
 	
 		if downCmd.Parsed() {
-			err := MigrateDown(downUntil)
+			err := MigrateDown(downUntil, lastRunTS)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Fprintf(os.Stdout, err.Error())
 			}
 		}
 	}
@@ -94,22 +93,17 @@ func AddMigrationTemplate(up bool) []byte {
 	{{ .Lower }}Migration.Filename = "{{ .Filename }}"
 	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
-	if track.LastRunTS < {{ .Lower }}Migration.Timestamp {
+	if lastRunTS < {{ .Lower }}Migration.Timestamp {
 		fmt.Printf("\n  >>> Migrating up: %s\n", {{ .Lower }}Migration.Filename)
 		err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
 
 		if err{{ .MigrationName }} != nil {
 			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 		}
-	
-		err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, {{ .Lower }}Migration.Filename, true)
-		if err{{ .MigrationName }} != nil {
-			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
-		}
 	}
 
 	if upUntil == "{{ .MigrationName }}" {
-		if track.LastRunTS == {{ .Lower }}Migration.Timestamp {
+		if lastRunTS == {{ .Lower }}Migration.Timestamp {
 			return
 		}
 		fmt.Printf("\n  >>> Migrated up until: %s\n", {{ .Lower }}Migration.Filename)
@@ -125,22 +119,17 @@ func AddMigrationTemplate(up bool) []byte {
 	{{ .Lower }}Migration.Filename = "{{ .Filename }}"
 	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
-	if track.LastRunTS >= {{ .Lower }}Migration.Timestamp {
+	if lastRunTS >= {{ .Lower }}Migration.Timestamp {
 		fmt.Printf("\n  >>> Migrating down: %s\n", {{ .Lower }}Migration.Filename)
 		err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
 
 		if err{{ .MigrationName }} != nil {
 			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
 		}
-
-		err{{ .MigrationName }} = Set({{ .Lower }}Migration.Timestamp, {{ .Lower }}Migration.Filename, false)
-		if err{{ .MigrationName }} != nil {
-			return fmt.Errorf("{{ .Filename }}, %w", err{{ .MigrationName }})
-		}	
 	}
 
 	if downUntil == "{{ .MigrationName }}" {
-		if track.LastRunTS == {{ .Lower }}Migration.Timestamp {
+		if lastRunTS == {{ .Lower }}Migration.Timestamp {
 			return
 		}
 		fmt.Printf("\n  >>> Migrated down until: %s\n", {{ .Lower }}Migration.Filename)
@@ -148,73 +137,6 @@ func AddMigrationTemplate(up bool) []byte {
 	}
 `)
 	}
-}
-
-func StoreTemplate() []byte {
-	return []byte(`package main
-
-	import (
-		"encoding/json"
-		"os"
-	
-		"github.com/g14a/go-migrate/pkg/types"
-	)
-
-	func Set(timestamp int, fileName string, up bool) error {
-		track, err := Load()
-		if err != nil {
-			return err
-		}
-	
-		if up {
-			track.LastRun = fileName
-			track.LastRunTS = timestamp
-			track.Migrations = append(track.Migrations, types.Migration{
-				Title:     fileName,
-				Timestamp: timestamp,
-			})
-		} else {
-			track.Migrations = track.Migrations[:len(track.Migrations)-1]
-			if len(track.Migrations) == 0 {
-				err = os.WriteFile("migrate.json", nil, 0644)
-				if err != nil {
-					return err
-				}
-				return nil
-			}
-			track.LastRun = track.Migrations[len(track.Migrations)-1].Title
-			track.LastRunTS = track.Migrations[len(track.Migrations)-1].Timestamp
-		}
-	
-		bytes, err := json.MarshalIndent(track, "", "	")
-		if err != nil {
-			return err
-		}
-	
-		err = os.WriteFile("migrate.json", bytes, 0644)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	
-	func Load() (types.Track, error) {
-		track, err := os.ReadFile("migrate.json")
-		if err != nil {
-			return types.Track{}, err
-		}
-	
-		t := types.Track{}
-	
-		if len(track) > 0 {
-			err = json.Unmarshal(track, &t)
-			if err != nil {
-				return types.Track{}, err
-			}
-		}
-	
-		return t, nil
-}`)
 }
 
 type NewMigration struct {

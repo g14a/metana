@@ -13,13 +13,7 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func AddMigration(migrationsDir, migrationName, fileName string) error {
-	camelCaseMigration := strcase.ToCamel(migrationName)
-
-	return regenerateMain(migrationsDir, camelCaseMigration, fileName)
-}
-
-func regenerateMain(migrationsDir, migrationName, fileName string) error {
+func Regen(migrationsDir, migrationName, fileName string, firstMigration bool) error {
 	lower := strcase.ToLowerCamel(migrationName)
 	input, err := os.ReadFile(migrationsDir + "/main.go")
 	if err != nil {
@@ -52,7 +46,6 @@ func regenerateMain(migrationsDir, migrationName, fileName string) error {
 			}
 
 			lines[i] = tplBuffer.String()
-
 			firstReturn = true
 		} else if strings.Contains(line, "func MigrateDown") {
 			var tplBuffer bytes.Buffer
@@ -64,7 +57,10 @@ func regenerateMain(migrationsDir, migrationName, fileName string) error {
 			if err != nil {
 				return err
 			}
-			lines[i+2] = tplBuffer.String()
+			if firstMigration {
+				tplBuffer.WriteString("\nreturn nil")
+			}
+			lines[i+1] = tplBuffer.String()
 		}
 	}
 
