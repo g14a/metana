@@ -166,5 +166,10 @@ AddIndexes down
 
 ### Track your migrations in your favourite database
 
+```shell
+go-migrate up --store <db-connection-url>
+```
+Defaults to a ``migrate.json`` if not `url` is provided.
+
 Databases supported for now:
 * PostgreSQL
