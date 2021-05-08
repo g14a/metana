@@ -2,7 +2,6 @@ package store
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/g14a/go-migrate/pkg/types"
 	"os"
 )
@@ -19,7 +18,6 @@ func (f File) Set(track types.Track) error {
 
 	err = os.WriteFile(f.file.Name(), bytes, 0644)
 	if err != nil {
-		fmt.Println(err, "===============err")
 		return err
 	}
 	return nil

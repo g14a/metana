@@ -60,8 +60,6 @@ Use "go-migrate [command] --help" for more information about a command.
 # Init migration
 > go-migrate init
  ✓ Created /Users/g14a/go-migrate/migrations/main.go
- ✓ Created /Users/g14a/go-migrate/migrations/store.go
- ✓ Created /Users/g14a/go-migrate/migrations/migrate.json
 
 # Create a migration
 > go-migrate create sample
@@ -103,8 +101,6 @@ the migrations directory to update your migration script.
 ```shell
 > go-migrate init --dir schema-mig
  ✓ Created /Users/g14a/go-migrate/schema-mig/main.go
- ✓ Created /Users/g14a/go-migrate/schema-mig/store.go
- ✓ Created /Users/g14a/go-migrate/schema-mig/migrate.json
 
 > go-migrate create initSchema --dir schema-mig
  ✓ Created /Users/g14a/go-migrate/schema-mig/scripts/1619943164-InitSchema.go
@@ -122,9 +118,7 @@ InitSchema up
 ```shell
 > go-migrate init                                                                              
  ✓ Created /Users/g14a/go-migrate/migrations/main.go
- ✓ Created /Users/g14a/go-migrate/migrations/store.go
- ✓ Created /Users/g14a/go-migrate/migrations/migrate.json
- 
+
 > go-migrate create initSchema                                                                
  ✓ Created /Users/g14a/go-migrate/migrations/scripts/1619942687-InitSchema.go
  ✓ Generated /Users/g14a/go-migrate/migrations/main.go
@@ -170,5 +164,7 @@ AddIndexes down
   >>> migration : complete
 ```
 
-### Roadmap
-[] Automatic downward migration when corresponding upward migration fails
+### Track your migrations in your favourite database
+
+Databases supported for now:
+* PostgreSQL

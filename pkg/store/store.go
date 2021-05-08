@@ -15,6 +15,7 @@ type Store interface {
 }
 
 func GetStoreViaConn(connString string, dir string) Store {
+
 	switch {
 	case strings.Contains(connString, "postgres://"):
 		options, err := pg.ParseURL(connString)
@@ -34,6 +35,7 @@ func GetStoreViaConn(connString string, dir string) Store {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		return p
 	}
 
