@@ -48,10 +48,17 @@ func GetStoreViaConn(connString string, dir string) Store {
 }
 
 func TrackToSetDown(track types.Track, num int) types.Track {
-
-	track.LastRun = track.Migrations[len(track.Migrations)-num-1].Title
-	track.LastRunTS = track.Migrations[len(track.Migrations)-num-1].Timestamp
+	if len(track.Migrations) == num {
+		track.LastRun = track.Migrations[len(track.Migrations)-num].Title
+		track.LastRunTS = track.Migrations[len(track.Migrations)-num].Timestamp
+	} else {
+		track.LastRun = track.Migrations[len(track.Migrations)-num-1].Title
+		track.LastRunTS = track.Migrations[len(track.Migrations)-num-1].Timestamp
+	}
 	track.Migrations = track.Migrations[:len(track.Migrations)-num]
+	if len(track.Migrations) == 0 {
+		return types.Track{}
+	}
 
 	return track
 }
