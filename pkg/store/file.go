@@ -19,7 +19,7 @@ func (f File) Set(track types.Track) error {
 
 	err = os.WriteFile(f.file.Name(), bytes, 0644)
 	if err != nil {
-		fmt.Println(err,"===============err")
+		fmt.Println(err, "===============err")
 		return err
 	}
 	return nil

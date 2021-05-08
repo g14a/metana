@@ -37,7 +37,7 @@ func GetStoreViaConn(connString string, dir string) Store {
 		return p
 	}
 
-	jsonFile, err := os.OpenFile(dir + "/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	jsonFile, err := os.OpenFile(dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
