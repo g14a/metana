@@ -2,7 +2,7 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/g14a/go-migrate/pkg/types"
+	"github.com/g14a/metana/pkg/types"
 	"os"
 )
 

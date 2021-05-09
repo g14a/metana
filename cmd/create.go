@@ -3,8 +3,8 @@ package cmd
 
 import (
 	"github.com/fatih/color"
-	"github.com/g14a/go-migrate/pkg"
-	"github.com/g14a/go-migrate/pkg/gen"
+	"github.com/g14a/metana/pkg"
+	"github.com/g14a/metana/pkg/gen"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 	"log"
@@ -49,7 +49,7 @@ var createCmd = &cobra.Command{
 
 		fileName, err := gen.CreateMigrationFile(dir, args[0])
 		if err != nil {
-			color.Yellow("\nTry initializing migration using `go-migrate init`\n\n")
+			color.Yellow("\nTry initializing migration using `metana init`\n\n")
 			os.Exit(0)
 		}
 

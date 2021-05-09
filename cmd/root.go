@@ -15,7 +15,7 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "go-migrate",
+	Use:   "metana",
 	Short: "A brief description of your application",
 	Long:  `An abstract migration framework for all types of migrations`,
 	// Uncomment the following line if your bare application
@@ -39,7 +39,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config gen (default is $HOME/.go-migrate.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config gen (default is $HOME/.metana.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -59,9 +59,9 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".go-migrate" (without extension).
+		// Search config in home directory with name ".metana" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".go-migrate")
+		viper.SetConfigName(".metana")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

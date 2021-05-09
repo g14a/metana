@@ -2,7 +2,7 @@ package gen
 
 import (
 	"fmt"
-	"github.com/g14a/go-migrate/pkg/tpl"
+	"github.com/g14a/metana/pkg/tpl"
 	"log"
 	"os"
 	"os/exec"

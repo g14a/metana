@@ -1,33 +1,33 @@
-# go-migrate
+# metana
 
 ![OpenSource](https://img.shields.io/badge/Open%20Source-000000?style=for-the-badge&logo=github)
 ![go](https://img.shields.io/badge/-Written%20In%20Go-00add8?style=for-the-badge&logo=Go&logoColor=ffffff)
 ![cli](https://img.shields.io/badge/-Build%20for%20CLI-000000?style=for-the-badge&logo=Powershell&logoColor=ffffff)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/g14a/go-migrate)](https://goreportcard.com/report/github.com/g14a/go-migrate)
-[![Go Workflow Status](https://github.com/g14a/go-migrate/workflows/Go/badge.svg)](https://github.com/g14a/go-migrate/workflows/Go/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/g14a/metana)](https://goreportcard.com/report/github.com/g14a/metana)
+[![Go Workflow Status](https://github.com/g14a/metana/workflows/Go/badge.svg)](https://github.com/g14a/metana/workflows/Go/badge.svg)
 
 An abstract migration tool for all types of migrations
 
-![demo.gif](https://github.com/g14a/go-migrate/blob/main/demo.gif)
+![demo.gif](https://github.com/g14a/metana/blob/main/demo.gif)
 
 ### Install
 
 ```shell
-go get github.com/g14a/go-migrate
+go get github.com/g14a/metana
 ```
 
 ### Build from source
 Make sure you have Go installed.
 ```shell
-git clone https://github.com/g14a/go-migrate.git
-cd go-migrate
+git clone https://github.com/g14a/metana.git
+cd metana
 go install
 ```
 
 ### Docker
 ```shell
-docker pull g14a/go-migrate
+docker pull g14a/metana
 docker run 
 ```
 
@@ -36,7 +36,7 @@ docker run
 An abstract migration tool for all types of migrations
 
 Usage:
-  go-migrate [command]
+  metana [command]
 
 Available Commands:
   create      Create a migration in Go
@@ -47,27 +47,27 @@ Available Commands:
   up          Run upward migrations
 
 Flags:
-      --config string   config gen (default is $HOME/.go-migrate.yaml)
-  -h, --help            help for go-migrate
+      --config string   config gen (default is $HOME/.metana.yaml)
+  -h, --help            help for metana
   -t, --toggle          Help message for toggle
 
-Use "go-migrate [command] --help" for more information about a command.
+Use "metana [command] --help" for more information about a command.
 ```
 
 ### Steps to create a migration
 
 ```shell
 # Init migration
-> go-migrate init
- ✓ Created /Users/g14a/go-migrate/migrations/main.go
+> metana init
+ ✓ Created /Users/g14a/metana/migrations/main.go
 
 # Create a migration
-> go-migrate create sample
- ✓ Created /Users/g14a/go-migrate/migrations/1614532908-Sample.go
- ✓ Generated /Users/g14a/go-migrate/migrations/main.go
+> metana create sample
+ ✓ Created /Users/g14a/metana/migrations/1614532908-Sample.go
+ ✓ Generated /Users/g14a/metana/migrations/main.go
  
 # Run upward migration
-> go-migrate up
+> metana up
 
   >>> Migrating up: 1614532908-Sample.go
   Sample up
@@ -75,7 +75,7 @@ Use "go-migrate [command] --help" for more information about a command.
   >>> migration : complete
 
 # Run downward migration
-> go-migrate down
+> metana down
   
   >>> Migrating down: 1614532908-Sample.go
   Sample down
@@ -83,7 +83,7 @@ Use "go-migrate [command] --help" for more information about a command.
   >>> migration : complete
 
 # List migrations
-> go-migrate list
+> metana list
  +----------------------+------------------+
  |      MIGRATION       |  LAST MODIFIED   |
  +----------------------+------------------+
@@ -99,14 +99,14 @@ the migrations directory to update your migration script.
 * Specify custom migrations directory when initializing, creating and running migrations with ```--dir | -d ``` flag. By default ```dir``` is set to ```migrations```
 
 ```shell
-> go-migrate init --dir schema-mig
- ✓ Created /Users/g14a/go-migrate/schema-mig/main.go
+> metana init --dir schema-mig
+ ✓ Created /Users/g14a/metana/schema-mig/main.go
 
-> go-migrate create initSchema --dir schema-mig
- ✓ Created /Users/g14a/go-migrate/schema-mig/scripts/1619943164-InitSchema.go
- ✓ Generated /Users/g14a/go-migrate/schema-mig/main.go
+> metana create initSchema --dir schema-mig
+ ✓ Created /Users/g14a/metana/schema-mig/scripts/1619943164-InitSchema.go
+ ✓ Generated /Users/g14a/metana/schema-mig/main.go
  
-> go-migrate up --dir schema-mig
+> metana up --dir schema-mig
   >>> Migrating up: 1619943670-InitSchema.go
 InitSchema up
 
@@ -116,16 +116,16 @@ InitSchema up
 * Run upward and downward migrations until(including) a certain migration with the ```--until``` flag.
 
 ```shell
-> go-migrate init                                                                              
- ✓ Created /Users/g14a/go-migrate/migrations/main.go
+> metana init                                                                              
+ ✓ Created /Users/g14a/metana/migrations/main.go
 
-> go-migrate create initSchema                                                                
- ✓ Created /Users/g14a/go-migrate/migrations/scripts/1619942687-InitSchema.go
- ✓ Generated /Users/g14a/go-migrate/migrations/main.go
+> metana create initSchema                                                                
+ ✓ Created /Users/g14a/metana/migrations/scripts/1619942687-InitSchema.go
+ ✓ Generated /Users/g14a/metana/migrations/main.go
  
 > Create more migration scripts...
 
-> go-migrate list
+> metana list
 
   +----------------------------------+------------------+
   |            MIGRATION             |  LAST MODIFIED   |
@@ -136,7 +136,7 @@ InitSchema up
   | 1619943888-AddBoilerPlateRows.go | 02-05-2021 13:54 |
   +----------------------------------+------------------+
 
-> go-migrate up --until AddFkeys                                                                
+> metana up --until AddFkeys                                                                
 
   >>> Migrating up: 1619942687-InitSchema.go
 InitSchema up
@@ -148,7 +148,7 @@ AddIndexes up
 
   >>> migration : complete
 
-> go-migrate down --until AddIndexes
+> metana down --until AddIndexes
   
   >>> Migrating down: 1619943888-AddBoilerPlateRows.go
 AddBoilerPlateRows down
@@ -167,7 +167,7 @@ AddIndexes down
 ### Track your migrations in your favourite database
 
 ```shell
-go-migrate up --store <db-connection-url>
+metana up --store <db-connection-url>
 ```
 Defaults to a ``migrate.json`` if not `url` is provided.
 

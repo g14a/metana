@@ -1,4 +1,4 @@
-module github.com/g14a/go-migrate
+module github.com/g14a/metana
 
 go 1.16
 

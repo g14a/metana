@@ -4,8 +4,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"github.com/g14a/go-migrate/pkg/migrate"
-	"github.com/g14a/go-migrate/pkg/store"
+	"github.com/g14a/metana/pkg/migrate"
+	"github.com/g14a/metana/pkg/store"
 	"github.com/spf13/cobra"
 	"log"
 	"os"

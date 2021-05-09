@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/g14a/go-migrate/cmd"
+import "github.com/g14a/metana/cmd"
 
 func main() {
 	cmd.Execute()

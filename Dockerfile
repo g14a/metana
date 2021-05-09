@@ -4,9 +4,9 @@ WORKDIR /app
 COPY go.sum go.mod ./
 RUN go mod download
 COPY . /app
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o go-migrate .
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o metana .
 
 # final stage
 FROM scratch
-COPY --from=builder /app/go-migrate /app/go-migrate
-CMD ["/app/go-migrate"]
+COPY --from=builder /app/metana /app/metana
+CMD ["/app/metana"]

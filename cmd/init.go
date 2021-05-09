@@ -4,13 +4,13 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/fatih/color"
-	"github.com/g14a/go-migrate/pkg/gen"
+	"github.com/g14a/metana/pkg/gen"
 	"log"
 	"os"
 	"os/exec"
 	//"path/filepath"
 
-	//"github.com/g14a/go-migrate/pkg/gen"
+	//"github.com/g14a/metana/pkg/gen"
 	"github.com/itchyny/gojq"
 
 	//"github.com/fatih/color"

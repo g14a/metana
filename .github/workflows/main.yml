@@ -52,4 +52,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: g14a/go-migrate:latest
+          tags: g14a/metana:latest

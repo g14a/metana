@@ -2,7 +2,7 @@
 package cmd
 
 import (
-	"github.com/g14a/go-migrate/pkg"
+	"github.com/g14a/metana/pkg"
 	"log"
 
 	"github.com/spf13/cobra"

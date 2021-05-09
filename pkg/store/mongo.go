@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	"github.com/g14a/go-migrate/pkg/types"
+	"github.com/g14a/metana/pkg/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )

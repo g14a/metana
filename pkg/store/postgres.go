@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/g14a/go-migrate/pkg/types"
+	"github.com/g14a/metana/pkg/types"
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
 )
