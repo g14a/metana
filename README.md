@@ -11,6 +11,14 @@ An abstract migration tool for all types of migrations
 
 ![demo.gif](https://github.com/g14a/metana/blob/main/demo.gif)
 
+## Use case
+The motivation behind creating this tool, is to abstract away the database part. If your task can be completed with Pure Go or via a Go driver of 
+your service, then this is for you. Since it makes use of the Go runtime, you can even perform database migrations like PostgreSQL, Mongo, Redis, Elasticsearch, GCP Buckets etc.
+You just need to be able to interact with your data store or complete your task using Go.
+
+The main use case is when you won't be able to do everything with SQL or No-SQL syntax. 
+There might be some tasks where you need to aggregate data, iterate over them, and do business related stuff with the retrieved data.
+All you need to know is Go syntax and write a Go program.
 ### Install
 
 ```shell
@@ -169,7 +177,9 @@ AddIndexes down
 ```shell
 metana up --store <db-connection-url>
 ```
-Defaults to a ``migrate.json`` if not `url` is provided.
+```--store``` needs to be passed for downward migrations as well for it to take effect.
+
+Defaults to a ``migrate.json`` if no `url` is provided.
 
 Databases supported for now:
 * PostgreSQL
