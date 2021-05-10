@@ -2,8 +2,9 @@
 package cmd
 
 import (
-	"github.com/g14a/metana/pkg"
 	"log"
+
+	"github.com/g14a/metana/pkg"
 
 	"github.com/spf13/cobra"
 )

@@ -2,14 +2,15 @@
 package cmd
 
 import (
+	"log"
+	"os"
+	"strings"
+
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg"
 	"github.com/g14a/metana/pkg/gen"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
-	"log"
-	"os"
-	"strings"
 )
 
 // createCmd represents the create command
@@ -43,6 +44,10 @@ var createCmd = &cobra.Command{
 
 		firstMigration := false
 		migrations, err := pkg.GetMigrations(dir)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if len(migrations) == 0 {
 			firstMigration = true
 		}

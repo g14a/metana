@@ -2,8 +2,9 @@ package store
 
 import (
 	"encoding/json"
-	"github.com/g14a/metana/pkg/types"
 	"os"
+
+	"github.com/g14a/metana/pkg/types"
 )
 
 type File struct {

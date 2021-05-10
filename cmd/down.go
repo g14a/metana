@@ -3,12 +3,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/migrate"
 	"github.com/g14a/metana/pkg/store"
 	"github.com/spf13/cobra"
-	"log"
-	"os"
 )
 
 // downCmd represents the down command
@@ -26,6 +27,11 @@ var downCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		dryRun, err := cmd.Flags().GetBool("dry")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if dir == "" {
 			dir = "migrations"
 		}
@@ -36,9 +42,11 @@ var downCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if len(existingTrack.Migrations) == 0 {
+		if len(existingTrack.Migrations) == 0 && !dryRun {
 			color.Yellow("at least one upward migration needed")
-			os.Exit(0)
+			return
+		} else {
+			existingTrack.LastRunTS = int(time.Now().Unix())
 		}
 
 		upUntil, _ := cmd.Flags().GetString("until")
@@ -48,15 +56,19 @@ var downCmd = &cobra.Command{
 			color.Cyan("%v\n", output)
 		}
 
-		_, num := store.ProcessLogs(errBuf)
-		track := store.TrackToSetDown(existingTrack, num)
+		if !dryRun {
+			_, num := store.ProcessLogs(errBuf)
+			track := store.TrackToSetDown(existingTrack, num)
 
-		err = storeHouse.Set(track)
-		if err != nil {
-			fmt.Println(err)
+			err = storeHouse.Set(track)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			color.Green("  >>> migration : complete")
+			return
 		}
-
-		color.Green("  >>> migration : complete")
+		color.White("  >>> dry run migration : complete")
 	},
 }
 
@@ -65,6 +77,8 @@ func init() {
 	downCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	downCmd.Flags().StringP("until", "u", "", "Migrate down until a specific point\n")
 	downCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
+	downCmd.Flags().Bool("dry", false, "Specify if the downward migration is a dry run {true | false}")
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

@@ -3,12 +3,13 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	"github.com/g14a/metana/pkg"
-	"github.com/g14a/metana/pkg/tpl"
 	"os"
 	"os/exec"
 	"strings"
 	"text/template"
+
+	"github.com/g14a/metana/pkg"
+	"github.com/g14a/metana/pkg/tpl"
 
 	"github.com/iancoleman/strcase"
 )

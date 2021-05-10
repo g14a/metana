@@ -2,15 +2,16 @@ package store
 
 import (
 	"context"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+
 	"github.com/g14a/metana/pkg/types"
 	"github.com/go-pg/pg/v10"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	mconnString "go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
-	"log"
-	"os"
-	"strconv"
-	"strings"
 )
 
 type Store interface {

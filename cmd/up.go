@@ -3,11 +3,13 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/migrate"
 	"github.com/g14a/metana/pkg/store"
+	"github.com/g14a/metana/pkg/types"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 // upCmd represents the up command
@@ -26,14 +28,25 @@ var upCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		dryRun, err := cmd.Flags().GetBool("dry")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if dir == "" {
 			dir = "migrations"
 		}
 
-		storeHouse := store.GetStoreViaConn(storeConn, dir)
-		existingTrack, err := storeHouse.Load()
-		if err != nil {
-			log.Fatal(err)
+		var existingTrack types.Track
+		var storeHouse store.Store
+		if !dryRun {
+			storeHouse = store.GetStoreViaConn(storeConn, dir)
+			existingTrack, err = storeHouse.Load()
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			existingTrack.LastRunTS = 0
 		}
 
 		upUntil, _ := cmd.Flags().GetString("until")
@@ -43,19 +56,23 @@ var upCmd = &cobra.Command{
 			color.Cyan("%v\n", output)
 		}
 
-		track, _ := store.ProcessLogs(errBuf)
+		if !dryRun {
+			track, _ := store.ProcessLogs(errBuf)
 
-		existingTrack.LastRun = track.LastRun
-		existingTrack.LastRunTS = track.LastRunTS
-		existingTrack.Migrations = append(existingTrack.Migrations, track.Migrations...)
+			existingTrack.LastRun = track.LastRun
+			existingTrack.LastRunTS = track.LastRunTS
+			existingTrack.Migrations = append(existingTrack.Migrations, track.Migrations...)
 
-		if len(track.Migrations) > 0 {
-			err = storeHouse.Set(existingTrack)
-			if err != nil {
-				fmt.Println(err)
+			if len(track.Migrations) > 0 {
+				err = storeHouse.Set(existingTrack)
+				if err != nil {
+					fmt.Println(err)
+				}
 			}
+			color.Green("  >>> migration : complete")
+			return
 		}
-		color.Green("  >>> migration : complete")
+		color.White("  >>> dry run migration : complete")
 	},
 }
 
@@ -64,6 +81,7 @@ func init() {
 	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	upCmd.Flags().StringP("until", "u", "", "Migrate up until a specific point\n")
 	upCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
+	upCmd.Flags().Bool("dry", false, "Specify if the upward migration is a dry run {true | false}")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
