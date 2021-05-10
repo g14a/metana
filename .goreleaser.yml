@@ -1,0 +1,19 @@
+project_name: example
+builds:
+  - env: [CGO_ENABLED=0]
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+nfpms:
+- maintainer: Gowtham Munukutla <gowtham.m81197@gmail.com>
+  description: Abstract task migration tool written in Go for Golang services. Database and non database migration management brought to the CLI. 
+  homepage: https://github.com/g14a/metana
+  license: Apache License 2.0
+  formats:
+  - deb
+  - rpm
