@@ -9,6 +9,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/migrate"
 	"github.com/g14a/metana/pkg/store"
+	"github.com/g14a/metana/pkg/types"
 	"github.com/spf13/cobra"
 )
 
@@ -36,10 +37,14 @@ var downCmd = &cobra.Command{
 			dir = "migrations"
 		}
 
-		storeHouse := store.GetStoreViaConn(storeConn, dir)
-		existingTrack, err := storeHouse.Load()
-		if err != nil {
-			log.Fatal(err)
+		var existingTrack types.Track
+		var storeHouse store.Store
+		if !dryRun {
+			storeHouse = store.GetStoreViaConn(storeConn, dir)
+			existingTrack, err = storeHouse.Load()
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		if len(existingTrack.Migrations) == 0 && !dryRun {

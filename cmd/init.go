@@ -2,15 +2,13 @@
 package cmd
 
 import (
-	"encoding/json"
 	"log"
 	"os"
-	"os/exec"
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/gen"
+	"github.com/g14a/metana/pkg/initpkg"
 
-	"github.com/itchyny/gojq"
 	"github.com/spf13/cobra"
 )
 
@@ -31,32 +29,9 @@ var initCmd = &cobra.Command{
 		_ = os.MkdirAll(dir+"/scripts", 0755)
 		wd, _ := os.Getwd()
 
-		goModInfo, err := exec.Command("go", "mod", "edit", "-json").Output()
-
-		query, err := gojq.Parse(".Module.Path | ..")
+		goModPath, err := initpkg.GetGoModPath()
 		if err != nil {
 			log.Fatal(err)
-		}
-
-		goModDetails := make(map[string]interface{})
-
-		errJson := json.Unmarshal(goModInfo, &goModDetails)
-		if errJson != nil {
-			log.Fatal(errJson)
-		}
-
-		iter := query.Run(goModDetails)
-
-		var goModPath string
-		for {
-			v, ok := iter.Next()
-			if !ok {
-				break
-			}
-			if err, ok := v.(error); ok {
-				log.Fatal(err)
-			}
-			goModPath = v.(string)
 		}
 
 		err = gen.CreateInitConfig(dir, goModPath)
