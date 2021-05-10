@@ -5,6 +5,9 @@ release:
   draft: true
   name_template: Metana {{ .Version }}
 
+changelog:
+  skip: true
+
 builds:
   - env: [CGO_ENABLED=0]
     goos:
