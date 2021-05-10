@@ -1,4 +1,4 @@
-project_name: example
+project_name: metana
 builds:
   - env: [CGO_ENABLED=0]
     goos:
