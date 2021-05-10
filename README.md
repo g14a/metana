@@ -7,7 +7,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/g14a/metana)](https://goreportcard.com/report/github.com/g14a/metana)
 [![Go Workflow Status](https://github.com/g14a/metana/workflows/Go/badge.svg)](https://github.com/g14a/metana/workflows/Go/badge.svg)
 
-An abstract migration tool for all types of migrations
+An abstract task migration tool written in Go for Go services. Database and non database migrations management brought to your CLI.
 
 ![demo.gif](https://github.com/g14a/metana/blob/main/demo.gif)
 
@@ -184,3 +184,33 @@ Defaults to a ``migrate.json`` if no `url` is provided.
 Databases supported for now:
 * PostgreSQL
 * MongoDB
+
+### Dry run
+
+You can dry run your migrations using the explicit `--dry` option. This option doesn't track any migrations, doesn't create a default `migrate.json` file. It literally just dry runs. However your tasks are run.
+
+```shell
+metana up --dry
+
+  >>> Migrating up: 1620656150-Abc.go
+Abc up
+
+  >>> Migrating up: 1620656165-Random.go
+Random up
+
+  >>> dry run migration : complete
+```
+
+```shell
+metana down --dry
+
+  >>> Migrating up: 1620656165-Random.go
+Random down
+
+  >>> Migrating up: 1620656150-Abc.go
+Abc down
+
+  >>> dry run migration : complete
+```
+
+All the other options work along with `--dry`.

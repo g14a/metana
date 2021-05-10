@@ -1,4 +1,10 @@
 project_name: metana
+
+release:
+  prerelease: auto
+  draft: true
+  name_template: Metana {{ .Version }}
+
 builds:
   - env: [CGO_ENABLED=0]
     goos:
@@ -11,7 +17,7 @@ builds:
 
 nfpms:
 - maintainer: Gowtham Munukutla <gowtham.m81197@gmail.com>
-  description: Abstract task migration tool written in Go for Golang services. Database and non database migration management brought to the CLI. 
+  description: Abstract task migration tool written in Go for Golang services. Database and non database migration management brought to your CLI. 
   homepage: https://github.com/g14a/metana
   license: Apache License 2.0
   formats:
