@@ -1,0 +1,38 @@
+site_name: Metana
+repo_name: g14a/metana
+repo_url: https://github.com/g14a/metana
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: IBM Plex Sans
+    code: JetBrains Mono
+
+nav:
+  - Home: index.md
+  - Usage Guide:
+      - 'Installation': install.md
+      - 'Usage': usage.md
+  - Features: features.md
+  - About: about.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - attr_list
+
+extra:
+  social:
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/g14a3
+    - icon: fontawesome/brands/github
+      link: https://github.com/g14a
+
+copyright: Copyright &copy; 2021 Gowtham Munukutla

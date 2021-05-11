@@ -72,7 +72,7 @@ var createCmd = &cobra.Command{
 
 		wd, _ := os.Getwd()
 		color.Green(" ✓ Created " + wd + "/" + fileName)
-		color.Green(" ✓ Generated " + wd + "/" + dir + "/main.go")
+		color.Green(" ✓ Updated " + wd + "/" + dir + "/main.go")
 	},
 }
 

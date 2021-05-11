@@ -80,7 +80,7 @@ Use "metana [command] --help" for more information about a command.
 # Create a migration
 > metana create sample
  ✓ Created /Users/g14a/metana/migrations/1614532908-Sample.go
- ✓ Generated /Users/g14a/metana/migrations/main.go
+ ✓ Updated /Users/g14a/metana/migrations/main.go
  
 # Run upward migration
 > metana up
