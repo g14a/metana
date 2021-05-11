@@ -18,6 +18,14 @@ builds:
       - amd64
       - arm64
 
+brews:
+  - github:
+        owner: g14a
+        name: homebrew-metana
+    folder: Formula
+    homepage: https://github.com/g14a/metana
+    description: An abstract migration tool written in Go for Go services.
+
 nfpms:
 - maintainer: Gowtham Munukutla <gowtham.m81197@gmail.com>
   description: Abstract task migration tool written in Go for Golang services. Database and non database migration management brought to your CLI. 
