@@ -16,6 +16,7 @@ Checkout the releases page and download your platforms binaries to install them.
 ### Building from source
 
 Prerequisites:
+
 * Git
 * Go 1.14 or newer. Better if its the latest version.
 
