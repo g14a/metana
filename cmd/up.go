@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/fatih/color"
+	"github.com/g14a/metana/pkg/config"
 	"github.com/g14a/metana/pkg/migrate"
 	"github.com/g14a/metana/pkg/store"
 	"github.com/g14a/metana/pkg/types"
@@ -33,7 +34,12 @@ var upCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		if dir == "" {
+		mc, _ := config.GetMetanaConfig()
+
+		// Priority range is explicit, then config, then migrations
+		if mc.Dir != "" && dir == "" {
+			dir = mc.Dir
+		} else {
 			dir = "migrations"
 		}
 

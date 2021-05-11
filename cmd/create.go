@@ -8,6 +8,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg"
+	"github.com/g14a/metana/pkg/config"
 	"github.com/g14a/metana/pkg/gen"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
@@ -20,15 +21,21 @@ var createCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir, err := cmd.Flags().GetString("dir")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if len(args) == 0 || len(args) > 1 {
 			color.Yellow("`create` accepts one argument")
 			os.Exit(0)
 		}
 
-		if err != nil {
-			log.Fatal(err)
-		}
-		if dir == "" {
+		mc, _ := config.GetMetanaConfig()
+
+		// Priority range is explicit, then config, then migrations
+		if mc.Dir != "" && dir == "" {
+			dir = mc.Dir
+		} else {
 			dir = "migrations"
 		}
 
