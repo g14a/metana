@@ -14,4 +14,3 @@ An abstract task migration tool written in Go for Go services. Database and non 
 Checkout features and documentation at https://g14a.github.io/metana
 ### Roadmap
 - [ ] Custom Templates
-- [ ]  
