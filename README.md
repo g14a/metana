@@ -216,3 +216,39 @@ Abc down
 ```
 
 All the other options like `--dir` and `--until` work along with `--dry`.
+
+### Set your custom config
+
+Set your custom config in your `.metana.yml` file. As of now it supports `dir` and `store` keys.
+
+For eg:
+
+```
+dir: schema-mig
+store: '@MONGO_URL'
+```
+Remember to add it to your git  unless you want to miss migrations on deployments.
+
+If your store has a remote database URL you can specify it via `'@<url>'` syntax and it will automatically be picked up from your environment variables (Remember the single quotes).You don't want to hardcode API Keys and connection URLs in your codebase.
+
+You can either manually add the config on to the `.metana.yml` file or do it via
+
+`metana config set --store @MONGO_URL`
+
+```
+$ metana config set --help
+Set your metana config
+
+Usage:
+  metana config set [flags]
+
+Flags:
+  -d, --dir string     Set your migrations directory (default "migrations")
+  -h, --help           help for set
+  -s, --store string   Set your store
+```
+
+CAUTION: If you change the `dir` flag in your `.metana.yml` after running `metana init`, don't forget to rename your migrations directory to the new directory. Otherwise running migrations would result in failure.
+
+### Roadmap
+- [ ] Custom Templates

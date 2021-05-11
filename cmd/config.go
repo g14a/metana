@@ -35,7 +35,7 @@ var configCmd = &cobra.Command{
 
 var setConfigCmd = &cobra.Command{
 	Use:   "set",
-	Short: "Set config",
+	Short: "Set your metana config",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir, err := cmd.Flags().GetString("dir")

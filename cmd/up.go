@@ -43,10 +43,17 @@ var upCmd = &cobra.Command{
 			dir = "migrations"
 		}
 
+		if mc.StoreConn != "" && storeConn == "" {
+			storeConn = mc.StoreConn
+		}
+
 		var existingTrack types.Track
 		var storeHouse store.Store
 		if !dryRun {
-			storeHouse = store.GetStoreViaConn(storeConn, dir)
+			storeHouse, err = store.GetStoreViaConn(storeConn, dir)
+			if err != nil {
+				log.Fatal(err)
+			}
 			existingTrack, err = storeHouse.Load()
 			if err != nil {
 				log.Fatal(err)

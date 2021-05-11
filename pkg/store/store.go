@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -19,7 +20,13 @@ type Store interface {
 	Load() (types.Track, error)
 }
 
-func GetStoreViaConn(connString string, dir string) Store {
+func GetStoreViaConn(connString string, dir string) (Store, error) {
+
+	if strings.HasPrefix(connString, "@") {
+		connString = strings.TrimPrefix(connString, "@")
+		connString = os.Getenv(connString)
+	}
+
 	switch {
 	case strings.Contains(connString, "postgres://"):
 		pgOptions, err := pg.ParseURL(connString)
@@ -31,29 +38,29 @@ func GetStoreViaConn(connString string, dir string) Store {
 
 		_, err = db.Exec("SELECT 1")
 		if err != nil {
-			log.Fatal(err)
+			return nil, fmt.Errorf("Could not connect to your PostgreSQL DB, ERROR: %w", err)
 		}
 
 		p := PGDB{db: db}
 		err = p.CreateTable()
 		if err != nil {
-			log.Fatal(err)
+			return nil, fmt.Errorf("Could not create migrations table in postgres")
 		}
 
-		return p
+		return p, nil
 	case strings.Contains(connString, "mongodb"):
 		ctx := context.TODO()
 		cs, err := mconnString.ParseAndValidate(connString)
 		clientOptions := options.Client().ApplyURI(connString)
 		client, err := mongo.Connect(ctx, clientOptions)
 		if err != nil {
-			log.Fatal(err)
+			return nil, fmt.Errorf("Could not connec to MongoDB, ERROR: %w", err)
 		}
 		err = client.Ping(ctx, nil)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
-		return MongoDb{coll: *client.Database(cs.Database).Collection("migrations")}
+		return MongoDb{coll: *client.Database(cs.Database).Collection("migrations")}, nil
 	}
 
 	jsonFile, err := os.OpenFile(dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -61,7 +68,7 @@ func GetStoreViaConn(connString string, dir string) Store {
 		log.Fatal(err)
 	}
 
-	return File{file: *jsonFile}
+	return File{file: *jsonFile}, nil
 }
 
 func TrackToSetDown(track types.Track, num int) types.Track {
