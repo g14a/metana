@@ -9,8 +9,9 @@
 
 An abstract task migration tool written in Go for Go services. Database and non database migrations management brought to your CLI.
 
+Checkout features and documentation at https://g14a.github.io/metana
+
 ![demo.gif](https://github.com/g14a/metana/blob/main/demo.gif)
 
-Checkout features and documentation at https://g14a.github.io/metana
 ### Roadmap
 - [ ] Custom Templates
