@@ -154,6 +154,7 @@ Flags:
 CAUTION: If you change the dir flag in your `.metana.yml` after running `metana init`, don't forget to rename your migrations directory to the new directory. Otherwise running migrations would result in failure.
 
 Priority order of config:
+
 1. `.metana.yml` if it exists.
 2. flags passed explicity
 3. default values of flags.
