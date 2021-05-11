@@ -16,13 +16,11 @@ limitations under the License.
 package cmd
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/g14a/metana/pkg/config"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
 )
 
 // configCmd represents the config command
@@ -66,12 +64,7 @@ var setConfigCmd = &cobra.Command{
 			mc.StoreConn = store
 		}
 
-		b, err := yaml.Marshal(mc)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		err = ioutil.WriteFile(".metana.yml", b, 0644)
+		err = config.SetMetanaConfig(mc)
 		if err != nil {
 			log.Fatal(err)
 		}

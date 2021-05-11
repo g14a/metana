@@ -2,6 +2,7 @@ package config
 
 import (
 	"io/ioutil"
+	"log"
 
 	"gopkg.in/yaml.v2"
 )
@@ -23,4 +24,18 @@ func GetMetanaConfig() (*MetanaConfig, error) {
 		return nil, err
 	}
 	return &MetanaConfigInstance, nil
+}
+
+func SetMetanaConfig(mc *MetanaConfig) error {
+	b, err := yaml.Marshal(mc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = ioutil.WriteFile(".metana.yml", b, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return nil
 }

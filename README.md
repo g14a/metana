@@ -213,4 +213,4 @@ Abc down
   >>> dry run migration : complete
 ```
 
-All the other options work along with `--dry`.
+All the other options like `--dir` and `--until` work along with `--dry`.
