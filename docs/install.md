@@ -9,7 +9,7 @@ homebrew install metana
 
 ### Linux
 
-Checkout the releases page and download your platforms binaries to install them.
+Checkout the releases page and download your platform's binaries to install them.
 
 [Releases Page](https://github.com/g14a/metana/releases)
 
