@@ -27,6 +27,12 @@ go get github.com/g14a/metana
 
 Checkout the [release binaries](https://github.com/g14a/metana/releases) page for precompiled binaries.
 
+### Homebrew
+```shell
+brew tap g14a/homebrew-metana
+brew install metana
+```
+
 ### Build from source
 Make sure you have Go installed.
 ```shell
