@@ -27,8 +27,10 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.superfences
   - attr_list
+  - meta
 
 extra:
+  manifest: manifest.webmanifest
   social:
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/g14a3
