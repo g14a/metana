@@ -25,6 +25,8 @@ All you need to know is Go syntax and write a Go program.
 go get github.com/g14a/metana
 ```
 
+Checkout the [release binaries](https://github.com/g14a/metana/releases) page for precompiled binaries.
+
 ### Build from source
 Make sure you have Go installed.
 ```shell
