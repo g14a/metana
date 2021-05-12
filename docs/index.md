@@ -1,5 +1,3 @@
-## Metana
-
 Metana is a cli abstract migration tool written in Go for Go services. It is inspired by real frustrations of not being able to track/store and run migrations in Go.
 
 The motivation however, behind creating this tool, is to abstract away the database part. If your task can be completed with Pure Go or via a Go driver of your service, then this is for you. Since it makes use of the Go runtime, you can even perform database migrations like PostgreSQL, Mongo, Redis, Elasticsearch, GCP Buckets etc. You just need to be able to interact with your data store or complete your task using Go.
