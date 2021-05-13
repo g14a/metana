@@ -11,3 +11,8 @@ type Migration struct {
 	Title     string `json:"title" bson:"title"`
 	Timestamp int    `json:"timestamp" bson:"timestamp"`
 }
+
+type Migrator interface {
+	Up() error
+	Down() error
+}

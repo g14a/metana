@@ -2,6 +2,7 @@ package migrate
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -38,12 +39,20 @@ func RunUp(until, migrationsDir string, lastRunTS int) (string, string) {
 	migrationsRun := exec.Command("./"+migrationsDir, migrationArgs...)
 	migrationsRun.Dir = wd + "/" + migrationsDir
 	var outBuf, errBuf bytes.Buffer
-	migrationsRun.Stdout = &outBuf
+	// migrationsRun.Stdout = &outBuf
 	migrationsRun.Stderr = &errBuf
 
-	errRun := migrationsRun.Run()
-	if errRun != nil {
-		return outBuf.String(), errRun.Error()
+	stdout, err := migrationsRun.StdoutPipe()
+	migrationsRun.Start()
+
+	oneByte := make([]byte, 256)
+
+	for {
+		_, err := stdout.Read(oneByte)
+		if err != nil {
+			break
+		}
+		fmt.Println(string(oneByte), "============one byte=========")
 	}
 
 	return outBuf.String(), errBuf.String()
