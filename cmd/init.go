@@ -27,13 +27,17 @@ var initCmd = &cobra.Command{
 		mc, _ := config.GetMetanaConfig()
 
 		// Priority range is explicit, then config, then migrations
-		if mc.Dir != "" && dir == "" {
-			dir = mc.Dir
+		var finalDir string
+
+		if dir != "" {
+			finalDir = dir
+		} else if mc != nil && mc.Dir != "" && dir == "" {
+			finalDir = mc.Dir
 		} else {
-			dir = "migrations"
+			finalDir = "migrations"
 		}
 
-		_ = os.MkdirAll(dir+"/scripts", 0755)
+		_ = os.MkdirAll(finalDir+"/scripts", 0755)
 		wd, _ := os.Getwd()
 
 		goModPath, err := initpkg.GetGoModPath()
@@ -41,12 +45,23 @@ var initCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = gen.CreateInitConfig(dir, goModPath)
+		err = gen.CreateInitConfig(finalDir, goModPath)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		color.Green(" ✓ Created " + wd + "/" + dir + "/main.go")
+		setMc := &config.MetanaConfig{
+			Dir: finalDir,
+		}
+
+		if (&config.MetanaConfig{}) == mc || mc == nil {
+			err := config.SetMetanaConfig(setMc)
+			if err != nil {
+				return
+			}
+		}
+
+		color.Green(" ✓ Created " + wd + "/" + finalDir + "/main.go")
 	},
 }
 

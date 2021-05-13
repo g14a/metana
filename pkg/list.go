@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"github.com/fatih/color"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,18 +16,22 @@ func ListMigrations(migrationsDir string) error {
 	}
 
 	var data [][]string
-	for _, f := range migrations {
-		data = append(data, []string{f.Name, f.ModTime})
+	if len(migrations) > 0 {
+		for _, f := range migrations {
+			data = append(data, []string{f.Name, f.ModTime})
+		}
+
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Migration", "Last Modified"})
+
+		for _, v := range data {
+			table.Append(v)
+		}
+
+		table.Render()
+	} else {
+		color.Yellow("%s", "No migrations found")
 	}
-
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Migration", "Last Modified"})
-
-	for _, v := range data {
-		table.Append(v)
-	}
-
-	table.Render()
 
 	return nil
 }

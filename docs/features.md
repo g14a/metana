@@ -155,6 +155,6 @@ CAUTION: If you change the dir flag in your `.metana.yml` after running `metana 
 
 Priority order of config:
 
-1. `.metana.yml` if it exists.
-2. flags passed explicity
+1. flags passed explicitly
+2. `.metana.yml` if it exists.
 3. default values of flags.

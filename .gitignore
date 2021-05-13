@@ -8,7 +8,7 @@ migrations
 demo.yml
 schema-mig
 .metana.yml
-
+schema
 # Test binary, built with `go test -c`
 *.test
 

@@ -33,13 +33,17 @@ var createCmd = &cobra.Command{
 		mc, _ := config.GetMetanaConfig()
 
 		// Priority range is explicit, then config, then migrations
-		if mc.Dir != "" && dir == "" {
-			dir = mc.Dir
+		var finalDir string
+
+		if dir != "" {
+			finalDir = dir
+		} else if mc != nil && mc.Dir != "" && dir == "" {
+			finalDir = mc.Dir
 		} else {
-			dir = "migrations"
+			finalDir = "migrations"
 		}
 
-		exists, err := gen.MigrationExists(dir, args[0])
+		exists, err := gen.MigrationExists(finalDir, args[0])
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -50,7 +54,7 @@ var createCmd = &cobra.Command{
 		}
 
 		firstMigration := false
-		migrations, err := pkg.GetMigrations(dir)
+		migrations, err := pkg.GetMigrations(finalDir)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -59,20 +63,20 @@ var createCmd = &cobra.Command{
 			firstMigration = true
 		}
 
-		fileName, err := gen.CreateMigrationFile(dir, args[0])
+		fileName, err := gen.CreateMigrationFile(finalDir, args[0])
 		if err != nil {
 			color.Yellow("\nTry initializing migration using `metana init`\n\n")
 			os.Exit(0)
 		}
 
-		err = gen.Regen(dir, strcase.ToCamel(args[0]), strings.TrimPrefix(fileName, dir+"/scripts/"), firstMigration)
+		err = gen.Regen(finalDir, strcase.ToCamel(args[0]), strings.TrimPrefix(fileName, finalDir+"/scripts/"), firstMigration)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		wd, _ := os.Getwd()
 		color.Green(" ✓ Created " + wd + "/" + fileName)
-		color.Green(" ✓ Updated " + wd + "/" + dir + "/main.go")
+		color.Green(" ✓ Updated " + wd + "/" + finalDir + "/main.go")
 	},
 }
 

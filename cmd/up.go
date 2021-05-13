@@ -37,20 +37,27 @@ var upCmd = &cobra.Command{
 		mc, _ := config.GetMetanaConfig()
 
 		// Priority range is explicit, then config, then migrations
-		if mc.Dir != "" && dir == "" {
-			dir = mc.Dir
+		var finalDir string
+
+		if dir != "" {
+			finalDir = dir
+		} else if mc != nil && mc.Dir != "" && dir == "" {
+			finalDir = mc.Dir
 		} else {
-			dir = "migrations"
+			finalDir = "migrations"
 		}
 
-		if mc.StoreConn != "" && storeConn == "" {
-			storeConn = mc.StoreConn
+		var finalStoreConn string
+		if storeConn != "" {
+			finalStoreConn = storeConn
+		} else if mc != nil && mc.StoreConn != "" && storeConn == "" {
+			finalStoreConn = mc.StoreConn
 		}
 
 		var existingTrack types.Track
 		var storeHouse store.Store
 		if !dryRun {
-			storeHouse, err = store.GetStoreViaConn(storeConn, dir)
+			storeHouse, err = store.GetStoreViaConn(finalStoreConn, finalDir)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -63,11 +70,7 @@ var upCmd = &cobra.Command{
 		}
 
 		upUntil, _ := cmd.Flags().GetString("until")
-		output, errBuf := migrate.RunUp(upUntil, dir, existingTrack.LastRunTS)
-
-		if output != "" {
-			color.Cyan("%v\n", output)
-		}
+		errBuf := migrate.Run(upUntil, finalDir, existingTrack.LastRunTS, true)
 
 		if !dryRun {
 			track, _ := store.ProcessLogs(errBuf)

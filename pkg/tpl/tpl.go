@@ -95,7 +95,7 @@ func AddMigrationTemplate(up bool) []byte {
 	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
 	if lastRunTS < {{ .Lower }}Migration.Timestamp {
-		fmt.Printf("\n  >>> Migrating up: %s\n", {{ .Lower }}Migration.Filename)
+		fmt.Printf("  >>> Migrating up: %s\n", {{ .Lower }}Migration.Filename)
 		err{{ .MigrationName }} := {{ .Lower }}Migration.Up()
 
 		if err{{ .MigrationName }} != nil {
@@ -108,7 +108,7 @@ func AddMigrationTemplate(up bool) []byte {
 		if lastRunTS == {{ .Lower }}Migration.Timestamp {
 			return
 		}
-		fmt.Printf("\n  >>> Migrated up until: %s\n", {{ .Lower }}Migration.Filename)
+		fmt.Printf("  >>> Migrated up until: %s\n", {{ .Lower }}Migration.Filename)
 		return
 	}
 
@@ -122,7 +122,7 @@ func AddMigrationTemplate(up bool) []byte {
 	{{ .Lower }}Migration.MigrationName = "{{ .MigrationName }}"
 
 	if lastRunTS >= {{ .Lower }}Migration.Timestamp {
-		fmt.Printf("\n  >>> Migrating down: %s\n", {{ .Lower }}Migration.Filename)
+		fmt.Printf("  >>> Migrating down: %s\n", {{ .Lower }}Migration.Filename)
 		err{{ .MigrationName }} := {{ .Lower }}Migration.Down()
 
 		if err{{ .MigrationName }} != nil {
@@ -135,7 +135,7 @@ func AddMigrationTemplate(up bool) []byte {
 		if lastRunTS == {{ .Lower }}Migration.Timestamp {
 			return
 		}
-		fmt.Printf("\n  >>> Migrated down until: %s\n", {{ .Lower }}Migration.Filename)
+		fmt.Printf("  >>> Migrated down until: %s\n", {{ .Lower }}Migration.Filename)
 		return
 	}
 `)

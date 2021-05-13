@@ -10,7 +10,6 @@ import (
 type MetanaConfig struct {
 	Dir       string `yaml:"dir"`
 	StoreConn string `yaml:"store"`
-	Wipe      bool   `yaml:"wipe"`
 }
 
 func GetMetanaConfig() (*MetanaConfig, error) {
