@@ -3,6 +3,7 @@ module github.com/g14a/metana
 go 1.16
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.2.12
 	github.com/fatih/color v1.7.0
 	github.com/go-pg/pg/v10 v10.9.1
 	github.com/iancoleman/strcase v0.1.3
