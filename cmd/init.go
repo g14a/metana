@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"fmt"
 	gen2 "github.com/g14a/metana/pkg/core/gen"
 	"log"
 	"os"
@@ -55,6 +56,7 @@ var initCmd = &cobra.Command{
 		}
 
 		if (&config.MetanaConfig{}) == mc || mc == nil {
+			fmt.Println("came in")
 			err := config.SetMetanaConfig(setMc)
 			if err != nil {
 				return

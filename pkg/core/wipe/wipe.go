@@ -24,7 +24,12 @@ func Wipe(migrationsDir string, storeConn string) error {
 		return err
 	}
 
+	if len(track.Migrations) == 0 {
+		color.Yellow("No migrations found to wipe.\nTry creating them or running existing ones.")
+	}
+
 	for _, m := range track.Migrations {
+		fmt.Println(migrationsDir + "/scripts/" + m.Title)
 		err := os.Remove(migrationsDir + "/scripts/" + m.Title)
 		if err != nil {
 			return err

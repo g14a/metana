@@ -27,7 +27,7 @@ func GetMetanaConfig() (*MetanaConfig, error) {
 }
 
 func SetMetanaConfig(mc *MetanaConfig) error {
-	b, err := yaml.Marshal(mc)
+	b, err := yaml.Marshal(&mc)
 	if err != nil {
 		log.Fatal(err)
 	}
