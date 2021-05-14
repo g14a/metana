@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	gen2 "github.com/g14a/metana/pkg/core/gen"
 	"log"
 	"os"
 	"strings"
@@ -9,7 +10,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg"
 	"github.com/g14a/metana/pkg/config"
-	"github.com/g14a/metana/pkg/gen"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +43,7 @@ var createCmd = &cobra.Command{
 			finalDir = "migrations"
 		}
 
-		exists, err := gen.MigrationExists(finalDir, args[0])
+		exists, err := gen2.MigrationExists(finalDir, args[0])
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -63,13 +63,13 @@ var createCmd = &cobra.Command{
 			firstMigration = true
 		}
 
-		fileName, err := gen.CreateMigrationFile(finalDir, args[0])
+		fileName, err := gen2.CreateMigrationFile(finalDir, args[0])
 		if err != nil {
 			color.Yellow("\nTry initializing migration using `metana init`\n\n")
 			os.Exit(0)
 		}
 
-		err = gen.Regen(finalDir, strcase.ToCamel(args[0]), strings.TrimPrefix(fileName, finalDir+"/scripts/"), firstMigration)
+		err = gen2.Regen(finalDir, strcase.ToCamel(args[0]), strings.TrimPrefix(fileName, finalDir+"/scripts/"), firstMigration)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -2,12 +2,12 @@
 package cmd
 
 import (
+	gen2 "github.com/g14a/metana/pkg/core/gen"
 	"log"
 	"os"
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/config"
-	"github.com/g14a/metana/pkg/gen"
 	"github.com/g14a/metana/pkg/initpkg"
 
 	"github.com/spf13/cobra"
@@ -45,7 +45,7 @@ var initCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		err = gen.CreateInitConfig(finalDir, goModPath)
+		err = gen2.CreateInitConfig(finalDir, goModPath)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -3,14 +3,13 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	tpl2 "github.com/g14a/metana/pkg/core/tpl"
 	"os"
 	"os/exec"
 	"strings"
 	"text/template"
 
 	"github.com/g14a/metana/pkg"
-	"github.com/g14a/metana/pkg/tpl"
-
 	"github.com/iancoleman/strcase"
 )
 
@@ -27,7 +26,7 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool) e
 
 	addMigrationTemplate := template.New("add")
 
-	nm := tpl.NewMigration{
+	nm := tpl2.NewMigration{
 		Lower:         lower,
 		MigrationName: migrationName,
 		Timestamp:     timeStamp,
@@ -37,7 +36,7 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool) e
 	for i, line := range lines {
 		if !firstReturn && strings.Contains(line, "return nil") {
 			var tplBuffer bytes.Buffer
-			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(true)))
+			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl2.AddMigrationTemplate(true)))
 			if errAdd != nil {
 				return err
 			}
@@ -50,7 +49,7 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool) e
 			firstReturn = true
 		} else if strings.Contains(line, "func MigrateDown") {
 			var tplBuffer bytes.Buffer
-			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl.AddMigrationTemplate(false)))
+			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl2.AddMigrationTemplate(false)))
 			if errAdd != nil {
 				return err
 			}

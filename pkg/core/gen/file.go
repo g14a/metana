@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	tpl2 "github.com/g14a/metana/pkg/core/tpl"
 	"log"
 	"os"
 	"os/exec"
@@ -10,13 +11,11 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/g14a/metana/pkg/tpl"
-
 	"github.com/iancoleman/strcase"
 )
 
 func CreateMigrationFile(migrationsDir, file string) (string, error) {
-	nm := tpl.NewMigration{
+	nm := tpl2.NewMigration{
 		MigrationName: strcase.ToCamel(file),
 		Timestamp:     strconv.Itoa(int(time.Now().Unix())),
 	}
@@ -30,7 +29,7 @@ func CreateMigrationFile(migrationsDir, file string) (string, error) {
 
 	defer mainFile.Close()
 
-	mainTemplate := template.Must(template.New("root").Parse(string(tpl.MigrationTemplate())))
+	mainTemplate := template.Must(template.New("root").Parse(string(tpl2.MigrationTemplate())))
 	err = mainTemplate.Execute(mainFile, nm)
 	if err != nil {
 		return "", err
@@ -58,7 +57,7 @@ func CreateInitConfig(migrationsDir, pwd string) error {
 		}
 	}(migrationRunFile)
 
-	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl.InitMigrationRunTemplate())))
+	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl2.InitMigrationRunTemplate())))
 	err = migrationRunTemplate.Execute(migrationRunFile, map[string]interface{}{
 		"pwd": pwd,
 		"dir": migrationsDir,

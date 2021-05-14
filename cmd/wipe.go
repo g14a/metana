@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/g14a/metana/pkg/config"
+	"github.com/g14a/metana/pkg/core/wipe"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -15,12 +16,27 @@ var wipeCmd = &cobra.Command{
 	Short: "Wipe out old stale migration files and track in your store",
 	Long: ``,
 	Run: func(cmd *cobra.Command, args []string) {
+		dir, err := cmd.Flags().GetString("dir")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		store, err := cmd.Flags().GetString("store")
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		mc, _ := config.GetMetanaConfig()
+
+		var finalDir string
+
+		if dir != "" {
+			finalDir = dir
+		} else if mc != nil && mc.Dir != "" && dir == "" {
+			finalDir = mc.Dir
+		} else {
+			finalDir = "migrations"
+		}
 
 		var finalStoreConn string
 		if store != "" {
@@ -40,12 +56,18 @@ var wipeCmd = &cobra.Command{
 
 		if confirmWipe {
 			// TODO
+			err := wipe.Wipe(finalDir, finalStoreConn)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	},
 }
 
 func init() {
 	wipeCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
+	wipeCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
+
 	rootCmd.AddCommand(wipeCmd)
 
 	// Here you will define your flags and configuration settings.

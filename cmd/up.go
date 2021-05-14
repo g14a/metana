@@ -3,11 +3,11 @@ package cmd
 
 import (
 	"fmt"
+	migrate2 "github.com/g14a/metana/pkg/core/migrate"
 	"log"
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/config"
-	"github.com/g14a/metana/pkg/migrate"
 	"github.com/g14a/metana/pkg/store"
 	"github.com/g14a/metana/pkg/types"
 	"github.com/spf13/cobra"
@@ -70,7 +70,7 @@ var upCmd = &cobra.Command{
 		}
 
 		upUntil, _ := cmd.Flags().GetString("until")
-		errBuf := migrate.Run(upUntil, finalDir, existingTrack.LastRunTS, true)
+		errBuf := migrate2.Run(upUntil, finalDir, existingTrack.LastRunTS, true)
 
 		if !dryRun {
 			track, _ := store.ProcessLogs(errBuf)
