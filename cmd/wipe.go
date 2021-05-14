@@ -14,7 +14,7 @@ import (
 var wipeCmd = &cobra.Command{
 	Use:   "wipe",
 	Short: "Wipe out old stale migration files and track in your store",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		dir, err := cmd.Flags().GetString("dir")
 		if err != nil {
@@ -50,7 +50,7 @@ var wipeCmd = &cobra.Command{
 		confirmWipe := false
 
 		prompt := &survey.Confirm{
-			Message: "Wiping will delete old migration files and existing store. Continue?",
+			Message: "Wiping will delete stale migration files. Continue?",
 		}
 		survey.AskOne(prompt, &confirmWipe)
 

@@ -36,18 +36,18 @@ func ListMigrations(migrationsDir string) error {
 	return nil
 }
 
-func GetMigrations(migrationsDir string) ([]migration, error) {
+func GetMigrations(migrationsDir string) ([]Migration, error) {
 	wd, err := os.Getwd()
 	if err != nil {
-		return []migration{}, err
+		return []Migration{}, err
 	}
 
 	m, err := filepath.Glob(wd + "/" + migrationsDir + "/scripts/[^.]*.*")
 	if err != nil {
-		return []migration{}, err
+		return []Migration{}, err
 	}
 
-	var migrations []migration
+	var migrations []Migration
 	for _, f := range m {
 		fi, err := os.Stat(f)
 		if err != nil {
@@ -56,7 +56,7 @@ func GetMigrations(migrationsDir string) ([]migration, error) {
 		if strings.Contains(f, "main.go") || strings.Contains(f, "store.go") {
 			continue
 		}
-		migrations = append(migrations, migration{
+		migrations = append(migrations, Migration{
 			Name:    filepath.Base(f),
 			ModTime: fi.ModTime().Format("02-01-2006 15:04"),
 		})
@@ -65,7 +65,7 @@ func GetMigrations(migrationsDir string) ([]migration, error) {
 	return migrations, nil
 }
 
-type migration struct {
+type Migration struct {
 	Name    string
 	ModTime string
 }
