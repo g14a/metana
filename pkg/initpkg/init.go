@@ -2,7 +2,6 @@ package initpkg
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os/exec"
 
@@ -12,15 +11,11 @@ import (
 func GetGoModPath() (string, error) {
 	goModInfo, err := exec.Command("go", "mod", "edit", "-json").Output()
 
-	fmt.Println(err, "===========err=========")
-
 	if err != nil {
 		return "", err
 	}
 
 	query, err := gojq.Parse(".Module.Path | ..")
-
-	fmt.Println(err, "===========err=========")
 
 	if err != nil {
 		return "", err
@@ -46,8 +41,6 @@ func GetGoModPath() (string, error) {
 		}
 		goModPath = v.(string)
 	}
-
-	fmt.Println(goModPath, "===========gomodpath=========")
 
 	return goModPath, nil
 }

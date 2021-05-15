@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -31,7 +30,6 @@ var initCmd = &cobra.Command{
 		// Priority range is explicit, then config, then migrations
 		var finalDir string
 
-		fmt.Println("came here before dir==================")
 		if dir != "" {
 			finalDir = dir
 		} else if mc != nil && mc.Dir != "" && dir == "" {
@@ -44,14 +42,10 @@ var initCmd = &cobra.Command{
 		_ = os.MkdirAll(finalDir+"/scripts", 0755)
 		wd, _ := os.Getwd()
 
-		fmt.Println("came here after dir==========")
-
 		goModPath, err := initpkg.GetGoModPath()
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		fmt.Println(goModPath, "==========gomodpath=========")
 
 		err = gen2.CreateInitConfig(finalDir, goModPath)
 		if err != nil {
