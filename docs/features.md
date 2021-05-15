@@ -3,6 +3,7 @@
 * Run a migration until a certain point.
 * Dry run migrations
 * Custom config
+* Wipe out stale migration files and update your store track
 
 
 ### Details
@@ -151,10 +152,35 @@ Flags:
 
 ```
 
-CAUTION: If you change the dir flag in your `.metana.yml` after running `metana init`, don't forget to rename your migrations directory to the new directory. Otherwise running migrations would result in failure.
+<span style="color:red">CAUTION: </span>
+If you change the dir flag in your `.metana.yml` after running `metana init`, don't forget to rename your migrations directory to the new directory. Otherwise running migrations would result in failure.
 
 Priority order of config:
 
 1. flags passed explicitly
 2. `.metana.yml` if it exists.
 3. default values of flags.
+
+* Wipe out stale migrations
+
+You can remove migration files which are already executed with the `wipe` command.
+
+```shell
+$ metana wipe
+
+Wipe out old stale migration files and track in your store
+
+Usage:
+  metana wipe [flags]
+
+Flags:
+  -d, --dir string     Specify custom migrations directory
+  -h, --help           help for wipe
+  -s, --store string   Specify a connection url to track migrations
+
+Global Flags:
+      --config string   config gen (default is $HOME/.metana.yaml)
+```
+
+Even the `wipe` command takes configuration from your `.metana.yml` file if there is one present.
+Otherwise the priority order is considered while wiping.

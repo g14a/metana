@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	migrate2 "github.com/g14a/metana/pkg/core/migrate"
@@ -73,6 +74,7 @@ var upCmd = &cobra.Command{
 		upUntil, _ := cmd.Flags().GetString("until")
 		errBuf := migrate2.Run(upUntil, finalDir, existingTrack.LastRunTS, true)
 
+		fmt.Println("came out of run")
 		if !dryRun {
 			track, _ := store.ProcessLogs(errBuf)
 

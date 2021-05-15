@@ -2,7 +2,6 @@ package initpkg
 
 import (
 	"encoding/json"
-	"log"
 	"os/exec"
 
 	"github.com/itchyny/gojq"
@@ -25,7 +24,7 @@ func GetGoModPath() (string, error) {
 
 	errJson := json.Unmarshal(goModInfo, &goModDetails)
 	if errJson != nil {
-		log.Fatal(errJson)
+		return "", errJson
 	}
 
 	iter := query.Run(goModDetails)
@@ -37,7 +36,7 @@ func GetGoModPath() (string, error) {
 			break
 		}
 		if err, ok := v.(error); ok {
-			log.Fatal(err)
+			return "", err
 		}
 		goModPath = v.(string)
 	}

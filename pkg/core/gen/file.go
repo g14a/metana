@@ -38,13 +38,13 @@ func CreateMigrationFile(migrationsDir, file string) (string, error) {
 
 	cmd := exec.Command("gofmt", "-w", fileName)
 	if errOut, err := cmd.CombinedOutput(); err != nil {
-		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
+		return "", fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut)
 	}
 
 	return fileName, nil
 }
 
-func CreateInitConfig(migrationsDir, pwd string) error {
+func CreateInitConfig(migrationsDir, goModPath string) error {
 
 	migrationRunFile, err := os.Create(migrationsDir + "/main.go")
 	if err != nil {
@@ -59,10 +59,16 @@ func CreateInitConfig(migrationsDir, pwd string) error {
 	}(migrationRunFile)
 
 	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl2.InitMigrationRunTemplate())))
-	err = migrationRunTemplate.Execute(migrationRunFile, map[string]interface{}{
-		"pwd": pwd,
-		"dir": migrationsDir,
-	})
+
+	params := map[string]interface{}{}
+
+	if goModPath == "" {
+		params["pwd"] = ".."
+	}
+
+	params["dir"] = migrationsDir
+
+	err = migrationRunTemplate.Execute(migrationRunFile, params)
 
 	if err != nil {
 		return err
@@ -70,7 +76,7 @@ func CreateInitConfig(migrationsDir, pwd string) error {
 
 	cmd := exec.Command("gofmt", "-w", migrationsDir+"/main.go")
 	if errOut, err := cmd.CombinedOutput(); err != nil {
-		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
+		return fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut)
 	}
 
 	return nil

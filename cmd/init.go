@@ -44,7 +44,8 @@ var initCmd = &cobra.Command{
 
 		goModPath, err := initpkg.GetGoModPath()
 		if err != nil {
-			log.Fatal(err)
+			color.Red("Go module not found!")
+			return
 		}
 
 		err = gen2.CreateInitConfig(finalDir, goModPath)

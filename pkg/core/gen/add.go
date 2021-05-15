@@ -74,7 +74,7 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool) e
 
 	cmd := exec.Command("gofmt", "-w", migrationsDir+"/main.go")
 	if errOut, err := cmd.CombinedOutput(); err != nil {
-		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
+		return fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut)
 	}
 
 	return nil
