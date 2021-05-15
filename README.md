@@ -1,4 +1,6 @@
-# metana
+![](metana.png)
+
+### metana
 
 ![OpenSource](https://img.shields.io/badge/Open%20Source-000000?style=for-the-badge&logo=github)
 ![go](https://img.shields.io/badge/-Written%20In%20Go-00add8?style=for-the-badge&logo=Go&logoColor=ffffff)
