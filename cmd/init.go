@@ -51,7 +51,7 @@ var initCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		fmt.Println(goModPath,"==========gomodpath=========")
+		fmt.Println(goModPath, "==========gomodpath=========")
 
 		err = gen2.CreateInitConfig(finalDir, goModPath)
 		if err != nil {
