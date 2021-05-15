@@ -18,7 +18,7 @@ Checkout the releases page and download your platform's binaries to install them
 Prerequisites:
 
 * Git
-* Go 1.14 or newer. Better if its the latest version.
+* Go 1.13 or newer. Go modules are needed. Better if its the latest version.
 
 ```shell
 git clone https://github.com/g14a/metana
