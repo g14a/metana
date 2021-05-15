@@ -60,13 +60,10 @@ func CreateInitConfig(migrationsDir, goModPath string) error {
 
 	migrationRunTemplate := template.Must(template.New("main").Parse(string(tpl2.InitMigrationRunTemplate())))
 
-	params := map[string]interface{}{}
-
-	if goModPath == "" {
-		params["pwd"] = ".."
+	params := map[string]interface{}{
+		"pwd": goModPath,
+		"dir": migrationsDir,
 	}
-
-	params["dir"] = migrationsDir
 
 	err = migrationRunTemplate.Execute(migrationRunFile, params)
 
