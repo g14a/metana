@@ -1,10 +1,11 @@
 package pkg
 
 import (
-	"github.com/fatih/color"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/fatih/color"
 
 	"github.com/olekukonko/tablewriter"
 )

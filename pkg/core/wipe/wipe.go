@@ -2,15 +2,17 @@ package wipe
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
+
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg"
 	"github.com/g14a/metana/pkg/initpkg"
 	s "github.com/g14a/metana/pkg/store"
 	"github.com/iancoleman/strcase"
-	"os"
-	"os/exec"
-	"strconv"
-	"strings"
 )
 
 func Wipe(migrationsDir string, storeConn string) error {
@@ -28,22 +30,30 @@ func Wipe(migrationsDir string, storeConn string) error {
 		color.Yellow("No migrations found to wipe.\nTry creating them or running existing ones.")
 	}
 
-	for _, m := range track.Migrations {
-		fmt.Println(migrationsDir + "/scripts/" + m.Title)
-		err := os.Remove(migrationsDir + "/scripts/" + m.Title)
-		if err != nil {
-			return err
-		}
-	}
-
-	migrations, err := pkg.GetMigrations(migrationsDir)
+	localMigrations, err := pkg.GetMigrations(migrationsDir)
 	if err != nil {
 		return err
 	}
 
-	if len(migrations) == 0 {
+	if len(localMigrations) == 0 {
 		color.Yellow("No migrations found to wipe.")
 		return nil
+	}
+
+	for _, m := range track.Migrations {
+		for _, lm := range localMigrations {
+			if lm.Name == m.Title {
+				err := os.Remove(migrationsDir + "/scripts/" + m.Title)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	err = store.Wipe()
+	if err != nil {
+		return err
 	}
 
 	var mainBuilder strings.Builder
@@ -53,7 +63,7 @@ func Wipe(migrationsDir string, storeConn string) error {
 
 	mainBuilder.WriteString("\nfunc MigrateUp(upUntil string, lastRunTS int) (err error){\n")
 
-	for _, m := range migrations {
+	for _, m := range localMigrations {
 		upComp := getMigrateComponent(m, true)
 		mainBuilder.Write(upComp)
 	}
@@ -61,7 +71,7 @@ func Wipe(migrationsDir string, storeConn string) error {
 
 	mainBuilder.WriteString("\n\nfunc MigrateDown(downUntil string, lastRunTS int) (err error){\n")
 
-	for _, m := range migrations {
+	for _, m := range localMigrations {
 		upComp := getMigrateComponent(m, false)
 		mainBuilder.Write(upComp)
 	}
@@ -73,12 +83,12 @@ func Wipe(migrationsDir string, storeConn string) error {
 
 	err = os.WriteFile(migrationsDir+"/main.go", []byte(mainBuilder.String()), 0644)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	cmd := exec.Command("gofmt", "-w", migrationsDir+"/main.go")
 	if errOut, err := cmd.CombinedOutput(); err != nil {
-		panic(fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut))
+		return fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut)
 	}
 
 	return nil
@@ -87,7 +97,7 @@ func Wipe(migrationsDir string, storeConn string) error {
 func getMainAndImportsComponent(migrationsDir string) []byte {
 	goModPath, err := initpkg.GetGoModPath()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	return []byte(`// This file is auto generated. DO NOT EDIT!
@@ -105,7 +115,7 @@ func getMainAndImportsComponent(migrationsDir string) []byte {
 func getMigrateComponent(m pkg.Migration, up bool) []byte {
 	ts, migrationName, err := pkg.GetComponents(m.Name)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	lowerMigration := strcase.ToLowerCamel(migrationName)

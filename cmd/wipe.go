@@ -2,12 +2,13 @@
 package cmd
 
 import (
-	"fmt"
+	"log"
+
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/config"
 	"github.com/g14a/metana/pkg/core/wipe"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 // wipeCmd represents the wipe command
@@ -33,6 +34,7 @@ var wipeCmd = &cobra.Command{
 		if dir != "" {
 			finalDir = dir
 		} else if mc != nil && mc.Dir != "" && dir == "" {
+			color.Green(" ✓ .metana.yml found")
 			finalDir = mc.Dir
 		} else {
 			finalDir = "migrations"
@@ -44,8 +46,6 @@ var wipeCmd = &cobra.Command{
 		} else if mc != nil && mc.StoreConn != "" && store == "" {
 			finalStoreConn = mc.StoreConn
 		}
-
-		fmt.Println(finalStoreConn)
 
 		confirmWipe := false
 

@@ -2,9 +2,9 @@
 package cmd
 
 import (
-	"fmt"
-	migrate2 "github.com/g14a/metana/pkg/core/migrate"
 	"log"
+
+	migrate2 "github.com/g14a/metana/pkg/core/migrate"
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/config"
@@ -42,6 +42,7 @@ var upCmd = &cobra.Command{
 		if dir != "" {
 			finalDir = dir
 		} else if mc != nil && mc.Dir != "" && dir == "" {
+			color.Green(" ✓ .metana.yml found")
 			finalDir = mc.Dir
 		} else {
 			finalDir = "migrations"
@@ -82,7 +83,7 @@ var upCmd = &cobra.Command{
 			if len(track.Migrations) > 0 {
 				err = storeHouse.Set(existingTrack)
 				if err != nil {
-					fmt.Println(err)
+					log.Fatal(err)
 				}
 			}
 			color.Green("  >>> migration : complete")

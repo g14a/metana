@@ -2,10 +2,11 @@
 package cmd
 
 import (
-	gen2 "github.com/g14a/metana/pkg/core/gen"
 	"log"
 	"os"
 	"strings"
+
+	gen2 "github.com/g14a/metana/pkg/core/gen"
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg"
@@ -38,6 +39,7 @@ var createCmd = &cobra.Command{
 		if dir != "" {
 			finalDir = dir
 		} else if mc != nil && mc.Dir != "" && dir == "" {
+			color.Green(" ✓ .metana.yml found")
 			finalDir = mc.Dir
 		} else {
 			finalDir = "migrations"

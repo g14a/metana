@@ -3,11 +3,12 @@ package migrate
 import (
 	"bufio"
 	"bytes"
-	"github.com/fatih/color"
 	"log"
 	"os"
 	"os/exec"
 	"strconv"
+
+	"github.com/fatih/color"
 )
 
 func Run(until, migrationsDir string, lastRunTS int, up bool) string {

@@ -18,6 +18,7 @@ import (
 type Store interface {
 	Set(track types.Track) error
 	Load() (types.Track, error)
+	Wipe() error
 }
 
 func GetStoreViaConn(connString string, dir string) (Store, error) {

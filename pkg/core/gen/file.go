@@ -2,7 +2,6 @@ package gen
 
 import (
 	"fmt"
-	tpl2 "github.com/g14a/metana/pkg/core/tpl"
 	"log"
 	"os"
 	"os/exec"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	tpl2 "github.com/g14a/metana/pkg/core/tpl"
 
 	"github.com/iancoleman/strcase"
 )

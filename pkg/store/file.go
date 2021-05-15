@@ -41,3 +41,12 @@ func (f File) Load() (types.Track, error) {
 
 	return t, nil
 }
+
+func (f File) Wipe() error {
+	err := os.WriteFile(f.file.Name(), nil, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

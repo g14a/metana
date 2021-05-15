@@ -3,11 +3,12 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	tpl2 "github.com/g14a/metana/pkg/core/tpl"
 	"os"
 	"os/exec"
 	"strings"
 	"text/template"
+
+	tpl2 "github.com/g14a/metana/pkg/core/tpl"
 
 	"github.com/g14a/metana/pkg"
 	"github.com/iancoleman/strcase"
@@ -68,7 +69,7 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool) e
 
 	err = os.WriteFile(migrationsDir+"/main.go", []byte(output), 0644)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 
 	cmd := exec.Command("gofmt", "-w", migrationsDir+"/main.go")
