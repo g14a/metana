@@ -1,19 +1,18 @@
 Metana can be installed in the following ways.
 
-### Mac
+## **Mac**
 
 ```shell
 homebrew tap g14a/homebrew-metana
 homebrew install metana
 ```
-
-### Linux
+## **Linux**
 
 Checkout the releases page and download your platform's binaries to install them.
 
 [Releases Page](https://github.com/g14a/metana/releases)
 
-### Building from source
+## **Building from source**
 
 Prerequisites:
 
@@ -26,7 +25,7 @@ cd metana
 go install
 ```
 
-### Docker
+## **Docker**
 ```shell
 docker pull g14a/metana
 docker run
