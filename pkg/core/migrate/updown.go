@@ -12,25 +12,14 @@ import (
 )
 
 func Run(until, migrationsDir string, lastRunTS int, up bool) string {
-	migrationsBuild := exec.Command("go", "build")
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	migrationsBuild.Dir = wd + "/" + migrationsDir
-
-	errBuild := migrationsBuild.Start()
-	if errBuild != nil {
-		log.Fatal(errBuild)
-	}
-
-	errWait := migrationsBuild.Wait()
-	if errWait != nil {
-		log.Fatal(errWait)
-	}
-
 	var migrationArgs []string
+
+	migrationArgs = append(migrationArgs, "run", "main.go")
 
 	if up {
 		migrationArgs = append(migrationArgs, "up")
@@ -45,7 +34,7 @@ func Run(until, migrationsDir string, lastRunTS int, up bool) string {
 
 	migrationArgs = append(migrationArgs, "--last-run-ts", lastRunTSString)
 
-	migrationsRun := exec.Command("./"+migrationsDir, migrationArgs...)
+	migrationsRun := exec.Command("go", migrationArgs...)
 	migrationsRun.Dir = wd + "/" + migrationsDir
 	var errBuf bytes.Buffer
 	migrationsRun.Stderr = &errBuf

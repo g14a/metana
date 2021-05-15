@@ -18,7 +18,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "metana",
 	Short: "A brief description of your application",
-	Long:  `An abstract migration tool for all types of migrations`,
+	Long:  `An abstract migration tool for Go services`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
