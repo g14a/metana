@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"github.com/spf13/afero"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,8 +11,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func ListMigrations(migrationsDir string) error {
-	migrations, err := GetMigrations(migrationsDir)
+func ListMigrations(migrationsDir string, fs afero.Fs) error {
+	migrations, err := GetMigrations(migrationsDir, fs)
 	if err != nil {
 		return err
 	}
@@ -37,24 +38,26 @@ func ListMigrations(migrationsDir string) error {
 	return nil
 }
 
-func GetMigrations(migrationsDir string) ([]Migration, error) {
+func GetMigrations(migrationsDir string, FS afero.Fs) ([]Migration, error) {
+	FSUtil = &afero.Afero{Fs: FS}
+
 	wd, err := os.Getwd()
 	if err != nil {
 		return []Migration{}, err
 	}
 
-	m, err := filepath.Glob(wd + "/" + migrationsDir + "/scripts/[^.]*.*")
+	m, err := afero.Glob(FS, wd+"/"+migrationsDir+"/scripts/[^.]*.*")
 	if err != nil {
 		return []Migration{}, err
 	}
 
 	var migrations []Migration
 	for _, f := range m {
-		fi, err := os.Stat(f)
+		fi, err := FSUtil.Stat(f)
 		if err != nil {
 			return nil, err
 		}
-		if strings.Contains(f, "main.go") || strings.Contains(f, "store.go") {
+		if strings.Contains(f, "main.go") {
 			continue
 		}
 		migrations = append(migrations, Migration{
@@ -65,6 +68,16 @@ func GetMigrations(migrationsDir string) ([]Migration, error) {
 
 	return migrations, nil
 }
+
+func init() {
+	FS = afero.NewOsFs()
+	FSUtil = &afero.Afero{Fs: FS}
+}
+
+var (
+	FS     afero.Fs
+	FSUtil *afero.Afero
+)
 
 type Migration struct {
 	Name    string

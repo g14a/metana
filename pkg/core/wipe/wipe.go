@@ -2,6 +2,7 @@ package wipe
 
 import (
 	"fmt"
+	"github.com/spf13/afero"
 	"log"
 	"os"
 	"os/exec"
@@ -15,7 +16,7 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func Wipe(migrationsDir string, storeConn string) error {
+func Wipe(migrationsDir string, storeConn string, FS afero.Fs) error {
 	store, err := s.GetStoreViaConn(storeConn, migrationsDir)
 	if err != nil {
 		return err
@@ -30,7 +31,7 @@ func Wipe(migrationsDir string, storeConn string) error {
 		color.Yellow("No migrations found to wipe.\nTry creating them or running existing ones.")
 	}
 
-	localMigrations, err := pkg.GetMigrations(migrationsDir)
+	localMigrations, err := pkg.GetMigrations(migrationsDir, FS)
 	if err != nil {
 		return err
 	}

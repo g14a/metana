@@ -23,7 +23,7 @@ var listCmd = &cobra.Command{
 			dir = "migrations"
 		}
 
-		err = pkg.ListMigrations(dir)
+		err = pkg.ListMigrations(dir, FS)
 		if err != nil {
 			log.Fatal(err)
 		}

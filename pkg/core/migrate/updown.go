@@ -3,7 +3,6 @@ package migrate
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -13,7 +12,6 @@ import (
 )
 
 func Run(until, migrationsDir string, lastRunTS int, up bool) string {
-	fmt.Println("came inside")
 	wd, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)

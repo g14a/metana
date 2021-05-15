@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"github.com/spf13/afero"
 	"log"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -56,7 +57,7 @@ var wipeCmd = &cobra.Command{
 
 		if confirmWipe {
 			// TODO
-			err := wipe.Wipe(finalDir, finalStoreConn)
+			err := wipe.Wipe(finalDir, finalStoreConn, FS)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -70,6 +71,9 @@ func init() {
 
 	rootCmd.AddCommand(wipeCmd)
 
+	FS = afero.NewOsFs()
+	FSUtil = &afero.Afero{Fs: FS}
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
@@ -80,3 +84,8 @@ func init() {
 	// is called directly, e.g.:
 	// wipeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
+
+var (
+	FS     afero.Fs
+	FSUtil *afero.Afero
+)

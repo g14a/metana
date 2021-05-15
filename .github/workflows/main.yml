@@ -25,11 +25,9 @@ jobs:
         run: |
           go get -v -t -d ./...
 
-      - name: Build
+      - name: Run tests
         run: |
-          CGO_ENABLED=0 GOOS=linux go build -v .
-          CGO_ENABLED=0 GOOS=windows go build -v .
-          CGO_ENABLED=0 GOOS=darwin go build -v .
+          go test ./...
 
       - name: Checkout
         uses: actions/checkout@v2

@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"github.com/spf13/afero"
 	"log"
 	"os"
 	"strings"
@@ -45,7 +46,7 @@ var createCmd = &cobra.Command{
 			finalDir = "migrations"
 		}
 
-		exists, err := gen2.MigrationExists(finalDir, args[0])
+		exists, err := gen2.MigrationExists(finalDir, args[0], FS)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -56,7 +57,7 @@ var createCmd = &cobra.Command{
 		}
 
 		firstMigration := false
-		migrations, err := pkg.GetMigrations(finalDir)
+		migrations, err := pkg.GetMigrations(finalDir, FS)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -85,6 +86,10 @@ var createCmd = &cobra.Command{
 func init() {
 	createCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	rootCmd.AddCommand(createCmd)
+
+	FS = afero.NewOsFs()
+	FSUtil = &afero.Afero{Fs: FS}
+
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

@@ -3,6 +3,7 @@ package gen
 import (
 	"bytes"
 	"fmt"
+	"github.com/spf13/afero"
 	"os"
 	"os/exec"
 	"strings"
@@ -80,10 +81,10 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool) e
 	return nil
 }
 
-func MigrationExists(migrationsDir, migrationName string) (bool, error) {
+func MigrationExists(migrationsDir, migrationName string, FS afero.Fs) (bool, error) {
 	camelCaseMigration := strcase.ToCamel(migrationName)
 
-	migrations, err := pkg.GetMigrations(migrationsDir)
+	migrations, err := pkg.GetMigrations(migrationsDir, FS)
 	if err != nil {
 		return false, err
 	}
