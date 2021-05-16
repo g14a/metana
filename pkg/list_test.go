@@ -1,10 +1,11 @@
 package pkg
 
 import (
-	"github.com/spf13/afero"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/spf13/afero"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetMigrations_validFiles(t *testing.T) {
@@ -55,9 +56,4 @@ func TestGetMigrations_no_files(t *testing.T) {
 func init() {
 	FS = afero.NewMemMapFs()
 	FSUtil = &afero.Afero{Fs: FS}
-
-	FS.MkdirAll("/Users/g14a/metana/migrations/scripts", 0755)
-	afero.WriteFile(FS, "/Users/g14a/metana/migrations/scripts/1621081055-InitSchema.go", []byte("{}"), 0644)
-	afero.WriteFile(FS, "/Users/g14a/metana/migrations/scripts/1621084125-AddIndexes.go", []byte("{}"), 0644)
-	afero.WriteFile(FS, "/Users/g14a/metana/migrations/scripts/1621084135-AddFKeys.go", []byte("{}"), 0644)
 }

@@ -3,21 +3,21 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	"github.com/spf13/afero"
 	"os"
 	"os/exec"
 	"strings"
 	"text/template"
 
+	"github.com/spf13/afero"
+
 	tpl2 "github.com/g14a/metana/pkg/core/tpl"
 
-	"github.com/g14a/metana/pkg"
 	"github.com/iancoleman/strcase"
 )
 
-func Regen(migrationsDir, migrationName, fileName string, firstMigration bool) error {
+func Regen(migrationsDir, migrationName, fileName string, firstMigration bool, FS afero.Fs) error {
 	lower := strcase.ToLowerCamel(migrationName)
-	input, err := os.ReadFile(migrationsDir + "/main.go")
+	input, err := afero.ReadFile(FS, migrationsDir+"/main.go")
 	if err != nil {
 		return err
 	}
@@ -79,25 +79,4 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool) e
 	}
 
 	return nil
-}
-
-func MigrationExists(migrationsDir, migrationName string, FS afero.Fs) (bool, error) {
-	camelCaseMigration := strcase.ToCamel(migrationName)
-
-	migrations, err := pkg.GetMigrations(migrationsDir, FS)
-	if err != nil {
-		return false, err
-	}
-
-	for _, m := range migrations {
-		mig := strings.TrimSuffix(m.Name, ".go")
-		mig = strings.TrimLeftFunc(mig, func(r rune) bool {
-			return r >= 48 && r <= 57 || r == '-'
-		})
-		if camelCaseMigration == mig {
-			return true, nil
-		}
-	}
-
-	return false, nil
 }

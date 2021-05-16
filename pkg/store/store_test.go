@@ -1,10 +1,11 @@
 package store
 
 import (
-	"github.com/g14a/metana/pkg/types"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/g14a/metana/pkg/types"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestProcessLogs(t *testing.T) {
@@ -88,7 +89,7 @@ func TestTrackToSetDown(t *testing.T) {
 			},
 			inputNum: 3,
 			wantedTrack: types.Track{
-				LastRun: "1621095067-Abc.go",
+				LastRun:   "1621095067-Abc.go",
 				LastRunTS: 1621095067,
 				Migrations: []types.Migration{
 					{

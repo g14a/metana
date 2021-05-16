@@ -48,7 +48,7 @@ var initCmd = &cobra.Command{
 			return
 		}
 
-		err = gen2.CreateInitConfig(finalDir, goModPath)
+		err = gen2.CreateInitConfig(finalDir, goModPath, FS)
 		if err != nil {
 			log.Fatal(err)
 		}

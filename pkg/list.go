@@ -1,10 +1,11 @@
 package pkg
 
 import (
-	"github.com/spf13/afero"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/afero"
 
 	"github.com/fatih/color"
 

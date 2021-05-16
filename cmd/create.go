@@ -2,10 +2,11 @@
 package cmd
 
 import (
-	"github.com/spf13/afero"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/spf13/afero"
 
 	gen2 "github.com/g14a/metana/pkg/core/gen"
 
@@ -66,13 +67,13 @@ var createCmd = &cobra.Command{
 			firstMigration = true
 		}
 
-		fileName, err := gen2.CreateMigrationFile(finalDir, args[0])
+		fileName, err := gen2.CreateMigrationFile(finalDir, args[0], FS)
 		if err != nil {
 			color.Yellow("\nTry initializing migration using `metana init`\n\n")
 			os.Exit(0)
 		}
 
-		err = gen2.Regen(finalDir, strcase.ToCamel(args[0]), strings.TrimPrefix(fileName, finalDir+"/scripts/"), firstMigration)
+		err = gen2.Regen(finalDir, strcase.ToCamel(args[0]), strings.TrimPrefix(fileName, finalDir+"/scripts/"), firstMigration, FS)
 		if err != nil {
 			log.Fatal(err)
 		}

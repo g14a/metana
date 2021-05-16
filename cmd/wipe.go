@@ -2,8 +2,9 @@
 package cmd
 
 import (
-	"github.com/spf13/afero"
 	"log"
+
+	"github.com/spf13/afero"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"

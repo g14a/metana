@@ -1,13 +1,13 @@
 package wipe
 
 import (
-	"fmt"
-	"github.com/spf13/afero"
+	"go/format"
 	"log"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/spf13/afero"
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg"
@@ -82,14 +82,11 @@ func Wipe(migrationsDir string, storeConn string, FS afero.Fs) error {
 
 	mainBuilder.Write(mainmainComponent)
 
-	err = os.WriteFile(migrationsDir+"/main.go", []byte(mainBuilder.String()), 0644)
+	fmtBytes, err := format.Source([]byte(mainBuilder.String()))
+
+	err = os.WriteFile(migrationsDir+"/main.go", fmtBytes, 0644)
 	if err != nil {
 		return err
-	}
-
-	cmd := exec.Command("gofmt", "-w", migrationsDir+"/main.go")
-	if errOut, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut)
 	}
 
 	return nil
