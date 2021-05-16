@@ -34,7 +34,7 @@ var setConfigCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		mc, err := config.GetMetanaConfig()
+		mc, err := config.GetMetanaConfig(FS)
 		if os.IsNotExist(err) {
 			_, err = os.Create(".metana.yml")
 			if err != nil {
@@ -50,7 +50,7 @@ var setConfigCmd = &cobra.Command{
 			mc.StoreConn = store
 		}
 
-		err = config.SetMetanaConfig(mc)
+		err = config.SetMetanaConfig(mc, FS)
 		if err != nil {
 			log.Fatal(err)
 		}

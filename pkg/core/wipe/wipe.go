@@ -3,7 +3,6 @@ package wipe
 import (
 	"go/format"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 
@@ -44,7 +43,7 @@ func Wipe(migrationsDir string, storeConn string, FS afero.Fs) error {
 	for _, m := range track.Migrations {
 		for _, lm := range localMigrations {
 			if lm.Name == m.Title {
-				err := os.Remove(migrationsDir + "/scripts/" + m.Title)
+				err := FS.Remove(migrationsDir + "/scripts/" + m.Title)
 				if err != nil {
 					return err
 				}
@@ -57,39 +56,53 @@ func Wipe(migrationsDir string, storeConn string, FS afero.Fs) error {
 		return err
 	}
 
-	var mainBuilder strings.Builder
-
-	mainImportsComponent := getMainAndImportsComponent(migrationsDir)
-	mainBuilder.Write(mainImportsComponent)
-
-	mainBuilder.WriteString("\nfunc MigrateUp(upUntil string, lastRunTS int) (err error){\n")
-
-	for _, m := range localMigrations {
-		upComp := getMigrateComponent(m, true)
-		mainBuilder.Write(upComp)
+	mainBuilder, err := genMainAfterWipe(migrationsDir, FS)
+	if err != nil {
+		return err
 	}
-	mainBuilder.WriteString("\nreturn nil\n}")
-
-	mainBuilder.WriteString("\n\nfunc MigrateDown(downUntil string, lastRunTS int) (err error){\n")
-
-	for _, m := range localMigrations {
-		upComp := getMigrateComponent(m, false)
-		mainBuilder.Write(upComp)
-	}
-	mainBuilder.WriteString("\nreturn nil\n}\n\n")
-
-	mainmainComponent := getMainOfMain()
-
-	mainBuilder.Write(mainmainComponent)
 
 	fmtBytes, err := format.Source([]byte(mainBuilder.String()))
 
-	err = os.WriteFile(migrationsDir+"/main.go", fmtBytes, 0644)
+	err = afero.WriteFile(FS, migrationsDir+"/main.go", fmtBytes, 0644)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func genMainAfterWipe(migrationsDir string, FS afero.Fs) (strings.Builder, error) {
+	var mainBuilder strings.Builder
+
+	newMigrations, err := pkg.GetMigrations(migrationsDir, FS)
+	if err != nil {
+		return mainBuilder, err
+	}
+
+	// imports component
+	mainImportsComponent := getMainAndImportsComponent(migrationsDir)
+	mainBuilder.Write(mainImportsComponent)
+
+	// Up component
+	mainBuilder.WriteString("\nfunc MigrateUp(upUntil string, lastRunTS int) (err error){\n")
+	for _, m := range newMigrations {
+		upComp := getMigrateComponent(m, true)
+		mainBuilder.Write(upComp)
+	}
+	mainBuilder.WriteString("\nreturn nil\n}")
+
+	// Down component
+	mainBuilder.WriteString("\n\nfunc MigrateDown(downUntil string, lastRunTS int) (err error){\n")
+	for i := len(newMigrations) - 1; i >= 0; i-- {
+		downComp := getMigrateComponent(newMigrations[i], false)
+		mainBuilder.Write(downComp)
+	}
+	mainBuilder.WriteString("\nreturn nil\n}\n\n")
+
+	mainmainComponent := getMainOfMain()
+	mainBuilder.Write(mainmainComponent)
+
+	return mainBuilder, nil
 }
 
 func getMainAndImportsComponent(migrationsDir string) []byte {

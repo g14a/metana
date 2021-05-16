@@ -25,7 +25,7 @@ var initCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		mc, _ := config.GetMetanaConfig()
+		mc, _ := config.GetMetanaConfig(FS)
 
 		// Priority range is explicit, then config, then migrations
 		var finalDir string
@@ -58,7 +58,7 @@ var initCmd = &cobra.Command{
 		}
 
 		if (&config.MetanaConfig{}) == mc || mc == nil {
-			err := config.SetMetanaConfig(setMc)
+			err := config.SetMetanaConfig(setMc, FS)
 			if err != nil {
 				return
 			}

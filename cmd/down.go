@@ -34,7 +34,7 @@ var downCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		mc, _ := config.GetMetanaConfig()
+		mc, _ := config.GetMetanaConfig(FS)
 
 		// Priority range is explicit, then config, then migrations
 		var finalDir string

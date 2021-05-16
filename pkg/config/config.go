@@ -1,8 +1,9 @@
 package config
 
 import (
-	"io/ioutil"
 	"log"
+
+	"github.com/spf13/afero"
 
 	"gopkg.in/yaml.v2"
 )
@@ -12,10 +13,10 @@ type MetanaConfig struct {
 	StoreConn string `yaml:"store"`
 }
 
-func GetMetanaConfig() (*MetanaConfig, error) {
+func GetMetanaConfig(FS afero.Fs) (*MetanaConfig, error) {
 	var MetanaConfigInstance MetanaConfig
 
-	yamlFile, err := ioutil.ReadFile(".metana.yml")
+	yamlFile, err := afero.ReadFile(FS, ".metana.yml")
 	if err != nil {
 		return nil, err
 	}
@@ -26,13 +27,13 @@ func GetMetanaConfig() (*MetanaConfig, error) {
 	return &MetanaConfigInstance, nil
 }
 
-func SetMetanaConfig(mc *MetanaConfig) error {
+func SetMetanaConfig(mc *MetanaConfig, FS afero.Fs) error {
 	b, err := yaml.Marshal(&mc)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(".metana.yml", b, 0644)
+	err = afero.WriteFile(FS, ".metana.yml", b, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}

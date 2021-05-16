@@ -29,7 +29,7 @@ var wipeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		mc, _ := config.GetMetanaConfig()
+		mc, _ := config.GetMetanaConfig(FS)
 
 		var finalDir string
 

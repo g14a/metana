@@ -33,7 +33,7 @@ var createCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		mc, _ := config.GetMetanaConfig()
+		mc, _ := config.GetMetanaConfig(FS)
 
 		// Priority range is explicit, then config, then migrations
 		var finalDir string
