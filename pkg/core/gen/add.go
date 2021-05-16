@@ -2,9 +2,7 @@ package gen
 
 import (
 	"bytes"
-	"fmt"
-	"os"
-	"os/exec"
+	"go/format"
 	"strings"
 	"text/template"
 
@@ -68,14 +66,11 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool, F
 
 	output := strings.Join(lines, "\n")
 
-	err = os.WriteFile(migrationsDir+"/main.go", []byte(output), 0644)
+	fmtOutput, err := format.Source([]byte(output))
+
+	err = afero.WriteFile(FS, migrationsDir+"/main.go", fmtOutput, 0644)
 	if err != nil {
 		return err
-	}
-
-	cmd := exec.Command("gofmt", "-w", migrationsDir+"/main.go")
-	if errOut, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("failed to run %v: %v\n%s", strings.Join(cmd.Args, ""), err, errOut)
 	}
 
 	return nil

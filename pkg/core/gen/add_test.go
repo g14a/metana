@@ -20,6 +20,6 @@ func TestRegen(t *testing.T) {
 	filename, err := CreateMigrationFile("migrations", "initSchema", FS)
 	assert.Equal(t, true, err == nil)
 
-	err = Regen("migrations", "InitSchema", strings.TrimPrefix(filename, "/Users/g14a/metana/migrations/scripts"), true, FS)
+	err = Regen("migrations", "InitSchema", strings.TrimPrefix(filename, "migrations/scripts/"), true, FS)
 	assert.Equal(t, true, err == nil)
 }
