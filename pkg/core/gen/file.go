@@ -3,13 +3,14 @@ package gen
 import (
 	"bytes"
 	"fmt"
-	"github.com/g14a/metana/pkg"
 	"go/format"
 	"log"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/g14a/metana/pkg"
 
 	"github.com/spf13/afero"
 
