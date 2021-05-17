@@ -12,8 +12,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func ListMigrations(migrationsDir string, fs afero.Fs) error {
-	migrations, err := GetMigrations(migrationsDir, fs)
+func ListMigrations(wd, migrationsDir string, fs afero.Fs) error {
+	migrations, err := GetMigrations(wd, migrationsDir, fs)
 	if err != nil {
 		return err
 	}
@@ -39,13 +39,8 @@ func ListMigrations(migrationsDir string, fs afero.Fs) error {
 	return nil
 }
 
-func GetMigrations(migrationsDir string, FS afero.Fs) ([]Migration, error) {
-	FSUtil = &afero.Afero{Fs: FS}
-
-	wd, err := os.Getwd()
-	if err != nil {
-		return []Migration{}, err
-	}
+func GetMigrations(wd, migrationsDir string, FS afero.Fs) ([]Migration, error) {
+	FSUtil := &afero.Afero{Fs: FS}
 
 	m, err := afero.Glob(FS, wd+"/"+migrationsDir+"/scripts/[^.]*.*")
 	if err != nil {
@@ -69,16 +64,6 @@ func GetMigrations(migrationsDir string, FS afero.Fs) ([]Migration, error) {
 
 	return migrations, nil
 }
-
-func init() {
-	FS = afero.NewOsFs()
-	FSUtil = &afero.Afero{Fs: FS}
-}
-
-var (
-	FS     afero.Fs
-	FSUtil *afero.Afero
-)
 
 type Migration struct {
 	Name    string

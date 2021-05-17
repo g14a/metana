@@ -9,8 +9,7 @@ import (
 )
 
 func TestGetMigrations_validFiles(t *testing.T) {
-	FS = afero.NewMemMapFs()
-	FSUtil = &afero.Afero{Fs: FS}
+	FS := afero.NewMemMapFs()
 
 	FS.MkdirAll("/Users/g14a/metana/migrations/scripts", 0755)
 	afero.WriteFile(FS, "/Users/g14a/metana/migrations/scripts/1621081055-InitSchema.go", []byte("{}"), 0644)
@@ -18,7 +17,7 @@ func TestGetMigrations_validFiles(t *testing.T) {
 	afero.WriteFile(FS, "/Users/g14a/metana/migrations/scripts/1621084135-AddFKeys.go", []byte("{}"), 0644)
 
 	os.Chdir("/Users/g14a/metana")
-	migrations, err := GetMigrations("migrations", FS)
+	migrations, err := GetMigrations("/Users/g14a/metana", "migrations", FS)
 	if err != nil {
 		return
 	}
@@ -39,21 +38,15 @@ func TestGetMigrations_validFiles(t *testing.T) {
 }
 
 func TestGetMigrations_no_files(t *testing.T) {
-	FS = afero.NewMemMapFs()
-	FSUtil = &afero.Afero{Fs: FS}
+	FS := afero.NewMemMapFs()
 
 	FS.MkdirAll("/Users/g14a/metana/migrations/scripts", 0755)
 
 	os.Chdir("/Users/g14a/metana")
-	migrations, err := GetMigrations("migrations", FS)
+	migrations, err := GetMigrations("/Users/g14a/metana", "migrations", FS)
 	if err != nil {
 		return
 	}
 
 	assert.Equal(t, 0, len(migrations))
-}
-
-func init() {
-	FS = afero.NewMemMapFs()
-	FSUtil = &afero.Afero{Fs: FS}
 }

@@ -3,6 +3,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/afero"
 
@@ -56,9 +57,14 @@ var wipeCmd = &cobra.Command{
 		}
 		survey.AskOne(prompt, &confirmWipe)
 
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if confirmWipe {
 			// TODO
-			err := wipe.Wipe(finalDir, finalStoreConn, FS)
+			err := wipe.Wipe(wd, finalDir, finalStoreConn, FS)
 			if err != nil {
 				log.Fatal(err)
 			}

@@ -46,8 +46,12 @@ var createCmd = &cobra.Command{
 		} else {
 			finalDir = "migrations"
 		}
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		exists, err := gen2.MigrationExists(finalDir, args[0], FS)
+		exists, err := gen2.MigrationExists(wd, finalDir, args[0], FS)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -58,7 +62,7 @@ var createCmd = &cobra.Command{
 		}
 
 		firstMigration := false
-		migrations, err := pkg.GetMigrations(finalDir, FS)
+		migrations, err := pkg.GetMigrations(wd, finalDir, FS)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,7 +82,6 @@ var createCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		wd, _ := os.Getwd()
 		color.Green(" ✓ Created " + wd + "/" + fileName)
 		color.Green(" ✓ Updated " + wd + "/" + finalDir + "/main.go")
 	},

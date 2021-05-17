@@ -15,7 +15,7 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func Wipe(migrationsDir string, storeConn string, FS afero.Fs) error {
+func Wipe(wd, migrationsDir string, storeConn string, FS afero.Fs) error {
 	store, err := s.GetStoreViaConn(storeConn, migrationsDir)
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func Wipe(migrationsDir string, storeConn string, FS afero.Fs) error {
 		color.Yellow("No migrations found to wipe.\nTry creating them or running existing ones.")
 	}
 
-	localMigrations, err := pkg.GetMigrations(migrationsDir, FS)
+	localMigrations, err := pkg.GetMigrations(wd, migrationsDir, FS)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func Wipe(migrationsDir string, storeConn string, FS afero.Fs) error {
 		return err
 	}
 
-	mainBuilder, err := genMainAfterWipe(migrationsDir, FS)
+	mainBuilder, err := genMainAfterWipe(wd, migrationsDir, FS)
 	if err != nil {
 		return err
 	}
@@ -71,10 +71,10 @@ func Wipe(migrationsDir string, storeConn string, FS afero.Fs) error {
 	return nil
 }
 
-func genMainAfterWipe(migrationsDir string, FS afero.Fs) (strings.Builder, error) {
+func genMainAfterWipe(wd, migrationsDir string, FS afero.Fs) (strings.Builder, error) {
 	var mainBuilder strings.Builder
 
-	newMigrations, err := pkg.GetMigrations(migrationsDir, FS)
+	newMigrations, err := pkg.GetMigrations(wd, migrationsDir, FS)
 	if err != nil {
 		return mainBuilder, err
 	}

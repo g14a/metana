@@ -2,7 +2,9 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/g14a/metana/pkg"
 
@@ -22,8 +24,12 @@ var listCmd = &cobra.Command{
 		if dir == "" {
 			dir = "migrations"
 		}
-
-		err = pkg.ListMigrations(dir, FS)
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(wd, "===========outer wd==============")
+		err = pkg.ListMigrations(wd, dir, FS)
 		if err != nil {
 			log.Fatal(err)
 		}

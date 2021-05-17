@@ -79,7 +79,7 @@ func TestMigrationExists(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		exists, err := MigrationExists(tt.inputMigrationsDir, tt.inputMigrationName, tt.FS)
+		exists, err := MigrationExists("/Users/g14a/metana", tt.inputMigrationsDir, tt.inputMigrationName, tt.FS)
 		assert.Equal(t, tt.Exists, exists)
 		assert.Equal(t, true, err == nil)
 	}

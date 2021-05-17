@@ -97,10 +97,10 @@ func CreateInitConfig(migrationsDir, goModPath string, FS afero.Fs) error {
 	return nil
 }
 
-func MigrationExists(migrationsDir, migrationName string, FS afero.Fs) (bool, error) {
+func MigrationExists(wd, migrationsDir, migrationName string, FS afero.Fs) (bool, error) {
 	camelCaseMigration := strcase.ToCamel(migrationName)
 
-	migrations, err := pkg.GetMigrations(migrationsDir, FS)
+	migrations, err := pkg.GetMigrations(wd, migrationsDir, FS)
 	if err != nil {
 		return false, err
 	}
