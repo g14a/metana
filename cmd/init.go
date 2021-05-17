@@ -4,13 +4,13 @@ package cmd
 import (
 	"log"
 	"os"
+	"os/exec"
+	"strings"
 
 	gen2 "github.com/g14a/metana/pkg/core/gen"
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/config"
-	"github.com/g14a/metana/pkg/initpkg"
-
 	"github.com/spf13/cobra"
 )
 
@@ -42,13 +42,17 @@ var initCmd = &cobra.Command{
 		_ = os.MkdirAll(finalDir+"/scripts", 0755)
 		wd, _ := os.Getwd()
 
-		goModPath, err := initpkg.GetGoModPath()
+		goModPath, err := exec.Command("go", "list", "-m").Output()
 		if err != nil {
-			color.Red("Go module not found!")
-			return
+			log.Fatal(err)
 		}
 
-		err = gen2.CreateInitConfig(finalDir, goModPath, FS)
+		goModPathString := strings.TrimSpace(string(goModPath))
+		if goModPathString == "" {
+			color.Yellow("No go module found")
+		}
+
+		err = gen2.CreateInitConfig(finalDir, goModPathString, FS)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -83,12 +83,14 @@ func CreateInitConfig(migrationsDir, goModPath string, FS afero.Fs) error {
 
 	buff := new(bytes.Buffer)
 	err = migrationRunTemplate.Execute(buff, params)
-
 	if err != nil {
 		return err
 	}
 
 	fmtBytes, err := format.Source(buff.Bytes())
+	if err != nil {
+		return err
+	}
 	err = afero.WriteFile(FS, migrationsDir+"/main.go", fmtBytes, 0644)
 	if err != nil {
 		return err

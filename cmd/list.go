@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -28,7 +27,6 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(wd, "===========outer wd==============")
 		err = pkg.ListMigrations(wd, dir, FS)
 		if err != nil {
 			log.Fatal(err)

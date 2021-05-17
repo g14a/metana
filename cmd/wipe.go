@@ -4,6 +4,8 @@ package cmd
 import (
 	"log"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/spf13/afero"
 
@@ -62,9 +64,15 @@ var wipeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		goModPath, err := exec.Command("go", "list", "-m").Output()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		goModPathString := strings.TrimSpace(string(goModPath))
+
 		if confirmWipe {
-			// TODO
-			err := wipe.Wipe(wd, finalDir, finalStoreConn, FS)
+			err := wipe.Wipe(goModPathString, wd, finalDir, finalStoreConn, FS)
 			if err != nil {
 				log.Fatal(err)
 			}

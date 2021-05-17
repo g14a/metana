@@ -10,12 +10,11 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg"
-	"github.com/g14a/metana/pkg/initpkg"
 	s "github.com/g14a/metana/pkg/store"
 	"github.com/iancoleman/strcase"
 )
 
-func Wipe(wd, migrationsDir string, storeConn string, FS afero.Fs) error {
+func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) error {
 	store, err := s.GetStoreViaConn(storeConn, migrationsDir)
 	if err != nil {
 		return err
@@ -56,7 +55,7 @@ func Wipe(wd, migrationsDir string, storeConn string, FS afero.Fs) error {
 		return err
 	}
 
-	mainBuilder, err := genMainAfterWipe(wd, migrationsDir, FS)
+	mainBuilder, err := genMainAfterWipe(goModPath, wd, migrationsDir, FS)
 	if err != nil {
 		return err
 	}
@@ -71,7 +70,7 @@ func Wipe(wd, migrationsDir string, storeConn string, FS afero.Fs) error {
 	return nil
 }
 
-func genMainAfterWipe(wd, migrationsDir string, FS afero.Fs) (strings.Builder, error) {
+func genMainAfterWipe(goModPath, wd, migrationsDir string, FS afero.Fs) (strings.Builder, error) {
 	var mainBuilder strings.Builder
 
 	newMigrations, err := pkg.GetMigrations(wd, migrationsDir, FS)
@@ -80,7 +79,7 @@ func genMainAfterWipe(wd, migrationsDir string, FS afero.Fs) (strings.Builder, e
 	}
 
 	// imports component
-	mainImportsComponent := getMainAndImportsComponent(migrationsDir)
+	mainImportsComponent := getMainAndImportsComponent(goModPath, migrationsDir)
 	mainBuilder.Write(mainImportsComponent)
 
 	// Up component
@@ -105,11 +104,7 @@ func genMainAfterWipe(wd, migrationsDir string, FS afero.Fs) (strings.Builder, e
 	return mainBuilder, nil
 }
 
-func getMainAndImportsComponent(migrationsDir string) []byte {
-	goModPath, err := initpkg.GetGoModPath()
-	if err != nil {
-		log.Fatal(err)
-	}
+func getMainAndImportsComponent(goModPath, migrationsDir string) []byte {
 
 	return []byte(`// This file is auto generated. DO NOT EDIT!
 	package main
