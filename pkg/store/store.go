@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/spf13/afero"
+
 	"github.com/g14a/metana/pkg/types"
 	"github.com/go-pg/pg/v10"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,12 +18,12 @@ import (
 )
 
 type Store interface {
-	Set(track types.Track) error
-	Load() (types.Track, error)
-	Wipe() error
+	Set(track types.Track, FS afero.Fs) error
+	Load(FS afero.Fs) (types.Track, error)
+	Wipe(FS afero.Fs) error
 }
 
-func GetStoreViaConn(connString string, dir string) (Store, error) {
+func GetStoreViaConn(connString string, dir string, FS afero.Fs) (Store, error) {
 
 	if strings.HasPrefix(connString, "@") {
 		connString = strings.TrimPrefix(connString, "@")
@@ -64,12 +66,13 @@ func GetStoreViaConn(connString string, dir string) (Store, error) {
 		return MongoDb{coll: *client.Database(cs.Database).Collection("migrations")}, nil
 	}
 
-	jsonFile, err := os.OpenFile(dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	fmt.Println(dir+"/migrate.json", "==============")
+	jsonFile, err := FS.OpenFile(dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return File{file: *jsonFile}, nil
+	return File{file: jsonFile}, nil
 }
 
 func TrackToSetDown(track types.Track, num int) types.Track {

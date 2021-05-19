@@ -3,6 +3,8 @@ package store
 import (
 	"context"
 
+	"github.com/spf13/afero"
+
 	"github.com/g14a/metana/pkg/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,7 +15,7 @@ type MongoDb struct {
 	ctx  context.Context
 }
 
-func (m MongoDb) Set(track types.Track) error {
+func (m MongoDb) Set(track types.Track, FS afero.Fs) error {
 	_, err := m.coll.DeleteMany(m.ctx, bson.M{})
 	if err != nil {
 		return err
@@ -26,7 +28,7 @@ func (m MongoDb) Set(track types.Track) error {
 	return nil
 }
 
-func (m MongoDb) Load() (types.Track, error) {
+func (m MongoDb) Load(FS afero.Fs) (types.Track, error) {
 	var track types.Track
 
 	err := m.coll.FindOne(m.ctx, bson.M{}).Decode(&track)
@@ -37,7 +39,7 @@ func (m MongoDb) Load() (types.Track, error) {
 	return track, nil
 }
 
-func (m MongoDb) Wipe() error {
+func (m MongoDb) Wipe(FS afero.Fs) error {
 	_, err := m.coll.DeleteMany(m.ctx, bson.M{})
 	if err != nil {
 		return err

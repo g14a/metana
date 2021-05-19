@@ -4,13 +4,14 @@ import (
 	"github.com/g14a/metana/pkg/types"
 	"github.com/go-pg/pg/v10"
 	"github.com/go-pg/pg/v10/orm"
+	"github.com/spf13/afero"
 )
 
 type PGDB struct {
 	db *pg.DB
 }
 
-func (p PGDB) Set(track types.Track) error {
+func (p PGDB) Set(track types.Track, FS afero.Fs) error {
 	err := p.CreateTable()
 	if err != nil {
 		return err
@@ -27,7 +28,7 @@ func (p PGDB) Set(track types.Track) error {
 	return nil
 }
 
-func (p PGDB) Load() (types.Track, error) {
+func (p PGDB) Load(FS afero.Fs) (types.Track, error) {
 	var track types.Track
 
 	err := p.db.Model(&track).Select(&track)
@@ -50,7 +51,7 @@ func (p PGDB) CreateTable() error {
 	return nil
 }
 
-func (p PGDB) Wipe() error {
+func (p PGDB) Wipe(FS afero.Fs) error {
 	_, err := p.db.Model(&types.Track{}).Exec(`TRUNCATE migrations`)
 	if err != nil {
 		return err

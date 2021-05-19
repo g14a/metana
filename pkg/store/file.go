@@ -2,30 +2,30 @@ package store
 
 import (
 	"encoding/json"
-	"os"
 
 	"github.com/g14a/metana/pkg/types"
+	"github.com/spf13/afero"
 )
 
 type File struct {
-	file os.File
+	file afero.File
 }
 
-func (f File) Set(track types.Track) error {
+func (f File) Set(track types.Track, FS afero.Fs) error {
 	bytes, err := json.MarshalIndent(track, "", "	")
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(f.file.Name(), bytes, 0644)
+	err = afero.WriteFile(FS, f.file.Name(), bytes, 0644)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (f File) Load() (types.Track, error) {
-	track, err := os.ReadFile(f.file.Name())
+func (f File) Load(FS afero.Fs) (types.Track, error) {
+	track, err := afero.ReadFile(FS, f.file.Name())
 	if err != nil {
 		return types.Track{}, err
 	}
@@ -42,8 +42,8 @@ func (f File) Load() (types.Track, error) {
 	return t, nil
 }
 
-func (f File) Wipe() error {
-	err := os.WriteFile(f.file.Name(), nil, 0644)
+func (f File) Wipe(FS afero.Fs) error {
+	err := afero.WriteFile(FS, f.file.Name(), nil, 0644)
 	if err != nil {
 		return err
 	}

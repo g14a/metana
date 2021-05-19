@@ -15,12 +15,12 @@ import (
 )
 
 func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) error {
-	store, err := s.GetStoreViaConn(storeConn, migrationsDir)
+	store, err := s.GetStoreViaConn(storeConn, migrationsDir, FS)
 	if err != nil {
 		return err
 	}
 
-	track, err := store.Load()
+	track, err := store.Load(FS)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) er
 	for _, m := range track.Migrations {
 		for _, lm := range localMigrations {
 			if lm.Name == m.Title {
-				err := FS.Remove(migrationsDir + "/scripts/" + m.Title)
+				err := FS.Remove(wd + "/" + migrationsDir + "/scripts/" + m.Title)
 				if err != nil {
 					return err
 				}
@@ -50,7 +50,7 @@ func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) er
 		}
 	}
 
-	err = store.Wipe()
+	err = store.Wipe(FS)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) er
 
 	fmtBytes, err := format.Source([]byte(mainBuilder.String()))
 
-	err = afero.WriteFile(FS, migrationsDir+"/main.go", fmtBytes, 0644)
+	err = afero.WriteFile(FS, wd+"/"+migrationsDir+"/main.go", fmtBytes, 0644)
 	if err != nil {
 		return err
 	}

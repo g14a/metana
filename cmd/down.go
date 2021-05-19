@@ -58,11 +58,11 @@ var downCmd = &cobra.Command{
 		var existingTrack types.Track
 		var storeHouse store.Store
 		if !dryRun {
-			storeHouse, err = store.GetStoreViaConn(finalStoreConn, finalDir)
+			storeHouse, err = store.GetStoreViaConn(finalStoreConn, finalDir, FS)
 			if err != nil {
 				log.Fatal(err)
 			}
-			existingTrack, err = storeHouse.Load()
+			existingTrack, err = storeHouse.Load(FS)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -82,7 +82,7 @@ var downCmd = &cobra.Command{
 			_, num := store.ProcessLogs(errBuf)
 			track := store.TrackToSetDown(existingTrack, num)
 
-			err = storeHouse.Set(track)
+			err = storeHouse.Set(track, FS)
 			if err != nil {
 				log.Fatal(err)
 			}

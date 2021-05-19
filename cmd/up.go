@@ -58,11 +58,11 @@ var upCmd = &cobra.Command{
 		var existingTrack types.Track
 		var storeHouse store.Store
 		if !dryRun {
-			storeHouse, err = store.GetStoreViaConn(finalStoreConn, finalDir)
+			storeHouse, err = store.GetStoreViaConn(finalStoreConn, finalDir, FS)
 			if err != nil {
 				log.Fatal(err)
 			}
-			existingTrack, err = storeHouse.Load()
+			existingTrack, err = storeHouse.Load(FS)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -81,7 +81,7 @@ var upCmd = &cobra.Command{
 			existingTrack.Migrations = append(existingTrack.Migrations, track.Migrations...)
 
 			if len(track.Migrations) > 0 {
-				err = storeHouse.Set(existingTrack)
+				err = storeHouse.Set(existingTrack, FS)
 				if err != nil {
 					log.Fatal(err)
 				}
