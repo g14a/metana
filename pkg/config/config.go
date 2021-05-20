@@ -13,10 +13,10 @@ type MetanaConfig struct {
 	StoreConn string `yaml:"store"`
 }
 
-func GetMetanaConfig(FS afero.Fs) (*MetanaConfig, error) {
+func GetMetanaConfig(FS afero.Fs, wd string) (*MetanaConfig, error) {
 	var MetanaConfigInstance MetanaConfig
 
-	yamlFile, err := afero.ReadFile(FS, ".metana.yml")
+	yamlFile, err := afero.ReadFile(FS, wd+"/.metana.yml")
 	if err != nil {
 		return nil, err
 	}
@@ -27,13 +27,13 @@ func GetMetanaConfig(FS afero.Fs) (*MetanaConfig, error) {
 	return &MetanaConfigInstance, nil
 }
 
-func SetMetanaConfig(mc *MetanaConfig, FS afero.Fs) error {
+func SetMetanaConfig(mc *MetanaConfig, FS afero.Fs, wd string) error {
 	b, err := yaml.Marshal(&mc)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = afero.WriteFile(FS, ".metana.yml", b, 0644)
+	err = afero.WriteFile(FS, wd+"/.metana.yml", b, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}

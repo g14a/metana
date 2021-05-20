@@ -2,10 +2,10 @@
 package cmd
 
 import (
-	"log"
 	"os"
 
-	"github.com/g14a/metana/pkg/config"
+	cmd2 "github.com/g14a/metana/pkg/cmd"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -24,36 +24,10 @@ var setConfigCmd = &cobra.Command{
 	Short: "Set your metana config",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		dir, err := cmd.Flags().GetString("dir")
-		if err != nil {
-			log.Fatal(err)
-		}
+		FS := afero.NewOsFs()
+		wd, _ := os.Getwd()
 
-		store, err := cmd.Flags().GetString("store")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		mc, err := config.GetMetanaConfig(FS)
-		if os.IsNotExist(err) {
-			_, err = os.Create(".metana.yml")
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-
-		if dir != "" {
-			mc.Dir = dir
-		}
-
-		if store != "" {
-			mc.StoreConn = store
-		}
-
-		err = config.SetMetanaConfig(mc, FS)
-		if err != nil {
-			log.Fatal(err)
-		}
+		cmd2.RunSetConfig(cmd, args, FS, wd)
 	},
 }
 

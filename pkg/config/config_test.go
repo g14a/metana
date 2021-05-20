@@ -13,9 +13,9 @@ func TestGetMetanaConfig(t *testing.T) {
 
 	config := "dir: migrations\nstore: \"\""
 
-	afero.WriteFile(FS, ".metana.yml", []byte(config), 0644)
+	afero.WriteFile(FS, "/Users/g14a/metana/.metana.yml", []byte(config), 0644)
 
-	mc, err := GetMetanaConfig(FS)
+	mc, err := GetMetanaConfig(FS, "/Users/g14a/metana")
 	assert.Equal(t, true, err == nil)
 	assert.Equal(t, true, mc != nil)
 	assert.Equal(t, "migrations", mc.Dir)
@@ -30,12 +30,12 @@ func TestSetMetanaConfig(t *testing.T) {
 		StoreConn: "migrate.json",
 	}
 
-	err := SetMetanaConfig(&mc, FS)
+	err := SetMetanaConfig(&mc, FS, "/Users/g14a/metana")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fileBytes, err := afero.ReadFile(FS, ".metana.yml")
+	fileBytes, err := afero.ReadFile(FS, "/Users/g14a/metana/.metana.yml")
 	if err != nil {
 		return
 	}

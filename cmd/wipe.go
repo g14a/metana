@@ -2,17 +2,11 @@
 package cmd
 
 import (
-	"log"
 	"os"
-	"os/exec"
-	"strings"
 
+	cmd2 "github.com/g14a/metana/pkg/cmd"
 	"github.com/spf13/afero"
 
-	"github.com/AlecAivazis/survey/v2"
-	"github.com/fatih/color"
-	"github.com/g14a/metana/pkg/config"
-	"github.com/g14a/metana/pkg/core/wipe"
 	"github.com/spf13/cobra"
 )
 
@@ -22,61 +16,10 @@ var wipeCmd = &cobra.Command{
 	Short: "Wipe out old stale migration files and track in your store",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		dir, err := cmd.Flags().GetString("dir")
-		if err != nil {
-			log.Fatal(err)
-		}
+		FS := afero.NewOsFs()
+		wd, _ := os.Getwd()
 
-		store, err := cmd.Flags().GetString("store")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		mc, _ := config.GetMetanaConfig(FS)
-
-		var finalDir string
-
-		if dir != "" {
-			finalDir = dir
-		} else if mc != nil && mc.Dir != "" && dir == "" {
-			color.Green(" ✓ .metana.yml found")
-			finalDir = mc.Dir
-		} else {
-			finalDir = "migrations"
-		}
-
-		var finalStoreConn string
-		if store != "" {
-			finalStoreConn = store
-		} else if mc != nil && mc.StoreConn != "" && store == "" {
-			finalStoreConn = mc.StoreConn
-		}
-
-		confirmWipe := false
-
-		prompt := &survey.Confirm{
-			Message: "Wiping will delete stale migration files. Continue?",
-		}
-		survey.AskOne(prompt, &confirmWipe)
-
-		wd, err := os.Getwd()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		goModPath, err := exec.Command("go", "list", "-m").Output()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		goModPathString := strings.TrimSpace(string(goModPath))
-
-		if confirmWipe {
-			err := wipe.Wipe(goModPathString, wd, finalDir, finalStoreConn, FS)
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
+		cmd2.RunWipe(cmd, args, FS, wd)
 	},
 }
 
@@ -85,9 +28,6 @@ func init() {
 	wipeCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 
 	rootCmd.AddCommand(wipeCmd)
-
-	FS = afero.NewOsFs()
-	FSUtil = &afero.Afero{Fs: FS}
 
 	// Here you will define your flags and configuration settings.
 
@@ -99,8 +39,3 @@ func init() {
 	// is called directly, e.g.:
 	// wipeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-var (
-	FS     afero.Fs
-	FSUtil *afero.Afero
-)
