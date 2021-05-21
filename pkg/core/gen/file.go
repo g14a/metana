@@ -10,6 +10,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/g14a/metana/pkg/core"
+
 	"github.com/g14a/metana/pkg"
 
 	"github.com/spf13/afero"
@@ -19,7 +21,7 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func CreateMigrationFile(migrationsDir, file string, FS afero.Fs) (string, error) {
+func CreateMigrationFile(wd string, migrationsDir, file string, customTemplateFile string, FS afero.Fs) (string, error) {
 	nm := tpl2.NewMigration{
 		MigrationName: strcase.ToCamel(file),
 		Timestamp:     strconv.Itoa(int(time.Now().Unix())),
@@ -39,9 +41,11 @@ func CreateMigrationFile(migrationsDir, file string, FS afero.Fs) (string, error
 		}
 	}(mainFile)
 
+	upBuilder, downBuilder := core.ParseCustomTemplate(wd, customTemplateFile, FS)
+
 	mainTemplate := template.Must(
 		template.New("root").
-			Parse(string(tpl2.MigrationTemplate())))
+			Parse(string(tpl2.MigrationTemplate(upBuilder, downBuilder))))
 
 	buff := new(bytes.Buffer)
 	err = mainTemplate.Execute(buff, nm)

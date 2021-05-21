@@ -15,7 +15,7 @@ import (
 )
 
 func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) error {
-	store, err := s.GetStoreViaConn(storeConn, migrationsDir, FS)
+	store, err := s.GetStoreViaConn(storeConn, migrationsDir, FS, wd)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/fatih/color"
@@ -13,19 +13,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) {
+func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	dir, err := cmd.Flags().GetString("dir")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	storeConn, err := cmd.Flags().GetString("store")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	dryRun, err := cmd.Flags().GetBool("dry")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	mc, _ := config.GetMetanaConfig(FS, wd)
@@ -36,7 +36,7 @@ func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) {
 	if dir != "" {
 		finalDir = dir
 	} else if mc != nil && mc.Dir != "" && dir == "" {
-		color.Green(" ✓ .metana.yml found")
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ .metana.yml found\n"))
 		finalDir = mc.Dir
 	} else {
 		finalDir = "migrations"
@@ -52,19 +52,19 @@ func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) {
 	var existingTrack types.Track
 	var storeHouse store.Store
 	if !dryRun {
-		storeHouse, err = store.GetStoreViaConn(finalStoreConn, finalDir, FS)
+		storeHouse, err = store.GetStoreViaConn(finalStoreConn, finalDir, FS, wd)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		existingTrack, err = storeHouse.Load(FS)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 
 	if len(existingTrack.Migrations) == 0 && !dryRun {
-		color.Yellow("at least one upward migration needed")
-		return
+		fmt.Fprintf(cmd.OutOrStdout(), color.YellowString("at least one upward migration needed\n"))
+		return nil
 	} else {
 		existingTrack.LastRunTS = int(time.Now().Unix())
 	}
@@ -78,11 +78,12 @@ func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) {
 
 		err = storeHouse.Set(track, FS)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
-		color.Green("  >>> migration : complete")
-		return
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString("  >>> migration : complete\n"))
+		return nil
 	}
-	color.White("  >>> dry run migration : complete")
+	fmt.Fprintf(cmd.OutOrStdout(), color.WhiteString("  >>> dry run migration : complete\n"))
+	return nil
 }

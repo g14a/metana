@@ -17,7 +17,7 @@ func TestRegen(t *testing.T) {
 	err := CreateInitConfig("migrations", "github.com/g14a/metana", FS)
 	assert.Equal(t, true, err == nil)
 
-	filename, err := CreateMigrationFile("migrations", "initSchema", FS)
+	filename, err := CreateMigrationFile("/Users/g14a/metana", "migrations", "initSchema", "", FS)
 	assert.Equal(t, true, err == nil)
 
 	err = Regen("migrations", "InitSchema", strings.TrimPrefix(filename, "migrations/scripts/"), true, FS)

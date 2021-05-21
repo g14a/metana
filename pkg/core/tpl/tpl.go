@@ -1,6 +1,22 @@
 package tpl
 
-func MigrationTemplate() []byte {
+func MigrationTemplate(customUp, customDown string) []byte {
+	finalUpComponent := `
+		fmt.Println("{{ .MigrationName }} up")
+		return nil`
+
+	if customUp != "" {
+		finalUpComponent = customUp
+	}
+
+	finalDownComponent := `
+		fmt.Println("{{ .MigrationName }} down")
+		return nil`
+
+	if customDown != "" {
+		finalDownComponent = customDown
+	}
+
 	return []byte(`package scripts
 
 	import (
@@ -13,14 +29,12 @@ func MigrationTemplate() []byte {
 		MigrationName string
 	}
 	
-	func (r *{{ .MigrationName }}Migration) Up() error {
-		fmt.Println("{{ .MigrationName }} up")
-		return nil
+	func (r *{{ .MigrationName }}Migration) Up() error {` +
+		finalUpComponent + `
 	}
 	
-	func (r *{{ .MigrationName }}Migration) Down() error {
-		fmt.Println("{{ .MigrationName }} down")
-		return nil
+	func (r *{{ .MigrationName }}Migration) Down() error {` +
+		finalDownComponent + `
 	}
 `)
 }

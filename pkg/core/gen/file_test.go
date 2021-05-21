@@ -91,7 +91,7 @@ func TestCreateMigrationFile(t *testing.T) {
 	os.Chdir("/Users/g14a/metana")
 	FS.MkdirAll("/Users/g14a/metana/migrations", 0755)
 
-	filename, err := CreateMigrationFile("migrations", "initSchema", FS)
+	filename, err := CreateMigrationFile("/Users/g14a/metana", "migrations", "initSchema", "", FS)
 	assert.Equal(t, true, err == nil)
 
 	resultFileBytes, err := afero.ReadFile(FS, filename)

@@ -20,6 +20,11 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 		return err
 	}
 
+	customTemplateFile, err := cmd.Flags().GetString("template")
+	if err != nil {
+		return err
+	}
+
 	mc, _ := config.GetMetanaConfig(FS, wd)
 
 	// Priority range is explicit, then config, then migrations
@@ -54,7 +59,7 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 		firstMigration = true
 	}
 
-	fileName, err := gen2.CreateMigrationFile(finalDir, args[0], FS)
+	fileName, err := gen2.CreateMigrationFile(wd, finalDir, args[0], customTemplateFile, FS)
 	if err != nil {
 		color.Yellow("\nTry initializing migration using `metana init`\n\n")
 		os.Exit(0)

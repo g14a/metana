@@ -7,7 +7,7 @@ import (
 )
 
 func TestMigrationTemplate(t *testing.T) {
-	resultTpl := MigrationTemplate()
+	resultTpl := MigrationTemplate("", "")
 
 	assert.Equal(t, []byte(`package scripts
 
@@ -31,6 +31,31 @@ func TestMigrationTemplate(t *testing.T) {
 		return nil
 	}
 `), resultTpl)
+}
+
+func TestMigrationTemplate_Custom(t *testing.T) {
+	resultTpl := MigrationTemplate(`fmt.Println("template up")`+"\nreturn nil", `fmt.Println("template down")`+"\nreturn nil")
+
+	assert.Equal(t, `package scripts
+
+	import (
+		"fmt"
+	)
+	
+	type {{ .MigrationName }}Migration struct {
+		Timestamp int
+		Filename  string
+		MigrationName string
+	}
+	
+	func (r *{{ .MigrationName }}Migration) Up() error {fmt.Println("template up")
+return nil
+	}
+	
+	func (r *{{ .MigrationName }}Migration) Down() error {fmt.Println("template down")
+return nil
+	}
+`, string(resultTpl))
 }
 
 func TestInitMigrationRunTemplate(t *testing.T) {

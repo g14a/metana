@@ -2,6 +2,7 @@
 package cmd
 
 import (
+	"log"
 	"os"
 
 	cmd2 "github.com/g14a/metana/pkg/cmd"
@@ -18,7 +19,10 @@ var upCmd = &cobra.Command{
 		FS := afero.NewOsFs()
 		wd, _ := os.Getwd()
 
-		cmd2.RunUp(cmd, args, FS, wd)
+		err := cmd2.RunUp(cmd, args, FS, wd)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
