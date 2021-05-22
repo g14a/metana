@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"log"
 	"os/exec"
 	"strings"
 
@@ -13,15 +12,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) {
+func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	dir, err := cmd.Flags().GetString("dir")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	store, err := cmd.Flags().GetString("store")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	mc, _ := config.GetMetanaConfig(FS, wd)
@@ -53,7 +52,7 @@ func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) {
 
 	goModPath, err := exec.Command("go", "list", "-m").Output()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	goModPathString := strings.TrimSpace(string(goModPath))
@@ -61,7 +60,9 @@ func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) {
 	if confirmWipe {
 		err := wipe.Wipe(goModPathString, wd, finalDir, finalStoreConn, FS)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
+
+	return nil
 }

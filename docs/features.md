@@ -8,7 +8,7 @@ $ metana init --dir schema-mig
 
 $ metana create initSchema --dir schema-mig
  ✓ Created /Users/g14a/metana/schema-mig/scripts/1619943164-InitSchema.go
- ✓ Generated /Users/g14a/metana/schema-mig/main.go
+ ✓ Updated /Users/g14a/metana/schema-mig/main.go
  
 $ metana up --dir schema-mig
   >>> Migrating up: 1619943670-InitSchema.go
@@ -26,7 +26,7 @@ Run upward and downward migrations until(and including) a certain migration with
 
 $ metana create initSchema                                                                
  ✓ Created /Users/g14a/metana/migrations/scripts/1619942687-InitSchema.go
- ✓ Generated /Users/g14a/metana/migrations/main.go
+ ✓ Updated /Users/g14a/metana/migrations/main.go
  
 $ Create more migration scripts...
 
