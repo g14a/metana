@@ -4,6 +4,10 @@ package cmd
 import (
 	"log"
 	"os"
+	"strings"
+
+	"github.com/g14a/metana/pkg"
+	"github.com/g14a/metana/pkg/config"
 
 	cmd2 "github.com/g14a/metana/pkg/cmd"
 	"github.com/spf13/afero"
@@ -32,6 +36,38 @@ func init() {
 	upCmd.Flags().StringP("until", "u", "", "Migrate up until a specific point\n")
 	upCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
 	upCmd.Flags().Bool("dry", false, "Specify if the upward migration is a dry run {true | false}")
+	upCmd.RegisterFlagCompletionFunc("until", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		FS := afero.NewOsFs()
+
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, 0
+		}
+
+		mc, _ := config.GetMetanaConfig(FS, wd)
+
+		var finalDir string
+
+		if mc != nil && mc.Dir != "" {
+			finalDir = mc.Dir
+		} else {
+			finalDir = "migrations"
+		}
+
+		migrations, err := pkg.GetMigrations(wd, finalDir, FS)
+		if err != nil {
+			return nil, 0
+		}
+
+		var names []string
+
+		for _, m := range migrations {
+			name := strings.TrimSuffix(m.Name, ".go")
+			names = append(names, strings.Split(name, "-")[1])
+		}
+
+		return names, cobra.ShellCompDirectiveDefault
+	})
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

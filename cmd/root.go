@@ -19,9 +19,10 @@ var rootCmd = &cobra.Command{
 	Use:   "metana",
 	Short: "A brief description of your application",
 	Long:  `An abstract migration tool for Go services`,
+	Args:  cobra.ExactArgs(1),
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -41,7 +42,6 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config gen (default is $HOME/.metana.yaml)")
-
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")

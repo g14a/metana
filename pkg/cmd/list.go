@@ -2,26 +2,31 @@ package cmd
 
 import (
 	"log"
-	"os"
 
 	"github.com/g14a/metana/pkg"
+	"github.com/g14a/metana/pkg/config"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
-func RunList(cmd *cobra.Command, args []string, FS afero.Fs) {
+func RunList(cmd *cobra.Command, args []string, wd string, FS afero.Fs) {
 	dir, err := cmd.Flags().GetString("dir")
 	if err != nil {
 		log.Fatal(err)
 	}
-	if dir == "" {
-		dir = "migrations"
+	var finalDir string
+
+	mc, _ := config.GetMetanaConfig(FS, wd)
+
+	if dir != "" {
+		finalDir = dir
+	} else if mc != nil && mc.Dir != "" && dir == "" {
+		finalDir = mc.Dir
+	} else {
+		finalDir = "migrations"
 	}
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = pkg.ListMigrations(wd, dir, FS)
+
+	err = pkg.ListMigrations(wd, finalDir, FS)
 	if err != nil {
 		log.Fatal(err)
 	}

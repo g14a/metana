@@ -2,6 +2,9 @@
 package cmd
 
 import (
+	"log"
+	"os"
+
 	cmd2 "github.com/g14a/metana/pkg/cmd"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -14,7 +17,11 @@ var listCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		FS := afero.NewOsFs()
-		cmd2.RunList(cmd, args, FS)
+		wd, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		cmd2.RunList(cmd, args, wd, FS)
 	},
 }
 
