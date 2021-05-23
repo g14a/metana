@@ -49,6 +49,7 @@ func Test_Up_Dry(t *testing.T) {
 			home, err := homedir.Dir()
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
+			afero.WriteFile(FS, home+"/metana/.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
 			return RunUp(cmd, []string{}, FS, home+"/metana")
 		},
 	}
