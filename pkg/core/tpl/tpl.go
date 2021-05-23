@@ -29,11 +29,11 @@ func MigrationTemplate(customUp, customDown string) []byte {
 		MigrationName string
 	}
 	
-	func (r *{{ .MigrationName }}Migration) Up() error {` +
+	func ({{ .FirstChar }} *{{ .MigrationName }}Migration) Up() error {` +
 		finalUpComponent + `
 	}
 	
-	func (r *{{ .MigrationName }}Migration) Down() error {` +
+	func ({{ .FirstChar }} *{{ .MigrationName }}Migration) Down() error {` +
 		finalDownComponent + `
 	}
 `)
@@ -162,4 +162,5 @@ type NewMigration struct {
 	Timestamp     string
 	Filename      string
 	MigrationsDir string
+	FirstChar     string
 }

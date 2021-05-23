@@ -21,12 +21,12 @@ func TestMigrationTemplate(t *testing.T) {
 		MigrationName string
 	}
 	
-	func (r *{{ .MigrationName }}Migration) Up() error {
+	func ({{ .FirstChar }} *{{ .MigrationName }}Migration) Up() error {
 		fmt.Println("{{ .MigrationName }} up")
 		return nil
 	}
 	
-	func (r *{{ .MigrationName }}Migration) Down() error {
+	func ({{ .FirstChar }} *{{ .MigrationName }}Migration) Down() error {
 		fmt.Println("{{ .MigrationName }} down")
 		return nil
 	}
@@ -48,11 +48,11 @@ func TestMigrationTemplate_Custom(t *testing.T) {
 		MigrationName string
 	}
 	
-	func (r *{{ .MigrationName }}Migration) Up() error {fmt.Println("template up")
+	func ({{ .FirstChar }} *{{ .MigrationName }}Migration) Up() error {fmt.Println("template up")
 return nil
 	}
 	
-	func (r *{{ .MigrationName }}Migration) Down() error {fmt.Println("template down")
+	func ({{ .FirstChar }} *{{ .MigrationName }}Migration) Down() error {fmt.Println("template down")
 return nil
 	}
 `, string(resultTpl))

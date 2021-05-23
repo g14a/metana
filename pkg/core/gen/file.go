@@ -25,6 +25,7 @@ func CreateMigrationFile(wd string, migrationsDir, file string, customTemplateFi
 	nm := tpl2.NewMigration{
 		MigrationName: strcase.ToCamel(file),
 		Timestamp:     strconv.Itoa(int(time.Now().Unix())),
+		FirstChar:     string(file[0]),
 	}
 
 	fileName := fmt.Sprintf(migrationsDir+"/scripts/%s-%s.go", nm.Timestamp, nm.MigrationName)
