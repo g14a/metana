@@ -178,10 +178,36 @@ Flags:
   -d, --dir string     Specify custom migrations directory
   -h, --help           help for wipe
   -s, --store string   Specify a connection url to track migrations
+  -y, --yes            Proceed at all costs i.e by pass the prompt
 
 Global Flags:
       --config string   config gen (default is $HOME/.metana.yaml)
 ```
 
+Pass the ``-y`` flag to bypass the prompt during script.
+
 Even the `wipe` command takes configuration from your `.metana.yml` file one exists.
 Otherwise the priority order is considered while wiping.
+
+## **Add Custom templates for Migrations**
+
+With the latest version of metana you can add create a custom template Go program
+and create migration scripts with that. 
+
+Your template should be a valid Go program(atleast syntactically) and needs
+to have an `Up()` and a `Down()` function returning an error.
+Spaces between the function name and the returning error are taken care of.
+The contents of your `Up()` and `Down()` will be copied into the migration script.
+
+So the following signatures are valid for now:
+
+- `func Up() error {}`
+- `func Up() (err error) {}`
+- `func Down() error {}`
+- `func Down() (err error) {}`
+
+Create a migration with a template with the `--template` flag:
+
+```shell
+metana create addIndexes --template ../path/to/template.go
+```
