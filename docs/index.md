@@ -10,3 +10,5 @@ The main use case is when you won't be able to do everything with SQL or No-SQL 
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/g14a/metana)](https://goreportcard.com/report/github.com/g14a/metana)
 [![Go Workflow Status](https://github.com/g14a/metana/workflows/Go/badge.svg)](https://github.com/g14a/metana/workflows/Go/badge.svg)
+
+Checkout my blog at https://g14a.github.io
