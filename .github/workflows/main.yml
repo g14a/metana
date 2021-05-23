@@ -29,6 +29,7 @@ jobs:
         run: |
           ls -all
           pwd
+          export POSTGRES_TEST_URL=${{ secrets.POSTGRES_TEST_URL }}
           go test -v $(go list ./... | grep -v github.com/g14a/metana/migrations)
 
       - name: Checkout
