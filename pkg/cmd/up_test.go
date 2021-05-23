@@ -21,10 +21,13 @@ func Test_Up(t *testing.T) {
 		Use: "up",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewOsFs()
-			home, err := homedir.Dir()
+			_, err := homedir.Dir()
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
-			return RunUp(cmd, []string{}, FS, home+"/metana")
+			wd, _ := os.Getwd()
+			fmt.Println(wd, "===========wd===========")
+			afero.WriteFile(FS, "../../.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
+			return RunUp(cmd, []string{}, FS, "../..")
 		},
 	}
 	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
@@ -47,12 +50,12 @@ func Test_Up_Dry(t *testing.T) {
 		Use: "up",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewOsFs()
-			home, err := homedir.Dir()
+			_, err := homedir.Dir()
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
 			wd, _ := os.Getwd()
-			fmt.Println(wd)
-			afero.WriteFile(FS, home+"/metana/.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
+			fmt.Println(wd, "===========wd===========")
+			afero.WriteFile(FS, "../../.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
 			return RunUp(cmd, []string{}, FS, "../..")
 		},
 	}
