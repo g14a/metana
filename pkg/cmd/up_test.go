@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/mitchellh/go-homedir"
@@ -49,8 +50,10 @@ func Test_Up_Dry(t *testing.T) {
 			home, err := homedir.Dir()
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
+			wd, _ := os.Getwd()
+			fmt.Println(wd)
 			afero.WriteFile(FS, home+"/metana/.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
-			return RunUp(cmd, []string{}, FS, home+"/metana")
+			return RunUp(cmd, []string{}, FS, "../..")
 		},
 	}
 	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
