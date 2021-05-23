@@ -28,6 +28,7 @@ jobs:
       - name: Run tests
         run: |
           ls -all
+          pwd
           go test -v $(go list ./... | grep -v github.com/g14a/metana/migrations)
 
       - name: Checkout
