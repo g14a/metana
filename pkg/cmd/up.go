@@ -65,7 +65,7 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	}
 
 	upUntil, _ := cmd.Flags().GetString("until")
-	errBuf := migrate2.Run(upUntil, finalDir, existingTrack.LastRunTS, true)
+	errBuf := migrate2.Run(upUntil, finalDir, wd, existingTrack.LastRunTS, true)
 
 	if !dryRun {
 		track, _ := store.ProcessLogs(errBuf)

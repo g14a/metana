@@ -27,7 +27,7 @@ jobs:
 
       - name: Run tests
         run: |
-          go test ./...
+          go test $(go list ./... | grep -v github.com/g14a/metana/migrations)
 
       - name: Checkout
         uses: actions/checkout@v2

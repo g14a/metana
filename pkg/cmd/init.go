@@ -24,6 +24,14 @@ func RunInit(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 
 	if dir != "" {
 		finalDir = dir
+		setMc := &config.MetanaConfig{
+			Dir: finalDir,
+		}
+		err := config.SetMetanaConfig(setMc, FS, wd)
+		if err != nil {
+			return err
+		}
+
 	} else if mc != nil && mc.Dir != "" && dir == "" {
 		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ .metana.yml found\n"))
 		finalDir = mc.Dir

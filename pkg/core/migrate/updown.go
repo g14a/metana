@@ -4,19 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"log"
-	"os"
 	"os/exec"
 	"strconv"
 
 	"github.com/fatih/color"
 )
 
-func Run(until, migrationsDir string, lastRunTS int, up bool) string {
-	wd, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-
+func Run(until, migrationsDir string, wd string, lastRunTS int, up bool) string {
 	var migrationArgs []string
 
 	migrationArgs = append(migrationArgs, "run", "main.go")
@@ -40,7 +34,10 @@ func Run(until, migrationsDir string, lastRunTS int, up bool) string {
 	migrationsRun.Stderr = &errBuf
 
 	stdout, err := migrationsRun.StdoutPipe()
-	_ = migrationsRun.Start()
+	err = migrationsRun.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	reader := bufio.NewReader(stdout)
 	line, err := reader.ReadString('\n')

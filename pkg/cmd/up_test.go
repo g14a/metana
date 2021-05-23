@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/mitchellh/go-homedir"
+
 	"github.com/g14a/metana/pkg"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -17,14 +19,11 @@ func Test_Up(t *testing.T) {
 	upCmd := &cobra.Command{
 		Use: "up",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			FS := afero.NewMemMapFs()
-			FS.MkdirAll("/Users/g14a/metana/migration/scripts", 0755)
-			err := RunInit(cmd, args, FS, "/Users/g14a/metana")
-			assert.NoError(t, err)
-			err = RunCreate(cmd, []string{"abc"}, FS, "/Users/g14a/metana")
+			FS := afero.NewOsFs()
+			home, err := homedir.Dir()
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
-			return RunUp(cmd, []string{}, FS, "/Users/g14a/metana")
+			return RunUp(cmd, []string{}, FS, home+"/metana")
 		},
 	}
 	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
@@ -42,20 +41,15 @@ func Test_Up(t *testing.T) {
 func Test_Up_Dry(t *testing.T) {
 	var buf bytes.Buffer
 	metanaCmd := NewMetanaCommand()
-	FS := afero.NewMemMapFs()
 
 	upCmd := &cobra.Command{
 		Use: "up",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			FS.MkdirAll("/Users/g14a/metana/migration/scripts", 0755)
-			err := RunInit(cmd, args, FS, "/Users/g14a/metana")
+			FS := afero.NewOsFs()
+			home, err := homedir.Dir()
 			assert.NoError(t, err)
-			for _, m := range []string{"abc", "random", "addIndexes", "initSchema"} {
-				err = RunCreate(cmd, []string{m}, FS, "/Users/g14a/metana")
-				assert.NoError(t, err)
-			}
 			cmd.SetOut(&buf)
-			return RunUp(cmd, []string{}, FS, "/Users/g14a/metana")
+			return RunUp(cmd, []string{}, FS, home+"/metana")
 		},
 	}
 	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")

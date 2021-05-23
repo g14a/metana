@@ -70,7 +70,7 @@ func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	}
 
 	upUntil, _ := cmd.Flags().GetString("until")
-	errBuf := migrate2.Run(upUntil, finalDir, existingTrack.LastRunTS, false)
+	errBuf := migrate2.Run(upUntil, finalDir, wd, existingTrack.LastRunTS, false)
 
 	if !dryRun {
 		_, num := store.ProcessLogs(errBuf)
