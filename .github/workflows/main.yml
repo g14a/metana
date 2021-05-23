@@ -28,13 +28,12 @@ jobs:
       - name: Run tests
         run: |
           ls -all
-          pwd
           export POSTGRES_TEST_URL=${{ secrets.POSTGRES_TEST_URL }}
           export MONGO_TEST_URL=${{ secrets.MONGO_TEST_URL }}
           go test -v $(go list ./... | grep -v github.com/g14a/metana/migrations)
 
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
