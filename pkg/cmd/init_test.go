@@ -26,7 +26,7 @@ func Test_Init(t *testing.T) {
 	metanaCmd.AddCommand(initCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "init")
 	assert.NoError(t, err)
-	assert.Equal(t, "\x1b[32m ✓ Created /Users/g14a/metana/migrations/main.go\n\x1b[0m", buf.String())
+	assert.Equal(t, " ✓ Created /Users/g14a/metana/migrations/main.go\n", buf.String())
 }
 
 func Test_Init_dir(t *testing.T) {
@@ -44,7 +44,7 @@ func Test_Init_dir(t *testing.T) {
 	metanaCmd.AddCommand(initCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "init", "--dir=schema-mig")
 	assert.NoError(t, err)
-	assert.Equal(t, "\x1b[32m ✓ Created /Users/g14a/metana/schema-mig/main.go\n\x1b[0m", buf.String())
+	assert.Equal(t, " ✓ Created /Users/g14a/metana/schema-mig/main.go\n", buf.String())
 }
 
 func Test_Init_config(t *testing.T) {

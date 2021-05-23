@@ -19,7 +19,7 @@ jobs:
         id: go
 
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
 
       - name: Get dependencies
         run: |
@@ -27,10 +27,11 @@ jobs:
 
       - name: Run tests
         run: |
+          ls -all
           go test -v $(go list ./... | grep -v github.com/g14a/metana/migrations)
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v1
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
