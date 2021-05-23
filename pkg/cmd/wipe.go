@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
+
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/config"
 	"github.com/g14a/metana/pkg/core/wipe"
@@ -19,6 +20,11 @@ func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	}
 
 	store, err := cmd.Flags().GetString("store")
+	if err != nil {
+		return err
+	}
+
+	confirmWipe, err := cmd.Flags().GetBool("yes")
 	if err != nil {
 		return err
 	}
@@ -43,12 +49,12 @@ func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		finalStoreConn = mc.StoreConn
 	}
 
-	confirmWipe := false
-
-	prompt := &survey.Confirm{
-		Message: "Wiping will delete stale migration files. Continue?",
+	if !confirmWipe {
+		prompt := &survey.Confirm{
+			Message: "Wiping will delete stale migration files. Continue?",
+		}
+		survey.AskOne(prompt, &confirmWipe)
 	}
-	survey.AskOne(prompt, &confirmWipe)
 
 	goModPath, err := exec.Command("go", "list", "-m").Output()
 	if err != nil {
