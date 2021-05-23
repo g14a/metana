@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/spf13/afero"
@@ -17,11 +16,7 @@ type MetanaConfig struct {
 func GetMetanaConfig(FS afero.Fs, wd string) (*MetanaConfig, error) {
 	var MetanaConfigInstance MetanaConfig
 
-	fmt.Println(wd + "/.metana.yml")
 	yamlFile, err := afero.ReadFile(FS, wd+"/.metana.yml")
-
-	fmt.Println(string(yamlFile),"======string yamlfile=========")
-
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +24,6 @@ func GetMetanaConfig(FS afero.Fs, wd string) (*MetanaConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(&MetanaConfigInstance,"============config========")
 	return &MetanaConfigInstance, nil
 }
 

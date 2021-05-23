@@ -3,10 +3,7 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"testing"
-
-	"github.com/mitchellh/go-homedir"
 
 	"github.com/g14a/metana/pkg"
 	"github.com/spf13/afero"
@@ -21,11 +18,7 @@ func Test_Up(t *testing.T) {
 		Use: "up",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewOsFs()
-			_, err := homedir.Dir()
-			assert.NoError(t, err)
 			cmd.SetOut(&buf)
-			wd, _ := os.Getwd()
-			fmt.Println(wd, "===========wd===========")
 			afero.WriteFile(FS, "../../.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
 			return RunUp(cmd, []string{}, FS, "../..")
 		},
@@ -50,11 +43,7 @@ func Test_Up_Dry(t *testing.T) {
 		Use: "up",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewOsFs()
-			_, err := homedir.Dir()
-			assert.NoError(t, err)
 			cmd.SetOut(&buf)
-			wd, _ := os.Getwd()
-			fmt.Println(wd, "===========wd===========")
 			afero.WriteFile(FS, "../../.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
 			return RunUp(cmd, []string{}, FS, "../..")
 		},

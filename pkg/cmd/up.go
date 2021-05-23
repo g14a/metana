@@ -49,8 +49,6 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		finalStoreConn = mc.StoreConn
 	}
 
-	fmt.Println(finalDir,"==============final dir========")
-	fmt.Println(storeConn,"==========store conn=========")
 	var existingTrack types.Track
 	var storeHouse store.Store
 	if !dryRun {
