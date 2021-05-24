@@ -3,14 +3,13 @@ package migrate
 import (
 	"bufio"
 	"bytes"
-	"log"
 	"os/exec"
 	"strconv"
 
 	"github.com/fatih/color"
 )
 
-func Run(until, migrationsDir string, wd string, lastRunTS int, up bool) string {
+func Run(until, migrationsDir string, wd string, lastRunTS int, up bool) (string, error) {
 	var migrationArgs []string
 
 	migrationArgs = append(migrationArgs, "run", "main.go")
@@ -34,9 +33,12 @@ func Run(until, migrationsDir string, wd string, lastRunTS int, up bool) string 
 	migrationsRun.Stderr = &errBuf
 
 	stdout, err := migrationsRun.StdoutPipe()
+	if err != nil {
+		return "", err
+	}
 	err = migrationsRun.Start()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	reader := bufio.NewReader(stdout)
@@ -46,5 +48,5 @@ func Run(until, migrationsDir string, wd string, lastRunTS int, up bool) string 
 		line, err = reader.ReadString('\n')
 	}
 
-	return errBuf.String()
+	return errBuf.String(), nil
 }

@@ -55,6 +55,10 @@ func CreateMigrationFile(wd string, migrationsDir, file string, customTemplateFi
 	}
 
 	fmtBytes, err := format.Source(buff.Bytes())
+	if err != nil {
+		return "", err
+	}
+
 	err = afero.WriteFile(FS, fileName, fmtBytes, 0644)
 	if err != nil {
 		return "", err

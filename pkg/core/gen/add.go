@@ -67,6 +67,9 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool, F
 	output := strings.Join(lines, "\n")
 
 	fmtOutput, err := format.Source([]byte(output))
+	if err != nil {
+		return err
+	}
 
 	err = afero.WriteFile(FS, migrationsDir+"/main.go", fmtOutput, 0644)
 	if err != nil {

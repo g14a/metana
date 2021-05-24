@@ -54,6 +54,9 @@ func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string) (Sto
 	case strings.Contains(connString, "mongodb"):
 		ctx := context.TODO()
 		cs, err := mconnString.ParseAndValidate(connString)
+		if err != nil {
+			return nil, err
+		}
 		clientOptions := options.Client().ApplyURI(connString)
 		client, err := mongo.Connect(ctx, clientOptions)
 		if err != nil {

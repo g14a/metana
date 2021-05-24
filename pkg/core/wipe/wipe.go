@@ -61,7 +61,9 @@ func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) er
 	}
 
 	fmtBytes, err := format.Source([]byte(mainBuilder.String()))
-
+	if err != nil {
+		return err
+	}
 	err = afero.WriteFile(FS, wd+"/"+migrationsDir+"/main.go", fmtBytes, 0644)
 	if err != nil {
 		return err

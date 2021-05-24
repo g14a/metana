@@ -70,10 +70,12 @@ func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	}
 
 	upUntil, _ := cmd.Flags().GetString("until")
-	errBuf := migrate2.Run(upUntil, finalDir, wd, existingTrack.LastRunTS, false)
-
+	output, err := migrate2.Run(upUntil, finalDir, wd, existingTrack.LastRunTS, false)
+	if err != nil {
+		return err
+	}
 	if !dryRun {
-		_, num := store.ProcessLogs(errBuf)
+		_, num := store.ProcessLogs(output)
 		track := store.TrackToSetDown(existingTrack, num)
 
 		err = storeHouse.Set(track, FS)

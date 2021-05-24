@@ -22,6 +22,8 @@ func TestMongoDb_Set(t *testing.T) {
 	client, err := mongo.Connect(ctx, clientOptions)
 	assert.NoError(t, err)
 	err = client.Ping(ctx, nil)
+	assert.NoError(t, err)
+
 	m := MongoDb{
 		coll: *client.Database(cs.Database).Collection("migrations"),
 	}
