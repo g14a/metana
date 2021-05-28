@@ -7,6 +7,7 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/go-pg/pg/v10 v10.9.1
 	github.com/iancoleman/strcase v0.1.3
+	github.com/joho/godotenv v1.3.0
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/olekukonko/tablewriter v0.0.5

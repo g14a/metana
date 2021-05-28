@@ -10,24 +10,26 @@ import (
 	"github.com/spf13/afero"
 )
 
-func RunUp(opts migrate2.MigrationOptions, FS afero.Fs, wd string) error {
+func RunUp(opts migrate2.MigrationOptions, FS afero.Fs) error {
 
 	var existingTrack types.Track
 	var storeHouse store.Store
 	if !opts.DryRun {
-		storeHouse, err := store.GetStoreViaConn(opts.StoreConn, opts.MigrationsDir, FS, wd)
+		sh, err := store.GetStoreViaConn(opts.StoreConn, opts.MigrationsDir, FS, opts.Wd)
 		if err != nil {
 			return err
 		}
-		existingTrack, err = storeHouse.Load(FS)
+		existingTrack, err = sh.Load(FS)
 		if err != nil {
 			return err
 		}
+		storeHouse = sh
+		opts.LastRunTS = existingTrack.LastRunTS
 	} else {
 		existingTrack.LastRunTS = 0
 	}
 
-	output, err := migrate2.Run(opts.Until, opts.MigrationsDir, wd, existingTrack.LastRunTS, true)
+	output, err := migrate2.Run(opts)
 	if err != nil {
 		return err
 	}
@@ -40,7 +42,7 @@ func RunUp(opts migrate2.MigrationOptions, FS afero.Fs, wd string) error {
 		existingTrack.Migrations = append(existingTrack.Migrations, track.Migrations...)
 
 		if len(track.Migrations) > 0 {
-			err = storeHouse.Set(existingTrack, FS)
+			err := storeHouse.Set(existingTrack, FS)
 			if err != nil {
 				return err
 			}

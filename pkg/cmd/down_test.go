@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"testing"
 
+	migrate2 "github.com/g14a/metana/pkg/core/migrate"
+
 	"github.com/g14a/metana/pkg"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -23,7 +25,11 @@ func Test_Down_AtleastOneMigrationNeeded(t *testing.T) {
 			err = RunCreate(cmd, []string{"abc"}, FS, "/Users/g14a/metana")
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
-			return RunDown(cmd, []string{}, FS, "/Users/g14a/metana")
+			return RunDown(migrate2.MigrationOptions{
+				MigrationsDir: "",
+				Wd:            "/Users/g14a/metana",
+				Up:            false,
+			}, FS)
 		},
 	}
 	downCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")

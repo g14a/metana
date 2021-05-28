@@ -3,10 +3,11 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/fatih/color"
-	migrate2 "github.com/g14a/metana/pkg/core/migrate"
 	"os"
 	"strings"
+
+	"github.com/fatih/color"
+	migrate2 "github.com/g14a/metana/pkg/core/migrate"
 
 	"github.com/g14a/metana/pkg"
 	"github.com/g14a/metana/pkg/config"
@@ -40,6 +41,11 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
+		envFile, err := cmd.Flags().GetString("env")
+		if err != nil {
+			return err
+		}
+
 		mc, _ := config.GetMetanaConfig(FS, wd)
 
 		// Priority range is explicit, then config, then migrations
@@ -66,9 +72,10 @@ var upCmd = &cobra.Command{
 			Wd:            wd,
 			Up:            true,
 			Cmd:           cmd,
-			DryRun: dryRun,
-			StoreConn: finalStoreConn,
-		}, FS, wd)
+			DryRun:        dryRun,
+			StoreConn:     finalStoreConn,
+			EnvFile:       envFile,
+		}, FS)
 		if err != nil {
 			return err
 		}
@@ -82,6 +89,8 @@ func init() {
 	upCmd.Flags().StringP("until", "u", "", "Migrate up until a specific point\n")
 	upCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
 	upCmd.Flags().Bool("dry", false, "Specify if the upward migration is a dry run {true | false}")
+	upCmd.Flags().StringP("env", "e", ".env", "Specify environment keys from a file")
+
 	upCmd.RegisterFlagCompletionFunc("until", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		FS := afero.NewOsFs()
 

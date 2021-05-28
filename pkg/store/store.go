@@ -47,7 +47,7 @@ func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string) (Sto
 		p := PGDB{db: db}
 		err = p.CreateTable()
 		if err != nil {
-			return nil, fmt.Errorf("Could not create migrations table in postgres")
+			return nil, fmt.Errorf("could not create migrations table in postgres")
 		}
 
 		return p, nil
@@ -60,7 +60,7 @@ func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string) (Sto
 		clientOptions := options.Client().ApplyURI(connString)
 		client, err := mongo.Connect(ctx, clientOptions)
 		if err != nil {
-			return nil, fmt.Errorf("Could not connec to MongoDB, ERROR: %w", err)
+			return nil, fmt.Errorf("could not connect to MongoDB, ERROR: %w", err)
 		}
 		err = client.Ping(ctx, nil)
 		if err != nil {

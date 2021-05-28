@@ -3,33 +3,36 @@ package migrate
 import (
 	"bufio"
 	"bytes"
-	"github.com/spf13/cobra"
+	"fmt"
+	"os"
 	"os/exec"
 	"strconv"
+
+	"github.com/joho/godotenv"
+
+	"github.com/spf13/cobra"
 
 	"github.com/fatih/color"
 )
 
-func Run(until, migrationsDir string, wd string, lastRunTS int, up bool) (string, error) {
-	var migrationArgs []string
+func Run(opts MigrationOptions) (string, error) {
+	migrationArgs := GetMigrationArgs(opts)
 
-	migrationArgs = append(migrationArgs, "run", "main.go")
-
-	if up {
-		migrationArgs = append(migrationArgs, "up")
-	} else {
-		migrationArgs = append(migrationArgs, "down")
+	var envKeys []string
+	if opts.EnvFile != "" {
+		envMap, err := godotenv.Read(opts.Wd + "/" + opts.EnvFile)
+		if err != nil {
+			return "", err
+		}
+		for k, v := range envMap {
+			envKeys = append(envKeys, fmt.Sprintf("%s=%s", k, v))
+		}
 	}
-
-	if until != "" {
-		migrationArgs = append(migrationArgs, "--until", until)
-	}
-	lastRunTSString := strconv.Itoa(lastRunTS)
-
-	migrationArgs = append(migrationArgs, "--last-run-ts", lastRunTSString)
 
 	migrationsRun := exec.Command("go", migrationArgs...)
-	migrationsRun.Dir = wd + "/" + migrationsDir
+	migrationsRun.Env = append(os.Environ(), envKeys...)
+	migrationsRun.Dir = opts.Wd + "/" + opts.MigrationsDir
+
 	var errBuf bytes.Buffer
 	migrationsRun.Stderr = &errBuf
 
@@ -52,6 +55,27 @@ func Run(until, migrationsDir string, wd string, lastRunTS int, up bool) (string
 	return errBuf.String(), nil
 }
 
+func GetMigrationArgs(opts MigrationOptions) []string {
+	var migrationArgs []string
+
+	migrationArgs = append(migrationArgs, "run", "main.go")
+
+	if opts.Up {
+		migrationArgs = append(migrationArgs, "up")
+	} else {
+		migrationArgs = append(migrationArgs, "down")
+	}
+
+	if opts.Until != "" {
+		migrationArgs = append(migrationArgs, "--until", opts.Until)
+	}
+
+	lastRunTSString := strconv.Itoa(opts.LastRunTS)
+	migrationArgs = append(migrationArgs, "--last-run-ts", lastRunTSString)
+
+	return migrationArgs
+}
+
 type MigrationOptions struct {
 	Until         string
 	MigrationsDir string
@@ -59,6 +83,7 @@ type MigrationOptions struct {
 	LastRunTS     int
 	Up            bool
 	StoreConn     string
-	DryRun 		  bool
+	DryRun        bool
+	EnvFile       string
 	Cmd           *cobra.Command
 }
