@@ -3,6 +3,7 @@ package migrate
 import (
 	"bufio"
 	"bytes"
+	"github.com/spf13/cobra"
 	"os/exec"
 	"strconv"
 
@@ -49,4 +50,15 @@ func Run(until, migrationsDir string, wd string, lastRunTS int, up bool) (string
 	}
 
 	return errBuf.String(), nil
+}
+
+type MigrationOptions struct {
+	Until         string
+	MigrationsDir string
+	Wd            string
+	LastRunTS     int
+	Up            bool
+	StoreConn     string
+	DryRun 		  bool
+	Cmd           *cobra.Command
 }
