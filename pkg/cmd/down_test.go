@@ -29,6 +29,7 @@ func Test_Down_AtleastOneMigrationNeeded(t *testing.T) {
 				MigrationsDir: "",
 				Wd:            "/Users/g14a/metana",
 				Up:            false,
+				Cmd:           cmd,
 			}, FS)
 		},
 	}
@@ -37,6 +38,8 @@ func Test_Down_AtleastOneMigrationNeeded(t *testing.T) {
 	downCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
 	downCmd.Flags().Bool("dry", false, "Specify if the upward migration is a dry run {true | false}")
 	downCmd.Flags().StringP("template", "t", "", "Specify a custom Go template with Up and Down functions")
+	downCmd.Flags().StringP("env", "e", ".env", "Specify environment keys from a file")
+
 	metanaCmd.AddCommand(downCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "down")
 	assert.NoError(t, err)

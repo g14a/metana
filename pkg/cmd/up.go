@@ -34,6 +34,8 @@ func RunUp(opts migrate2.MigrationOptions, FS afero.Fs) error {
 		return err
 	}
 
+	fmt.Println(output, "======output=========")
+
 	if !opts.DryRun {
 		track, _ := store.ProcessLogs(output)
 

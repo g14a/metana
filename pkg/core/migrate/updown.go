@@ -29,6 +29,9 @@ func Run(opts MigrationOptions) (string, error) {
 		}
 	}
 
+	fmt.Println(migrationArgs, "=========migration args========")
+	fmt.Println(opts.MigrationsDir, "=========mig dir==========")
+
 	migrationsRun := exec.Command("go", migrationArgs...)
 	migrationsRun.Env = append(os.Environ(), envKeys...)
 	migrationsRun.Dir = opts.Wd + "/" + opts.MigrationsDir

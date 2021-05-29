@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	migrate2 "github.com/g14a/metana/pkg/core/migrate"
+
 	"github.com/g14a/metana/pkg"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -20,7 +22,13 @@ func Test_Up(t *testing.T) {
 			FS := afero.NewOsFs()
 			cmd.SetOut(&buf)
 			afero.WriteFile(FS, "../../.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
-			return RunUp(cmd, []string{}, FS, "../..")
+			return RunUp(migrate2.MigrationOptions{
+				Wd:        "../..",
+				DryRun:    false,
+				Cmd:       cmd,
+				Up:        true,
+				LastRunTS: 0,
+			}, FS)
 		},
 	}
 	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
@@ -28,6 +36,7 @@ func Test_Up(t *testing.T) {
 	upCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
 	upCmd.Flags().Bool("dry", false, "Specify if the upward migration is a dry run {true | false}")
 	upCmd.Flags().StringP("template", "t", "", "Specify a custom Go template with Up and Down functions")
+	upCmd.Flags().StringP("env", "e", ".env", "Specify environment keys from a file")
 
 	metanaCmd.AddCommand(upCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "up")
@@ -45,7 +54,13 @@ func Test_Up_Dry(t *testing.T) {
 			FS := afero.NewOsFs()
 			cmd.SetOut(&buf)
 			afero.WriteFile(FS, "../../.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
-			return RunUp(cmd, []string{}, FS, "../..")
+			return RunUp(migrate2.MigrationOptions{
+				Wd:        "../..",
+				DryRun:    true,
+				Cmd:       cmd,
+				Up:        true,
+				LastRunTS: 0,
+			}, FS)
 		},
 	}
 	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
@@ -53,6 +68,8 @@ func Test_Up_Dry(t *testing.T) {
 	upCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
 	upCmd.Flags().Bool("dry", false, "Specify if the upward migration is a dry run {true | false}")
 	upCmd.Flags().StringP("template", "t", "", "Specify a custom Go template with Up and Down functions")
+	upCmd.Flags().StringP("env", "e", ".env", "Specify environment keys from a file")
+
 	metanaCmd.AddCommand(upCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "up", "--dry")
 	assert.NoError(t, err)

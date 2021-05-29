@@ -1,2 +1,2 @@
-dir: migrations
+dir: testdata
 store: ''
