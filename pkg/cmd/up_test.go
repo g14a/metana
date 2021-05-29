@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"testing"
 
 	migrate2 "github.com/g14a/metana/pkg/core/migrate"
@@ -23,11 +22,12 @@ func Test_Up(t *testing.T) {
 			cmd.SetOut(&buf)
 			afero.WriteFile(FS, "../../.metana.yml", []byte("dir: testdata\nstore: ''"), 0644)
 			return RunUp(migrate2.MigrationOptions{
-				Wd:        "../..",
-				DryRun:    false,
-				Cmd:       cmd,
-				Up:        true,
-				LastRunTS: 0,
+				Wd:            "..",
+				MigrationsDir: "../testdata",
+				DryRun:        false,
+				Cmd:           cmd,
+				Up:            true,
+				LastRunTS:     0,
 			}, FS)
 		},
 	}
@@ -41,7 +41,7 @@ func Test_Up(t *testing.T) {
 	metanaCmd.AddCommand(upCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "up")
 	assert.NoError(t, err)
-	pkg.ExpectLines(t, buf.String(), []string{`✓ .metana.yml found`, `  >>> migration : complete`}...)
+	pkg.ExpectLines(t, buf.String(), []string{`  >>> migration : complete`}...)
 }
 
 func Test_Up_Dry(t *testing.T) {
@@ -73,6 +73,5 @@ func Test_Up_Dry(t *testing.T) {
 	metanaCmd.AddCommand(upCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "up", "--dry")
 	assert.NoError(t, err)
-	fmt.Println(buf.String())
-	pkg.ExpectLines(t, buf.String(), []string{`✓ .metana.yml found`, `  >>> dry run migration : complete`}...)
+	pkg.ExpectLines(t, buf.String(), []string{`  >>> dry run migration : complete`}...)
 }
