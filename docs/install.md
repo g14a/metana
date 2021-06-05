@@ -1,5 +1,10 @@
 Metana can be installed in the following ways.
 
+## Using Go
+```shell
+go get github.com/g14a/metana
+```
+
 ## **Mac**
 
 ```shell
@@ -28,5 +33,5 @@ go install
 ## **Docker**
 ```shell
 docker pull g14a/metana
-docker run
+docker run g14a/metana
 ```
