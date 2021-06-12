@@ -40,5 +40,5 @@ func TestSetMetanaConfig(t *testing.T) {
 		return
 	}
 
-	assert.Equal(t, "dir: migrations\nstore: migrate.json\n", string(fileBytes))
+	assert.Equal(t, "dir: migrations\nstore: migrate.json\nenvironments: []\n", string(fileBytes))
 }

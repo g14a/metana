@@ -14,12 +14,29 @@ func TestRegen(t *testing.T) {
 
 	os.Chdir("/Users/g14a/metana")
 
-	err := CreateInitConfig("migrations", "github.com/g14a/metana", FS)
+	err := CreateInitConfig("migrations", "github.com/g14a/metana", FS, "")
 	assert.Equal(t, true, err == nil)
 
-	filename, err := CreateMigrationFile("/Users/g14a/metana", "migrations", "initSchema", "", FS)
+	cOpts := CreateMigrationOpts{
+		Wd:            "/Users/g14a/metana",
+		MigrationsDir: "migrations",
+		File:          "initSchema",
+		CustomTmpl:    "",
+		Environment:   "",
+		FS:            FS,
+	}
+	filename, err := CreateMigrationFile(cOpts)
 	assert.Equal(t, true, err == nil)
 
-	err = Regen("migrations", "InitSchema", strings.TrimPrefix(filename, "migrations/scripts/"), true, FS)
+	rOpts := RegenOpts{
+		MigrationsDir:  "migrations",
+		MigrationName:  "InitSchema",
+		Filename:       strings.TrimPrefix(filename, "migrations/scripts/"),
+		FirstMigration: true,
+		Environment:    "",
+		FS:             FS,
+	}
+
+	err = Regen(rOpts)
 	assert.Equal(t, true, err == nil)
 }

@@ -27,6 +27,7 @@ func Test_Create(t *testing.T) {
 	}
 	createCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	createCmd.Flags().StringP("template", "t", "", "Specify a custom Go template with Up and Down functions")
+	createCmd.Flags().StringP("env", "e", "", "Specify an environment to create the migration")
 
 	metanaCmd.AddCommand(createCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "create", "abc")
@@ -51,6 +52,7 @@ func Test_Create_dir(t *testing.T) {
 	}
 	createCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	createCmd.Flags().StringP("template", "t", "", "Specify a custom Go template with Up and Down functions")
+	createCmd.Flags().StringP("env", "e", "", "Specify an environment to create the migration")
 
 	metanaCmd.AddCommand(createCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "create", "abc", "--dir=schema-mig")

@@ -32,7 +32,6 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 
 	mc, _ := config.GetMetanaConfig(FS, wd)
 
-	fmt.Println(mc, "===========config===========")
 	// Priority range is explicit, then config, then migrations
 	var finalDir string
 

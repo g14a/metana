@@ -1,5 +1,2 @@
 dir: testdata
-store: ""
-environments:
-- name: dev
-  store: ""
+store: ''
