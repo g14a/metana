@@ -1,4 +1,4 @@
-dir: migrations
+dir: testdata
 store: ""
 environments:
 - name: dev
