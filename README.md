@@ -89,7 +89,7 @@ Flags:
 Use "metana [command] --help" for more information about a command.
 ```
 
-## **`Init`**
+### **`Init`**
 
 `init` initializes a boilerplate migrations directory in your current path.
 
@@ -106,7 +106,7 @@ If you want to initialize migrations in a different directory, you can do so wit
 metana init --dir /path/to/folder
 ```
 
-## **`Create`**
+### **`Create`**
 
 `create` creates a migration script with two functions `Up()` and `Down()` denoting the upward and downward migration of the same.
 
@@ -118,7 +118,7 @@ $ metana create initSchema
 
 Head over to your `1614532908-InitSchema.go` to edit your script. Remember to not change any function signature.
 
-## **`Up`**
+### **`Up`**
 
 `up` runs all the upward migrations in the migrations directory in order of their creation time.
 
@@ -134,7 +134,7 @@ AddIndexes up
   >>> migration : complete
 ```
 
-## **`Down`**
+### **`Down`**
 
 `down` runs the downward migrations in the reverse order of creation time because we're trying to undo the upward migrations.
 
@@ -150,7 +150,7 @@ $ metana down
   >>> migration : complete
 ```
 
-## **`Wipe`**
+### **`Wipe`**
 
 `wipe` removes stale(already executed) migration files and track in your store to keep things clean.
 
@@ -160,7 +160,7 @@ $ metana wipe
 ? Wiping will delete stale migration files. Continue? Yes
 ```
 
-## **`List`**
+### **`List`**
 
 `list` lists all the migrations present in your migrations folder along with the last modified time.
 
