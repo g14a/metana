@@ -3,6 +3,9 @@ name: Go
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'cmd/**'
+      - 'pkg/**'
   pull_request:
     branches: [ main ]
 
