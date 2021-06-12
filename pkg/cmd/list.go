@@ -14,6 +14,12 @@ func RunList(cmd *cobra.Command, args []string, wd string, FS afero.Fs) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	environment, err := cmd.Flags().GetString("env")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	var finalDir string
 
 	mc, _ := config.GetMetanaConfig(FS, wd)
@@ -26,7 +32,7 @@ func RunList(cmd *cobra.Command, args []string, wd string, FS afero.Fs) {
 		finalDir = "migrations"
 	}
 
-	err = pkg.ListMigrations(wd, finalDir, FS)
+	err = pkg.ListMigrations(wd, finalDir, FS, environment)
 	if err != nil {
 		log.Fatal(err)
 	}

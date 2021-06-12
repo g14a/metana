@@ -2,7 +2,6 @@
 package cmd
 
 import (
-	"log"
 	"os"
 
 	cmd2 "github.com/g14a/metana/pkg/cmd"
@@ -16,20 +15,22 @@ var createCmd = &cobra.Command{
 	Short: "Create a migration in Go",
 	Long:  ``,
 	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		FS := afero.NewOsFs()
 		wd, _ := os.Getwd()
 
 		err := cmd2.RunCreate(cmd, args, FS, wd)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
+		return nil
 	},
 }
 
 func init() {
 	createCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	createCmd.Flags().StringP("template", "t", "", "Specify a custom Go template with Up and Down functions")
+	createCmd.Flags().StringP("env", "e", "", "Specify an environment to create the migration")
 	rootCmd.AddCommand(createCmd)
 
 	// Here you will define your flags and configuration settings.

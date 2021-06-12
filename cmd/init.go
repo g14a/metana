@@ -11,7 +11,7 @@ import (
 )
 
 // InitCmd represents the init command
-var InitCmd = &cobra.Command{
+var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize a migrations directory",
 	Long:  ``,
@@ -27,8 +27,9 @@ var InitCmd = &cobra.Command{
 }
 
 func init() {
-	InitCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
-	rootCmd.AddCommand(InitCmd)
+	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
+	initCmd.Flags().StringP("env", "e", "", "Specify the environment to initialize migration")
+	rootCmd.AddCommand(initCmd)
 
 	// Here you will define your flags and configuration settings.
 

@@ -25,8 +25,14 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 		return err
 	}
 
+	environment, err := cmd.Flags().GetString("env")
+	if err != nil {
+		return err
+	}
+
 	mc, _ := config.GetMetanaConfig(FS, wd)
 
+	fmt.Println(mc, "===========config===========")
 	// Priority range is explicit, then config, then migrations
 	var finalDir string
 
@@ -39,7 +45,7 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 		finalDir = "migrations"
 	}
 
-	exists, err := gen2.MigrationExists(wd, finalDir, args[0], FS)
+	exists, err := gen2.MigrationExists(wd, finalDir, args[0], FS, environment)
 	if err != nil {
 		return err
 	}
@@ -50,7 +56,7 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 	}
 
 	firstMigration := false
-	migrations, err := pkg.GetMigrations(wd, finalDir, FS)
+	migrations, err := pkg.GetMigrations(wd, finalDir, FS, environment)
 	if err != nil {
 		return err
 	}
@@ -59,19 +65,49 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 		firstMigration = true
 	}
 
-	fileName, err := gen2.CreateMigrationFile(wd, finalDir, args[0], customTemplateFile, FS)
+	opts := gen2.CreateMigrationOpts{
+		Wd:            wd,
+		MigrationsDir: finalDir,
+		File:          args[0],
+		CustomTmpl:    customTemplateFile,
+		Environment:   environment,
+		FS:            FS,
+	}
+
+	fileName, err := gen2.CreateMigrationFile(opts)
 	if err != nil {
 		color.Yellow("\nTry initializing migration using `metana init`\n\n")
 		os.Exit(0)
 	}
 
-	err = gen2.Regen(finalDir, strcase.ToCamel(args[0]), strings.TrimPrefix(fileName, finalDir+"/scripts/"), firstMigration, FS)
+	var trimmedFile string
+
+	if environment == "" {
+		trimmedFile = strings.TrimPrefix(fileName, finalDir+"/scripts/")
+	} else {
+		trimmedFile = strings.TrimPrefix(fileName, finalDir+"/environments/"+environment+"/scripts/")
+	}
+
+	regenOpts := gen2.RegenOpts{
+		MigrationsDir:  finalDir,
+		MigrationName:  strcase.ToCamel(args[0]),
+		Filename:       trimmedFile,
+		FirstMigration: firstMigration,
+		Environment:    environment,
+		FS:             FS,
+	}
+
+	err = gen2.Regen(regenOpts)
 	if err != nil {
 		return err
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Created "+wd+"/"+fileName+"\n"))
-	fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Updated "+wd+"/"+finalDir+"/main.go\n"))
+	if environment == "" {
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Updated "+wd+"/"+finalDir+"/main.go\n"))
+	} else {
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Updated "+wd+"/"+finalDir+"/environments/"+environment+"/main.go\n"))
+	}
 
 	return nil
 }

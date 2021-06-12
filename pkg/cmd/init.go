@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/g14a/metana/pkg/core/environments"
+
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/config"
 	gen2 "github.com/g14a/metana/pkg/core/gen"
@@ -18,35 +20,64 @@ func RunInit(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		return err
 	}
 
+	environment, err := cmd.Flags().GetString("env")
+	if err != nil {
+		return err
+	}
+
 	mc, _ := config.GetMetanaConfig(FS, wd)
 	// Priority range is explicit, then config, then migrations
 	var finalDir string
 
-	if dir != "" {
-		finalDir = dir
-		setMc := &config.MetanaConfig{
-			Dir: finalDir,
+	setMc := &config.MetanaConfig{}
+
+	switch {
+	case environment != "":
+		if dir == "" && mc.Dir != "" {
+			dir = mc.Dir
+			finalDir = dir
+		} else if dir != "" {
+			finalDir = dir
+		} else {
+			finalDir = "migrations"
 		}
+		envExists := environments.CheckExistingEnvironment(FS, wd, dir, environment)
+		if envExists {
+			fmt.Fprintf(cmd.OutOrStdout(), color.YellowString("Environment `"+environment+"` already exists\n"))
+			return nil
+		}
+		environments.CheckExistingMigrationSetup(FS, wd)
+		setMc.Dir = finalDir
+		err := config.SetEnvironmentMetanaConfig(setMc, environment, FS, wd)
+		if err != nil {
+			return err
+		}
+		_ = FS.MkdirAll(finalDir+"/environments/"+environment+"/scripts", 0755)
+	case dir != "":
+		finalDir = dir
+		setMc.Dir = finalDir
 		err := config.SetMetanaConfig(setMc, FS, wd)
 		if err != nil {
 			return err
 		}
-
-	} else if mc != nil && mc.Dir != "" && dir == "" {
+		_ = FS.MkdirAll(finalDir+"/scripts", 0755)
+	case mc != nil && mc.Dir != "" && dir == "":
 		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ .metana.yml found\n"))
 		finalDir = mc.Dir
-		setMc := &config.MetanaConfig{
-			Dir: finalDir,
-		}
 		err := config.SetMetanaConfig(setMc, FS, wd)
 		if err != nil {
 			return err
 		}
-	} else {
+		_ = FS.MkdirAll(finalDir+"/scripts", 0755)
+	default:
 		finalDir = "migrations"
+		setMc.Dir = finalDir
+		err := config.SetMetanaConfig(setMc, FS, wd)
+		if err != nil {
+			return err
+		}
+		_ = FS.MkdirAll(finalDir+"/scripts", 0755)
 	}
-
-	_ = FS.MkdirAll(finalDir+"/scripts", 0755)
 
 	goModPath, err := exec.Command("go", "list", "-m").Output()
 	if err != nil {
@@ -58,13 +89,9 @@ func RunInit(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		color.Yellow("No go module found")
 	}
 
-	err = gen2.CreateInitConfig(finalDir, goModPathString, FS)
+	err = gen2.CreateInitConfig(finalDir, goModPathString, FS, environment)
 	if err != nil {
 		return err
-	}
-
-	setMc := &config.MetanaConfig{
-		Dir: finalDir,
 	}
 
 	if (&config.MetanaConfig{}) == mc || mc == nil {
@@ -74,6 +101,10 @@ func RunInit(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		}
 	}
 
-	fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Created "+wd+"/"+finalDir+"/main.go\n"))
+	if environment == "" {
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Created "+wd+"/"+finalDir+"/main.go\n"))
+	} else {
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Created "+wd+"/"+finalDir+"/environments/"+environment+"/main.go\n"))
+	}
 	return nil
 }

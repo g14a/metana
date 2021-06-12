@@ -13,24 +13,35 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func Regen(migrationsDir, migrationName, fileName string, firstMigration bool, FS afero.Fs) error {
-	lower := strcase.ToLowerCamel(migrationName)
-	input, err := afero.ReadFile(FS, migrationsDir+"/main.go")
-	if err != nil {
-		return err
+func Regen(opts RegenOpts) error {
+	lower := strcase.ToLowerCamel(opts.MigrationName)
+	var input []byte
+	if opts.Environment == "" {
+		inputBytes, err := afero.ReadFile(opts.FS, opts.MigrationsDir+"/main.go")
+		if err != nil {
+			return err
+		}
+		input = inputBytes
+	} else {
+		inputBytes, err := afero.ReadFile(opts.FS, opts.MigrationsDir+"/environments/"+opts.Environment+"/main.go")
+		if err != nil {
+			return err
+		}
+		input = inputBytes
 	}
+
 	lines := strings.Split(string(input), "\n")
 
 	var firstReturn bool
-	timeStamp := strings.TrimLeft(strings.Split(fileName, "-")[0], "scripts/")
+	timeStamp := strings.TrimLeft(strings.Split(opts.Filename, "-")[0], "scripts/")
 
 	addMigrationTemplate := template.New("add")
 
 	nm := tpl2.NewMigration{
 		Lower:         lower,
-		MigrationName: migrationName,
+		MigrationName: opts.MigrationName,
 		Timestamp:     timeStamp,
-		Filename:      fileName,
+		Filename:      opts.Filename,
 	}
 
 	for i, line := range lines {
@@ -38,9 +49,9 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool, F
 			var tplBuffer bytes.Buffer
 			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl2.AddMigrationTemplate(true)))
 			if errAdd != nil {
-				return err
+				return errAdd
 			}
-			err = addMigrationTemplate.Execute(&tplBuffer, nm)
+			err := addMigrationTemplate.Execute(&tplBuffer, nm)
 			if err != nil {
 				return err
 			}
@@ -51,13 +62,13 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool, F
 			var tplBuffer bytes.Buffer
 			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl2.AddMigrationTemplate(false)))
 			if errAdd != nil {
-				return err
+				return errAdd
 			}
-			err = addMigrationTemplate.Execute(&tplBuffer, nm)
+			err := addMigrationTemplate.Execute(&tplBuffer, nm)
 			if err != nil {
 				return err
 			}
-			if firstMigration {
+			if opts.FirstMigration {
 				tplBuffer.WriteString("\nreturn nil")
 			}
 			lines[i+1] = tplBuffer.String()
@@ -71,10 +82,26 @@ func Regen(migrationsDir, migrationName, fileName string, firstMigration bool, F
 		return err
 	}
 
-	err = afero.WriteFile(FS, migrationsDir+"/main.go", fmtOutput, 0644)
-	if err != nil {
-		return err
+	if opts.Environment == "" {
+		err = afero.WriteFile(opts.FS, opts.MigrationsDir+"/main.go", fmtOutput, 0644)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = afero.WriteFile(opts.FS, opts.MigrationsDir+"/environments/"+opts.Environment+"/main.go", fmtOutput, 0644)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+
+type RegenOpts struct {
+	MigrationsDir  string
+	MigrationName  string
+	Filename       string
+	FirstMigration bool
+	Environment    string
+	FS             afero.Fs
 }
