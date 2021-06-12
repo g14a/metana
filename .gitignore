@@ -13,7 +13,7 @@ schema
 tmpl.go
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-
+.env
 # Dependency directories (remove the comment below to include it)
 # vendor/
 .idea
