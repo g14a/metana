@@ -37,7 +37,16 @@ func TestWipe(t *testing.T) {
 		]
 	}`), 0644)
 
-	err := Wipe("/Users/g14a/metana", "/Users/g14a/metana", "migrations", "", FS)
+	opts := WipeOpts{
+		GoModPath:     "/Users/g14a/metana",
+		Wd:            "/Users/g14a/metana",
+		MigrationsDir: "migrations",
+		StoreConn:     "",
+		Environment:   "",
+		FS:            FS,
+	}
+
+	err := Wipe(opts)
 	assert.NoError(t, err)
 
 	file, err := afero.ReadFile(FS, "/Users/g14a/metana/migrations/main.go")

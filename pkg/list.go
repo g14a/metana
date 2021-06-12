@@ -12,8 +12,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func ListMigrations(wd, migrationsDir string, fs afero.Fs) error {
-	migrations, err := GetMigrations(wd, migrationsDir, fs)
+func ListMigrations(wd, migrationsDir string, fs afero.Fs, environment string) error {
+	migrations, err := GetMigrations(wd, migrationsDir, fs, environment)
 	if err != nil {
 		return err
 	}
@@ -39,12 +39,20 @@ func ListMigrations(wd, migrationsDir string, fs afero.Fs) error {
 	return nil
 }
 
-func GetMigrations(wd, migrationsDir string, FS afero.Fs) ([]Migration, error) {
+func GetMigrations(wd, migrationsDir string, FS afero.Fs, environment string) ([]Migration, error) {
 	FSUtil := &afero.Afero{Fs: FS}
-
-	m, err := afero.Glob(FS, wd+"/"+migrationsDir+"/scripts/[^.]*.*")
-	if err != nil {
-		return []Migration{}, err
+	var m []string
+	var err error
+	if environment == "" {
+		m, err = afero.Glob(FS, wd+"/"+migrationsDir+"/scripts/[^.]*.*")
+		if err != nil {
+			return []Migration{}, err
+		}
+	} else {
+		m, err = afero.Glob(FS, wd+"/"+migrationsDir+"/environments/"+environment+"/scripts/[^.]*.*")
+		if err != nil {
+			return []Migration{}, err
+		}
 	}
 
 	var migrations []Migration

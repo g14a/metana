@@ -14,13 +14,13 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) error {
-	store, err := s.GetStoreViaConn(storeConn, migrationsDir, FS, wd)
+func Wipe(opts WipeOpts) error {
+	store, err := s.GetStoreViaConn(opts.StoreConn, opts.MigrationsDir, opts.FS, opts.Wd, opts.Environment)
 	if err != nil {
 		return err
 	}
 
-	track, err := store.Load(FS)
+	track, err := store.Load(opts.FS)
 	if err != nil {
 		return err
 	}
@@ -29,7 +29,7 @@ func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) er
 		color.Yellow("No migrations found to wipe.\nTry creating them or running existing ones.")
 	}
 
-	localMigrations, err := pkg.GetMigrations(wd, migrationsDir, FS)
+	localMigrations, err := pkg.GetMigrations(opts.Wd, opts.MigrationsDir, opts.FS, opts.Environment)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) er
 	for _, m := range track.Migrations {
 		for _, lm := range localMigrations {
 			if lm.Name == m.Title {
-				err := FS.Remove(wd + "/" + migrationsDir + "/scripts/" + m.Title)
+				err := opts.FS.Remove(opts.Wd + "/" + opts.MigrationsDir + "/scripts/" + m.Title)
 				if err != nil {
 					return err
 				}
@@ -50,12 +50,12 @@ func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) er
 		}
 	}
 
-	err = store.Wipe(FS)
+	err = store.Wipe(opts.FS)
 	if err != nil {
 		return err
 	}
 
-	mainBuilder, err := genMainAfterWipe(goModPath, wd, migrationsDir, FS)
+	mainBuilder, err := genMainAfterWipe(opts.GoModPath, opts.Wd, opts.MigrationsDir, opts.FS, opts.Environment)
 	if err != nil {
 		return err
 	}
@@ -64,18 +64,20 @@ func Wipe(goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs) er
 	if err != nil {
 		return err
 	}
-	err = afero.WriteFile(FS, wd+"/"+migrationsDir+"/main.go", fmtBytes, 0644)
-	if err != nil {
-		return err
+	if opts.Environment == "" {
+		err = afero.WriteFile(opts.FS, opts.Wd+"/"+opts.MigrationsDir+"/main.go", fmtBytes, 0644)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func genMainAfterWipe(goModPath, wd, migrationsDir string, FS afero.Fs) (strings.Builder, error) {
+func genMainAfterWipe(goModPath, wd, migrationsDir string, FS afero.Fs, environment string) (strings.Builder, error) {
 	var mainBuilder strings.Builder
 
-	newMigrations, err := pkg.GetMigrations(wd, migrationsDir, FS)
+	newMigrations, err := pkg.GetMigrations(wd, migrationsDir, FS, environment)
 	if err != nil {
 		return mainBuilder, err
 	}
@@ -204,3 +206,14 @@ func getMainOfMain() []byte {
 }
 `)
 }
+
+type WipeOpts struct {
+	GoModPath     string
+	Wd            string
+	MigrationsDir string
+	StoreConn     string
+	Environment   string
+	FS            afero.Fs
+}
+
+//goModPath, wd, migrationsDir string, storeConn string, FS afero.Fs

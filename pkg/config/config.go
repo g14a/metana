@@ -1,17 +1,10 @@
 package config
 
 import (
-	"log"
-
 	"github.com/spf13/afero"
 
 	"gopkg.in/yaml.v2"
 )
-
-type MetanaConfig struct {
-	Dir       string `yaml:"dir"`
-	StoreConn string `yaml:"store"`
-}
 
 func GetMetanaConfig(FS afero.Fs, wd string) (*MetanaConfig, error) {
 	var MetanaConfigInstance MetanaConfig
@@ -30,13 +23,47 @@ func GetMetanaConfig(FS afero.Fs, wd string) (*MetanaConfig, error) {
 func SetMetanaConfig(mc *MetanaConfig, FS afero.Fs, wd string) error {
 	b, err := yaml.Marshal(&mc)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = afero.WriteFile(FS, wd+"/.metana.yml", b, 0644)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil
+}
+
+func SetEnvironmentMetanaConfig(mc *MetanaConfig, env string, FS afero.Fs, wd string) error {
+	environments := mc.Environments
+	for _, e := range environments {
+		if e.Name == env {
+			return nil
+		}
+	}
+	mc.Environments = append(mc.Environments, Environment{
+		Name:  env,
+		Store: "",
+	})
+	b, err := yaml.Marshal(&mc)
+	if err != nil {
+		return err
+	}
+
+	err = afero.WriteFile(FS, wd+"/.metana.yml", b, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type MetanaConfig struct {
+	Dir          string        `yaml:"dir"`
+	StoreConn    string        `yaml:"store"`
+	Environments []Environment `yaml:"environments"`
+}
+
+type Environment struct {
+	Name  string `yaml:"name"`
+	Store string `yaml:"store"`
 }

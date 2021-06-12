@@ -17,7 +17,7 @@ func TestCreateInitConfig(t *testing.T) {
 	FS.MkdirAll("/Users/g14a/metana/migrations", 0755)
 	FS.MkdirAll("/Users/g14a/metana/migrations/scripts", 0755)
 
-	err := CreateInitConfig("migrations", "github.com/g14a/metana", FS)
+	err := CreateInitConfig("migrations", "github.com/g14a/metana", FS, "")
 	assert.Equal(t, true, err == nil)
 
 	bytes, err := afero.ReadFile(FS, "migrations/main.go")
@@ -44,42 +44,49 @@ func TestMigrationExists(t *testing.T) {
 		inputMigrationName string
 		FS                 afero.Fs
 		Exists             bool
+		Environment        string
 	}{
 		{
 			inputMigrationsDir: "migrations",
 			inputMigrationName: "addFKeys",
 			FS:                 FS,
 			Exists:             true,
+			Environment:        "",
 		}, {
 			inputMigrationsDir: "migrations",
 			inputMigrationName: "FKeys",
 			FS:                 FS,
 			Exists:             false,
+			Environment:        "",
 		}, {
 			inputMigrationsDir: "migrations",
 			inputMigrationName: "AddFKeys",
 			FS:                 FS,
 			Exists:             true,
+			Environment:        "",
 		}, {
 			inputMigrationsDir: "migrations",
 			inputMigrationName: "initSchema",
 			FS:                 FS,
 			Exists:             true,
+			Environment:        "",
 		}, {
 			inputMigrationsDir: "migrations",
 			inputMigrationName: "addIndexes",
 			FS:                 FS,
 			Exists:             true,
+			Environment:        "",
 		}, {
 			inputMigrationsDir: "migrations",
 			inputMigrationName: "nsdlgvnw",
 			FS:                 FS,
 			Exists:             false,
+			Environment:        "",
 		},
 	}
 
 	for _, tt := range tests {
-		exists, err := MigrationExists("/Users/g14a/metana", tt.inputMigrationsDir, tt.inputMigrationName, tt.FS)
+		exists, err := MigrationExists("/Users/g14a/metana", tt.inputMigrationsDir, tt.inputMigrationName, tt.FS, tt.Environment)
 		assert.Equal(t, tt.Exists, exists)
 		assert.Equal(t, true, err == nil)
 	}
@@ -91,7 +98,16 @@ func TestCreateMigrationFile(t *testing.T) {
 	os.Chdir("/Users/g14a/metana")
 	FS.MkdirAll("/Users/g14a/metana/migrations", 0755)
 
-	filename, err := CreateMigrationFile("/Users/g14a/metana", "migrations", "initSchema", "", FS)
+	cOpts := CreateMigrationOpts{
+		Wd:            "/Users/g14a/metana",
+		MigrationsDir: "migrations",
+		File:          "initSchema",
+		CustomTmpl:    "",
+		Environment:   "",
+		FS:            FS,
+	}
+
+	filename, err := CreateMigrationFile(cOpts)
 	assert.Equal(t, true, err == nil)
 
 	resultFileBytes, err := afero.ReadFile(FS, filename)

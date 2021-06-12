@@ -23,7 +23,7 @@ type Store interface {
 	Wipe(FS afero.Fs) error
 }
 
-func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string) (Store, error) {
+func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string, environment string) (Store, error) {
 
 	if strings.HasPrefix(connString, "@") {
 		connString = strings.TrimPrefix(connString, "@")
@@ -69,9 +69,18 @@ func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string) (Sto
 		return MongoDb{coll: *client.Database(cs.Database).Collection("migrations")}, nil
 	}
 
-	jsonFile, err := FS.OpenFile(wd+"/"+dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatal(err)
+	var jsonFile afero.File
+	var err error
+	if environment == "" {
+		jsonFile, err = FS.OpenFile(wd+"/"+dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		jsonFile, err = FS.OpenFile(wd+"/"+dir+"/environments/"+environment+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return File{file: jsonFile}, nil

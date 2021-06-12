@@ -29,6 +29,11 @@ func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		return err
 	}
 
+	environment, err := cmd.Flags().GetString("env")
+	if err != nil {
+		return err
+	}
+
 	mc, _ := config.GetMetanaConfig(FS, wd)
 
 	var finalDir string
@@ -64,7 +69,15 @@ func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	goModPathString := strings.TrimSpace(string(goModPath))
 
 	if confirmWipe {
-		err := wipe.Wipe(goModPathString, wd, finalDir, finalStoreConn, FS)
+		opts := wipe.WipeOpts{
+			GoModPath:     goModPathString,
+			Wd:            wd,
+			MigrationsDir: finalDir,
+			StoreConn:     finalStoreConn,
+			Environment:   environment,
+			FS:            FS,
+		}
+		err := wipe.Wipe(opts)
 		if err != nil {
 			return err
 		}

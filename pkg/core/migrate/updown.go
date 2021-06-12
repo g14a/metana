@@ -31,7 +31,11 @@ func Run(opts MigrationOptions) (string, error) {
 
 	migrationsRun := exec.Command("go", migrationArgs...)
 	migrationsRun.Env = append(os.Environ(), envKeys...)
-	migrationsRun.Dir = opts.Wd + "/" + opts.MigrationsDir
+	if opts.Environment == "" {
+		migrationsRun.Dir = opts.Wd + "/" + opts.MigrationsDir
+	} else {
+		migrationsRun.Dir = opts.Wd + "/" + opts.MigrationsDir + "/environments/" + opts.Environment
+	}
 
 	var errBuf bytes.Buffer
 	migrationsRun.Stderr = &errBuf
@@ -85,5 +89,6 @@ type MigrationOptions struct {
 	StoreConn     string
 	DryRun        bool
 	EnvFile       string
+	Environment   string
 	Cmd           *cobra.Command
 }

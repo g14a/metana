@@ -31,7 +31,7 @@ func init() {
 	wipeCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
 	wipeCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	wipeCmd.Flags().BoolP("yes", "y", false, "Proceed at all costs i.e by pass the prompt")
-
+	wipeCmd.Flags().StringP("env", "e", "", "Specify environment to wipe")
 	rootCmd.AddCommand(wipeCmd)
 
 	// Here you will define your flags and configuration settings.

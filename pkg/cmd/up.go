@@ -15,7 +15,7 @@ func RunUp(opts migrate2.MigrationOptions, FS afero.Fs) error {
 	var existingTrack types.Track
 	var storeHouse store.Store
 	if !opts.DryRun {
-		sh, err := store.GetStoreViaConn(opts.StoreConn, opts.MigrationsDir, FS, opts.Wd)
+		sh, err := store.GetStoreViaConn(opts.StoreConn, opts.MigrationsDir, FS, opts.Wd, opts.Environment)
 		if err != nil {
 			return err
 		}

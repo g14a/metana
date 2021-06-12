@@ -17,7 +17,7 @@ func TestGetMigrations_validFiles(t *testing.T) {
 	afero.WriteFile(FS, "/Users/g14a/metana/migrations/scripts/1621084135-AddFKeys.go", []byte("{}"), 0644)
 
 	os.Chdir("/Users/g14a/metana")
-	migrations, err := GetMigrations("/Users/g14a/metana", "migrations", FS)
+	migrations, err := GetMigrations("/Users/g14a/metana", "migrations", FS, "")
 	if err != nil {
 		return
 	}
@@ -43,7 +43,7 @@ func TestGetMigrations_no_files(t *testing.T) {
 	FS.MkdirAll("/Users/g14a/metana/migrations/scripts", 0755)
 
 	os.Chdir("/Users/g14a/metana")
-	migrations, err := GetMigrations("/Users/g14a/metana", "migrations", FS)
+	migrations, err := GetMigrations("/Users/g14a/metana", "migrations", FS, "")
 	if err != nil {
 		return
 	}

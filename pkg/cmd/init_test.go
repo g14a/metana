@@ -23,6 +23,8 @@ func Test_Init(t *testing.T) {
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
+	initCmd.Flags().StringP("env", "e", "", "Specify the environment to initialize migration")
+
 	metanaCmd.AddCommand(initCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "init")
 	assert.NoError(t, err)
@@ -41,6 +43,8 @@ func Test_Init_dir(t *testing.T) {
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
+	initCmd.Flags().StringP("env", "e", "", "Specify the environment to initialize migration")
+
 	metanaCmd.AddCommand(initCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "init", "--dir=schema-mig")
 	assert.NoError(t, err)
@@ -60,6 +64,8 @@ func Test_Init_config(t *testing.T) {
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
+	initCmd.Flags().StringP("env", "e", "", "Specify the environment to initialize migration")
+
 	metanaCmd.AddCommand(initCmd)
 	_, err := pkg.ExecuteCommand(metanaCmd, "init")
 	assert.NoError(t, err)
