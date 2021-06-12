@@ -1,6 +1,6 @@
 ![](metana.png)
 
-## metana
+# Metana
 
 ![OpenSource](https://img.shields.io/badge/Open%20Source-000000?style=for-the-badge&logo=github)
 ![go](https://img.shields.io/badge/-Written%20In%20Go-00add8?style=for-the-badge&logo=Go&logoColor=ffffff)
@@ -14,32 +14,32 @@ An abstract task migration tool written in Go for Go services. Database and non 
 
 Checkout installation, features and documentation at https://g14a.github.io/metana
 
-## Use case
+# Use case
 
 The motivation behind creating this tool, is to abstract away the database part. If your task can be completed with Pure Go or via a Go driver of your service, then this is for you. Since it makes use of the Go runtime, you can even perform database migrations like PostgreSQL, Mongo, Redis, Elasticsearch, GCP Buckets etc. You just need to be able to interact with your data store or complete your task using Go.
 
 The main use case is when you won't be able to do everything with SQL or No-SQL syntax. There might be some tasks where you need to aggregate data, iterate over them, and do business related stuff with the retrieved data. All you need to know is Go syntax and write a Go program.
 
-## Installation
+# Installation
 
-### Using Go
+## Using Go
 ```shell
 go get github.com/g14a/metana
 ```
 
-### **Mac**
+## **Mac**
 
 ```shell
 homebrew tap g14a/homebrew-metana
 homebrew install metana
 ```
-### **Linux**
+## **Linux**
 
 Checkout the releases page and download your platform's binaries to install them.
 
 [Releases Page](https://github.com/g14a/metana/releases)
 
-### **Building from source**
+## **Building from source**
 
 Prerequisites:
 
@@ -52,13 +52,13 @@ cd metana
 go install
 ```
 
-### **Docker**
+## **Docker**
 ```shell
 docker pull g14a/metana
 docker run g14a/metana
 ```
 
-## Usage
+# Usage
 
 After installation, let's just hit metana on the terminal.
 
@@ -89,7 +89,7 @@ Flags:
 Use "metana [command] --help" for more information about a command.
 ```
 
-### **`Init`**
+## **`Init`**
 
 `init` initializes a boilerplate migrations directory in your current path.
 
@@ -106,7 +106,7 @@ If you want to initialize migrations in a different directory, you can do so wit
 metana init --dir /path/to/folder
 ```
 
-### **`Create`**
+## **`Create`**
 
 `create` creates a migration script with two functions `Up()` and `Down()` denoting the upward and downward migration of the same.
 
@@ -118,7 +118,7 @@ $ metana create initSchema
 
 Head over to your `1614532908-InitSchema.go` to edit your script. Remember to not change any function signature.
 
-### **`Up`**
+## **`Up`**
 
 `up` runs all the upward migrations in the migrations directory in order of their creation time.
 
@@ -134,7 +134,7 @@ AddIndexes up
   >>> migration : complete
 ```
 
-### **`Down`**
+## **`Down`**
 
 `down` runs the downward migrations in the reverse order of creation time because we're trying to undo the upward migrations.
 
@@ -150,7 +150,7 @@ $ metana down
   >>> migration : complete
 ```
 
-### **`Wipe`**
+## **`Wipe`**
 
 `wipe` removes stale(already executed) migration files and track in your store to keep things clean.
 
@@ -160,7 +160,7 @@ $ metana wipe
 ? Wiping will delete stale migration files. Continue? Yes
 ```
 
-### **`List`**
+## **`List`**
 
 `list` lists all the migrations present in your migrations folder along with the last modified time.
 
@@ -179,7 +179,7 @@ $ metana list
 
 ## Features
 
-### **Custom directory to store migrations**
+## **Custom directory to store migrations**
 
 Specify a custom directory when creating and running upward or downward migrations using the `--dir` flag. Be default it is set to `"migrations"`
 
@@ -199,7 +199,7 @@ InitSchema up
 
 ```
 
-### **Run a migration until a certain point**
+## **Run a migration until a certain point**
 
 Run upward and downward migrations until(and including) a certain migration with the `--until` flag.
 
@@ -253,7 +253,7 @@ AddIndexes down
 
 Notice the capitalized format when passing to `--until`.
 
-### **Store and track your migrations in your favourite database**
+## **Store and track your migrations in your favourite database**
 
 Store and track your migrations in your favourite database by passing the `--store` flag.
 
@@ -267,7 +267,7 @@ Right now, PostgreSQL(which means even CockroachDB URLs) and MongoDB are support
 
 If no `--store` flag is passed, migrations will be stored in a default `migrate.json` file in the migrations directory.
 
-### **Dry run migrations**
+## **Dry run migrations**
 
 Dry run your migrations using the `--dry` flag.
 
@@ -299,7 +299,7 @@ InitSchema down
 
 All the other options like `--dir` and `--until` work along with `--dry`.
 
-### **Custom config**
+## **Custom config**
 
 Set your custom config in your `.metana.yml` file. As of now it supports `dir` and `store` keys.
 
@@ -343,7 +343,7 @@ Priority order of config:
 3. Default values of flags.
 
 
-### **Wipe out stale migrations**
+## **Wipe out stale migrations**
 
 Wipe out stale(already executed) migration files and update your store with the `wipe` command.
 
@@ -370,7 +370,7 @@ Pass the ``-y`` flag to bypass the prompt during script.
 Even the `wipe` command takes configuration from your `.metana.yml` file one exists.
 Otherwise the priority order is considered while wiping.
 
-### **Add Custom templates for Migrations**
+## **Add Custom templates for Migrations**
 
 With the latest version of metana you can add create a custom template Go program
 and create migration scripts with that.
@@ -393,7 +393,7 @@ Create a migration with a template with the `--template` flag:
 metana create addIndexes --template ../path/to/template.go
 ```
 
-### **Shell Completions**
+## **Shell Completions**
 
 You can get enable shell completions to metana by doing
 
