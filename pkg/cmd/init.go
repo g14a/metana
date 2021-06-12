@@ -33,7 +33,7 @@ func RunInit(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 
 	switch {
 	case environment != "":
-		if dir == "" && mc.Dir != "" {
+		if dir == "" && mc != nil && mc.Dir != "" {
 			dir = mc.Dir
 			finalDir = dir
 		} else if dir != "" {
