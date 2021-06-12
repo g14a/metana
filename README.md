@@ -177,7 +177,7 @@ $ metana list
   +----------------------------------+------------------+
 ```
 
-## Features
+# Features
 
 ## **Custom directory to store migrations**
 
@@ -271,7 +271,7 @@ If no `--store` flag is passed, migrations will be stored in a default `migrate.
 
 Dry run your migrations using the `--dry` flag.
 
-You can dry run your migrations using the explicit --dry option. This option doesn't track any migrations, doesn't create a default `migrate.json` file. It literally just dry runs. However your tasks are run. This helps when you're incrementally writing, testing and running your functions instead of manually deleting states in your store.
+You can dry run your migrations using the explicit `--dry` option. This option doesn't track any migrations, doesn't create a default `migrate.json` file. It literally just dry runs. However your tasks are run. This helps when you're incrementally writing, testing and running your functions instead of manually deleting states in your store.
 
 ```shell
 $ metana up --dry
@@ -456,3 +456,90 @@ Flags:
 Global Flags:
       --config string   config gen (default is $HOME/.metana.yaml)
 ```
+
+## Secrets and Environment keys while running migrations
+
+Now you can run upward and downward migrations and specify your `.env` files.
+
+Use the `--env-file` flag to do so. By default the value is set to `.env`.
+
+```shell
+$ metana up --env-file dev.env
+ ✓ .metana.yml found
+  >>> Migrating up: 1623502023-InitSchema.go
+
+InitSchema up
+
+  >>> migration : complete
+
+```
+
+# Environments
+With metana, you can manage your multiple environments in your migrations setup.
+
+You can manage your deployments like `dev`, `staging`, and `production` etc.
+
+It is recommended that you either manage environments, or the traditional `metana init` way.
+
+To initialize a environment, run `metana init` with the `--env` flag. 
+
+All environments need to be unique.
+
+### Initialize an environment `dev`.
+
+```shell
+$ metana init --env dev
+ ✓ Created /Users/g14a/metana/migrations/environments/dev/main.go
+$ metana init --env dev
+ Environment `dev` already exists
+```
+
+### Create a migration in a specific environment with the same `--env` flag.
+
+```shell
+$ metana create initSchema --env dev
+ ✓ .metana.yml found
+ ✓ Created /Users/g14a/metana/migrations/environments/dev/scripts/1623502023-InitSchema.go
+ ✓ Updated /Users/g14a/metana/migrations/environments/dev/main.go
+```
+
+```shell
+$ metana create initSchema --env staging
+ ✓ .metana.yml found
+ ✓ Created /Users/g14a/metana/migrations/environments/staging/scripts/1623502023-InitSchema.go
+ ✓ Updated /Users/g14a/metana/migrations/environments/staging/main.go
+```
+
+### Run migrations(both up and down) in an environment
+
+```shell
+$ metana up --env dev
+
+ ✓ .metana.yml found
+  >>> Migrating up: 1623502023-InitSchema.go
+
+InitSchema up
+
+  >>> migration : complete
+
+```
+
+All the other flags like `--dry`, `--until`, `--dir` work with environments seamlessly.
+
+### Config for environments
+
+You can specify your environment configuration in the same `.metana.yml` file.
+
+```yaml
+dir: migrations
+store: ""
+environments:
+- name: dev
+  store: "dev store"
+- name: staging
+  store: "staging store"
+- name: prod
+  store: "prod store"
+```
+
+The `name` field of the config should be the same as the environment directory inside `/environments/`.
