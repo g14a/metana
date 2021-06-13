@@ -48,7 +48,7 @@ func RunInit(cmd *cobra.Command, FS afero.Fs, wd string) error {
 		}
 		environments.CheckExistingMigrationSetup(FS, wd)
 		setMc.Dir = finalDir
-		err := config.SetEnvironmentMetanaConfig(setMc, environment, FS, wd)
+		err := config.SetEnvironmentMetanaConfig(setMc, environment, "", FS, wd)
 		if err != nil {
 			return err
 		}
@@ -64,6 +64,8 @@ func RunInit(cmd *cobra.Command, FS afero.Fs, wd string) error {
 	case mc != nil && mc.Dir != "" && dir == "":
 		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ .metana.yml found\n"))
 		finalDir = mc.Dir
+		setMc.Dir = finalDir
+		setMc.Environments = mc.Environments
 		err := config.SetMetanaConfig(setMc, FS, wd)
 		if err != nil {
 			return err

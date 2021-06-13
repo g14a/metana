@@ -23,17 +23,19 @@ var setConfigCmd = &cobra.Command{
 	Use:   "set",
 	Short: "Set your metana config",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		FS := afero.NewOsFs()
 		wd, _ := os.Getwd()
 
-		cmd2.RunSetConfig(cmd, FS, wd)
+		return cmd2.RunSetConfig(cmd, FS, wd)
 	},
 }
 
 func init() {
 	setConfigCmd.Flags().StringP("store", "s", "", "Set your store")
 	setConfigCmd.Flags().StringP("dir", "d", "migrations", "Set your migrations directory")
+	setConfigCmd.Flags().StringP("env", "e", "", "Set config for your environment")
+
 	configCmd.AddCommand(setConfigCmd)
 	rootCmd.AddCommand(configCmd)
 
