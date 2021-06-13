@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunInit(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
+func RunInit(cmd *cobra.Command, FS afero.Fs, wd string) error {
 	dir, err := cmd.Flags().GetString("dir")
 	if err != nil {
 		return err

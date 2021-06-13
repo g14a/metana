@@ -10,8 +10,6 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/spf13/cobra"
-
 	"github.com/fatih/color"
 )
 
@@ -20,12 +18,15 @@ func Run(opts MigrationOptions) (string, error) {
 
 	var envKeys []string
 	if opts.EnvFile != "" {
-		envMap, err := godotenv.Read(opts.Wd + "/" + opts.EnvFile)
-		if err != nil {
-			return "", err
-		}
-		for k, v := range envMap {
-			envKeys = append(envKeys, fmt.Sprintf("%s=%s", k, v))
+		_, err := os.Stat(opts.Wd + "/" + opts.EnvFile)
+		if !os.IsNotExist(err) {
+			envMap, err := godotenv.Read(opts.Wd + "/" + opts.EnvFile)
+			if err != nil {
+				return "", err
+			}
+			for k, v := range envMap {
+				envKeys = append(envKeys, fmt.Sprintf("%s=%s", k, v))
+			}
 		}
 	}
 
@@ -90,5 +91,4 @@ type MigrationOptions struct {
 	DryRun        bool
 	EnvFile       string
 	Environment   string
-	Cmd           *cobra.Command
 }

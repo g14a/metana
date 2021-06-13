@@ -3,6 +3,9 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/g14a/metana/pkg/config"
+	"github.com/spf13/cobra"
+
 	"github.com/fatih/color"
 	migrate2 "github.com/g14a/metana/pkg/core/migrate"
 	"github.com/g14a/metana/pkg/store"
@@ -10,12 +13,75 @@ import (
 	"github.com/spf13/afero"
 )
 
-func RunUp(opts migrate2.MigrationOptions, FS afero.Fs) error {
+func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
+
+	dir, err := cmd.Flags().GetString("dir")
+	if err != nil {
+		return err
+	}
+
+	storeConn, err := cmd.Flags().GetString("store")
+	if err != nil {
+		return err
+	}
+
+	until, err := cmd.Flags().GetString("until")
+	if err != nil {
+		return err
+	}
+
+	dryRun, err := cmd.Flags().GetBool("dry")
+	if err != nil {
+		return err
+	}
+
+	envFile, err := cmd.Flags().GetString("env-file")
+	if err != nil {
+		return err
+	}
+
+	env, err := cmd.Flags().GetString("env")
+	if err != nil {
+		return err
+	}
+
+	mc, _ := config.GetMetanaConfig(FS, wd)
+
+	// Priority range is explicit, then config, then migrations
+	var finalDir string
+
+	if dir != "" {
+		finalDir = dir
+	} else if mc != nil && mc.Dir != "" && dir == "" {
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ .metana.yml found\n"))
+		finalDir = mc.Dir
+	} else {
+		finalDir = "migrations"
+	}
+
+	var finalStoreConn string
+	if storeConn != "" {
+		finalStoreConn = storeConn
+	} else if mc != nil && mc.StoreConn != "" && storeConn == "" {
+		finalStoreConn = mc.StoreConn
+	}
 
 	var existingTrack types.Track
 	var storeHouse store.Store
-	if !opts.DryRun {
-		sh, err := store.GetStoreViaConn(opts.StoreConn, opts.MigrationsDir, FS, opts.Wd, opts.Environment)
+
+	opts := migrate2.MigrationOptions{
+		Until:         until,
+		MigrationsDir: finalDir,
+		Wd:            wd,
+		Up:            true,
+		StoreConn:     finalStoreConn,
+		DryRun:        dryRun,
+		EnvFile:       envFile,
+		Environment:   env,
+	}
+
+	if !dryRun {
+		sh, err := store.GetStoreViaConn(finalStoreConn, finalDir, FS, wd, env)
 		if err != nil {
 			return err
 		}
@@ -27,6 +93,7 @@ func RunUp(opts migrate2.MigrationOptions, FS afero.Fs) error {
 		opts.LastRunTS = existingTrack.LastRunTS
 	} else {
 		existingTrack.LastRunTS = 0
+		opts.LastRunTS = 0
 	}
 
 	output, err := migrate2.Run(opts)
@@ -47,10 +114,10 @@ func RunUp(opts migrate2.MigrationOptions, FS afero.Fs) error {
 				return err
 			}
 		}
-		fmt.Fprintf(opts.Cmd.OutOrStdout(), color.GreenString("  >>> migration : complete\n"))
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString("  >>> migration : complete\n"))
 
 		return nil
 	}
-	fmt.Fprintf(opts.Cmd.OutOrStdout(), color.WhiteString("  >>> dry run migration : complete\n"))
+	fmt.Fprintf(cmd.OutOrStdout(), color.WhiteString("  >>> dry run migration : complete\n"))
 	return nil
 }

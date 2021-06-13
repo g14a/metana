@@ -18,8 +18,10 @@ func TestGetMetanaConfig(t *testing.T) {
 	mc, err := GetMetanaConfig(FS, "/Users/g14a/metana")
 	assert.Equal(t, true, err == nil)
 	assert.Equal(t, true, mc != nil)
-	assert.Equal(t, "migrations", mc.Dir)
-	assert.Equal(t, "", mc.StoreConn)
+	if mc != nil {
+		assert.Equal(t, "migrations", mc.Dir)
+		assert.Equal(t, "", mc.StoreConn)
+	}
 }
 
 func TestSetMetanaConfig(t *testing.T) {

@@ -20,7 +20,7 @@ var wipeCmd = &cobra.Command{
 		FS := afero.NewOsFs()
 		wd, _ := os.Getwd()
 
-		err := cmd2.RunWipe(cmd, args, FS, wd)
+		err := cmd2.RunWipe(cmd, FS, wd)
 		if err != nil {
 			log.Fatal(err)
 		}

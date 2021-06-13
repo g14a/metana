@@ -27,7 +27,7 @@ var setConfigCmd = &cobra.Command{
 		FS := afero.NewOsFs()
 		wd, _ := os.Getwd()
 
-		cmd2.RunSetConfig(cmd, args, FS, wd)
+		cmd2.RunSetConfig(cmd, FS, wd)
 	},
 }
 

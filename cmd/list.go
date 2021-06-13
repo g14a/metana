@@ -21,7 +21,7 @@ var listCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		cmd2.RunList(cmd, args, wd, FS)
+		cmd2.RunList(cmd, wd, FS)
 	},
 }
 

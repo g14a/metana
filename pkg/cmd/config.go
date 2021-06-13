@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunSetConfig(cmd *cobra.Command, args []string, FS afero.Fs, wd string) {
+func RunSetConfig(cmd *cobra.Command, FS afero.Fs, wd string) {
 	dir, err := cmd.Flags().GetString("dir")
 	if err != nil {
 		log.Fatal(err)

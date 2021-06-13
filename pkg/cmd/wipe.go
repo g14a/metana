@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
+func RunWipe(cmd *cobra.Command, FS afero.Fs, wd string) error {
 	dir, err := cmd.Flags().GetString("dir")
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func RunWipe(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	goModPathString := strings.TrimSpace(string(goModPath))
 
 	if confirmWipe {
-		opts := wipe.WipeOpts{
+		opts := wipe.Opts{
 			GoModPath:     goModPathString,
 			Wd:            wd,
 			MigrationsDir: finalDir,

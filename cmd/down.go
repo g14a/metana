@@ -2,12 +2,8 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"strings"
-
-	"github.com/fatih/color"
-	migrate2 "github.com/g14a/metana/pkg/core/migrate"
 
 	"github.com/g14a/metana/pkg"
 	"github.com/g14a/metana/pkg/config"
@@ -26,56 +22,7 @@ var downCmd = &cobra.Command{
 		FS := afero.NewOsFs()
 		wd, _ := os.Getwd()
 
-		dir, err := cmd.Flags().GetString("dir")
-		if err != nil {
-			return err
-		}
-
-		storeConn, err := cmd.Flags().GetString("store")
-		if err != nil {
-			return err
-		}
-
-		dryRun, err := cmd.Flags().GetBool("dry")
-		if err != nil {
-			return err
-		}
-
-		envFile, err := cmd.Flags().GetString("env")
-		if err != nil {
-			return err
-		}
-
-		mc, _ := config.GetMetanaConfig(FS, wd)
-
-		// Priority range is explicit, then config, then migrations
-		var finalDir string
-
-		if dir != "" {
-			finalDir = dir
-		} else if mc != nil && mc.Dir != "" && dir == "" {
-			fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ .metana.yml found\n"))
-			finalDir = mc.Dir
-		} else {
-			finalDir = "migrations"
-		}
-
-		var finalStoreConn string
-		if storeConn != "" {
-			finalStoreConn = storeConn
-		} else if mc != nil && mc.StoreConn != "" && storeConn == "" {
-			finalStoreConn = mc.StoreConn
-		}
-
-		err = cmd2.RunDown(migrate2.MigrationOptions{
-			MigrationsDir: finalDir,
-			Wd:            wd,
-			Up:            true,
-			Cmd:           cmd,
-			DryRun:        dryRun,
-			StoreConn:     finalStoreConn,
-			EnvFile:       envFile,
-		}, FS)
+		err := cmd2.RunDown(cmd, args, FS, wd)
 		if err != nil {
 			return err
 		}

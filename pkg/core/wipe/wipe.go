@@ -14,7 +14,7 @@ import (
 	"github.com/iancoleman/strcase"
 )
 
-func Wipe(opts WipeOpts) error {
+func Wipe(opts Opts) error {
 	store, err := s.GetStoreViaConn(opts.StoreConn, opts.MigrationsDir, opts.FS, opts.Wd, opts.Environment)
 	if err != nil {
 		return err
@@ -207,7 +207,7 @@ func getMainOfMain() []byte {
 `)
 }
 
-type WipeOpts struct {
+type Opts struct {
 	GoModPath     string
 	Wd            string
 	MigrationsDir string

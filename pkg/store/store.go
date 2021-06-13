@@ -34,14 +34,15 @@ func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string, envi
 	case strings.Contains(connString, "postgres://"):
 		pgOptions, err := pg.ParseURL(connString)
 		if err != nil {
-			log.Println("Couldn't parse postgres connection string")
+			log.Println("")
+			return nil, fmt.Errorf("couldn't parse postgres connection string, %w", err)
 		}
 
 		db := pg.Connect(pgOptions)
 
 		_, err = db.Exec("SELECT 1")
 		if err != nil {
-			return nil, fmt.Errorf("Could not connect to your PostgreSQL DB, ERROR: %w", err)
+			return nil, fmt.Errorf("could not connect to your PostgreSQL DB, ERROR: %w", err)
 		}
 
 		p := PGDB{db: db}

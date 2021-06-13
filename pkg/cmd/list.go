@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunList(cmd *cobra.Command, args []string, wd string, FS afero.Fs) {
+func RunList(cmd *cobra.Command, wd string, FS afero.Fs) {
 	dir, err := cmd.Flags().GetString("dir")
 	if err != nil {
 		log.Fatal(err)

@@ -37,7 +37,7 @@ func TestWipe(t *testing.T) {
 		]
 	}`), 0644)
 
-	opts := WipeOpts{
+	opts := Opts{
 		GoModPath:     "/Users/g14a/metana",
 		Wd:            "/Users/g14a/metana",
 		MigrationsDir: "migrations",

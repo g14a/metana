@@ -19,7 +19,7 @@ func Test_Create(t *testing.T) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewMemMapFs()
 			FS.MkdirAll("/Users/g14a/metana/migration/scripts", 0755)
-			err := RunInit(cmd, args, FS, "/Users/g14a/metana")
+			err := RunInit(cmd, FS, "/Users/g14a/metana")
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
 			return RunCreate(cmd, args, FS, "/Users/g14a/metana")
@@ -44,7 +44,7 @@ func Test_Create_dir(t *testing.T) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewMemMapFs()
 			FS.MkdirAll("/Users/g14a/metana/migration/scripts", 0755)
-			err := RunInit(cmd, args, FS, "/Users/g14a/metana")
+			err := RunInit(cmd, FS, "/Users/g14a/metana")
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
 			return RunCreate(cmd, args, FS, "/Users/g14a/metana")
@@ -69,7 +69,7 @@ func Test_Create_Environment(t *testing.T) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewMemMapFs()
 			FS.MkdirAll("/Users/g14a/metana/schema-mig/scripts", 0755)
-			err := RunInit(cmd, args, FS, "/Users/g14a/metana")
+			err := RunInit(cmd, FS, "/Users/g14a/metana")
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
 			return RunCreate(cmd, args, FS, "/Users/g14a/metana")

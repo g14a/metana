@@ -19,7 +19,7 @@ var initCmd = &cobra.Command{
 		FS := afero.NewOsFs()
 		wd, _ := os.Getwd()
 
-		err := cmd2.RunInit(cmd, args, FS, wd)
+		err := cmd2.RunInit(cmd, FS, wd)
 		if err != nil {
 			log.Fatal(err)
 		}

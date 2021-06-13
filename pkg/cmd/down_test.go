@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"testing"
 
-	migrate2 "github.com/g14a/metana/pkg/core/migrate"
-
 	"github.com/g14a/metana/pkg"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -19,18 +17,13 @@ func Test_Down_AtleastOneMigrationNeeded(t *testing.T) {
 		Use: "down",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewMemMapFs()
-			FS.MkdirAll("/Users/g14a/metana/migration/scripts", 0755)
-			err := RunInit(cmd, args, FS, "/Users/g14a/metana")
+			FS.MkdirAll("/Users/g14a/metana/migrations/scripts", 0755)
+			err := RunInit(cmd, FS, "/Users/g14a/metana")
 			assert.NoError(t, err)
 			err = RunCreate(cmd, []string{"abc"}, FS, "/Users/g14a/metana")
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)
-			return RunDown(migrate2.MigrationOptions{
-				MigrationsDir: "",
-				Wd:            "/Users/g14a/metana",
-				Up:            false,
-				Cmd:           cmd,
-			}, FS)
+			return RunDown(cmd, args, FS, "migrations")
 		},
 	}
 	downCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")

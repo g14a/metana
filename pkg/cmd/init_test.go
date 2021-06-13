@@ -19,7 +19,7 @@ func Test_Init(t *testing.T) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewMemMapFs()
 			cmd.SetOut(&buf)
-			return RunInit(cmd, args, FS, "/Users/g14a/metana")
+			return RunInit(cmd, FS, "/Users/g14a/metana")
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
@@ -39,7 +39,7 @@ func Test_Init_dir(t *testing.T) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewMemMapFs()
 			cmd.SetOut(&buf)
-			return RunInit(cmd, args, FS, "/Users/g14a/metana")
+			return RunInit(cmd, FS, "/Users/g14a/metana")
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
@@ -60,7 +60,7 @@ func Test_Init_config(t *testing.T) {
 			FS := afero.NewMemMapFs()
 			cmd.SetOut(&buf)
 			afero.WriteFile(FS, "/Users/g14a/metana/.metana.yml", []byte("dir: schema-mig\nstore: \n"), 0644)
-			return RunInit(cmd, args, FS, "/Users/g14a/metana")
+			return RunInit(cmd, FS, "/Users/g14a/metana")
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
@@ -80,7 +80,7 @@ func Test_Init_Environment(t *testing.T) {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewMemMapFs()
 			cmd.SetOut(&buf)
-			return RunInit(cmd, args, FS, "/Users/g14a/metana")
+			return RunInit(cmd, FS, "/Users/g14a/metana")
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
@@ -101,7 +101,7 @@ func Test_Init_EnvironmentConfig(t *testing.T) {
 			FS := afero.NewMemMapFs()
 			cmd.SetOut(&buf)
 			afero.WriteFile(FS, "/Users/g14a/metana/.metana.yml", []byte("dir: schema-mig\nstore: \"\"\n"), 0644)
-			return RunInit(cmd, args, FS, "/Users/g14a/metana")
+			return RunInit(cmd, FS, "/Users/g14a/metana")
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
