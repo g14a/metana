@@ -22,12 +22,12 @@ An abstract task migration tool written in Go for Go services. Database and non 
     * [Building from Source](https://github.com/g14a/metana#building-from-source)
     * [Docker](https://github.com/g14a/metana#docker)
 * [Usage](https://github.com/g14a/metana#usage)
-    * [Init](https://github.com/g14a/metana#init)
-    * [Create](https://github.com/g14a/metana#create)
-    * [Up](https://github.com/g14a/metana#up)
-    * [Down](https://github.com/g14a/metana#down)
-    * [Wipe](https://github.com/g14a/metana#wipe)
-    * [List](https://github.com/g14a/metana#list)
+    * [Init](https://github.com/g14a/metana#init) ✅
+    * [Create](https://github.com/g14a/metana#create) 👌 
+    * [Up](https://github.com/g14a/metana#up) ⬆️
+    * [Down](https://github.com/g14a/metana#down) ⬇️
+    * [Wipe](https://github.com/g14a/metana#wipe) 💅
+    * [List](https://github.com/g14a/metana#list) 
 * [Features](https://github.com/g14a/metana#features)
     * [Custom directory to store migrations](https://github.com/g14a/metana#custom-directory-to-store-migrations)
     * [Run migrations until a certain point](https://github.com/g14a/metana#run-a-migration-until-a-certain-point)
