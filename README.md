@@ -12,8 +12,37 @@
 
 An abstract task migration tool written in Go for Go services. Database and non database migrations management brought to your CLI.
 
-Checkout installation, features and documentation at https://g14a.github.io/metana
+# Table of Contents
 
+* [Use case](https://github.com/g14a/metana#use-case)
+* [Installation](https://github.com/g14a/metana#installation)
+    * [Using Go](https://github.com/g14a/metana#using-go)
+    * [macOS](https://github.com/g14a/metana#mac)
+    * [Linux](https://github.com/g14a/metana#linux)
+    * [Building from Source](https://github.com/g14a/metana#building-from-source)
+    * [Docker](https://github.com/g14a/metana#docker)
+* [Usage](https://github.com/g14a/metana#usage)
+    * [Init](https://github.com/g14a/metana#init)
+    * [Create](https://github.com/g14a/metana#create)
+    * [Up](https://github.com/g14a/metana#up)
+    * [Down](https://github.com/g14a/metana#down)
+    * [Wipe](https://github.com/g14a/metana#wipe)
+    * [List](https://github.com/g14a/metana#list)
+* [Features](https://github.com/g14a/metana#features)
+    * [Custom directory to store migrations](https://github.com/g14a/metana#custom-directory-to-store-migrations)
+    * [Run migrations until a certain point](https://github.com/g14a/metana#run-a-migration-until-a-certain-point)
+    * [Store and Track your migrations in your favourite database](https://github.com/g14a/metana#store-and-track-your-migrations-in-your-favourite-database)
+    * [Dry Run Migrations](https://github.com/g14a/metana#dry-run-migrations)
+    * [Custom Config](https://github.com/g14a/metana#custom-config)
+    * [Wipe out stale migrations](https://github.com/g14a/metana#wipe-out-stale-migrations)
+    * [Custom Templates for Migrations](https://github.com/g14a/metana#add-custom-templates-for-migrations)
+    * [Shell Completions](https://github.com/g14a/metana#shell-completions)
+    * [Secrets and Environment Keys](https://github.com/g14a/metana#secrets-and-environment-keys-while-running-migrations)
+    * [Managing Environments](https://github.com/g14a/metana#environments)
+        * [Create a migration in an environment](https://github.com/g14a/metana#create-a-migration-in-a-specific-environment-with-the-same---env-flag)
+        * [Run migrations in an environment](https://github.com/g14a/metana#run-migrationsboth-up-and-down-in-an-environment)
+        * [Config for Environments](https://github.com/g14a/metana#config-for-environments)
+    
 # Use case
 
 The motivation behind creating this tool, is to abstract away the database part. If your task can be completed with Pure Go or via a Go driver of your service, then this is for you. Since it makes use of the Go runtime, you can even perform database migrations like PostgreSQL, Mongo, Redis, Elasticsearch, GCP Buckets etc. You just need to be able to interact with your data store or complete your task using Go.
