@@ -1,9 +1,10 @@
 package pkg
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cobra"
 
 	"github.com/spf13/afero"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func ListMigrations(wd, migrationsDir string, fs afero.Fs, environment string) error {
+func ListMigrations(cmd *cobra.Command, wd, migrationsDir string, fs afero.Fs, environment string) error {
 	migrations, err := GetMigrations(wd, migrationsDir, fs, environment)
 	if err != nil {
 		return err
@@ -24,7 +25,7 @@ func ListMigrations(wd, migrationsDir string, fs afero.Fs, environment string) e
 			data = append(data, []string{f.Name, f.ModTime})
 		}
 
-		table := tablewriter.NewWriter(os.Stdout)
+		table := tablewriter.NewWriter(cmd.OutOrStdout())
 		table.SetHeader([]string{"Migration", "Last Modified"})
 
 		for _, v := range data {

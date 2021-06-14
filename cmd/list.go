@@ -15,13 +15,13 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List existing migrations",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		FS := afero.NewOsFs()
 		wd, err := os.Getwd()
 		if err != nil {
 			log.Fatal(err)
 		}
-		cmd2.RunList(cmd, wd, FS)
+		return cmd2.RunList(cmd, wd, FS)
 	},
 }
 

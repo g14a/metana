@@ -36,6 +36,7 @@ func RunInit(cmd *cobra.Command, FS afero.Fs, wd string) error {
 		if dir == "" && mc != nil && mc.Dir != "" {
 			dir = mc.Dir
 			finalDir = dir
+			setMc.Environments = mc.Environments
 		} else if dir != "" {
 			finalDir = dir
 		} else {

@@ -36,19 +36,18 @@ func SetMetanaConfig(mc *MetanaConfig, FS afero.Fs, wd string) error {
 
 func SetEnvironmentMetanaConfig(mc *MetanaConfig, env, store string, FS afero.Fs, wd string) error {
 	environments := mc.Environments
-	if len(environments) == 0 {
-		mc.Environments = append(mc.Environments, Environment{
-			Name:  env,
-			Store: store,
-		})
-	}
 	for i, e := range environments {
 		if e.Name == env {
 			e.Name = env
 			e.Store = store
 			mc.Environments[i] = e
+			break
 		}
 	}
+	mc.Environments = append(mc.Environments, Environment{
+		Name:  env,
+		Store: store,
+	})
 	b, err := yaml.Marshal(&mc)
 	if err != nil {
 		return err
