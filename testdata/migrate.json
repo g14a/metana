@@ -1,0 +1,18 @@
+{
+	"LastRun": "1621746410-AddData.go",
+	"LastRunTS": 1621746410,
+	"Migrations": [
+		{
+			"title": "1621746399-InitSchema.go",
+			"timestamp": 1621746399
+		},
+		{
+			"title": "1621746406-AddIndexes.go",
+			"timestamp": 1621746406
+		},
+		{
+			"title": "1621746410-AddData.go",
+			"timestamp": 1621746410
+		}
+	]
+}

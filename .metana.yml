@@ -1,9 +1,2 @@
-dir: migrations
-store: ""
-environments:
-- name: dev
-  store: ""
-- name: staging
-  store: ""
-- name: prod
-  store: ""
+dir: testdata
+store: ''
