@@ -42,9 +42,16 @@ func Wipe(opts Opts) error {
 	for _, m := range track.Migrations {
 		for _, lm := range localMigrations {
 			if lm.Name == m.Title {
-				err := opts.FS.Remove(opts.Wd + "/" + opts.MigrationsDir + "/scripts/" + m.Title)
-				if err != nil {
-					return err
+				if opts.Environment == "" {
+					err := opts.FS.Remove(opts.Wd + "/" + opts.MigrationsDir + "/scripts/" + m.Title)
+					if err != nil {
+						return err
+					}
+				} else {
+					err := opts.FS.Remove(opts.Wd + "/" + opts.MigrationsDir + "/environments/" + opts.Environment + "/scripts/" + m.Title)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -69,6 +76,11 @@ func Wipe(opts Opts) error {
 		if err != nil {
 			return err
 		}
+	} else {
+		err = afero.WriteFile(opts.FS, opts.Wd+"/"+opts.MigrationsDir+"/environments/"+opts.Environment+"/main.go", fmtBytes, 0644)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -83,7 +95,7 @@ func genMainAfterWipe(goModPath, wd, migrationsDir string, FS afero.Fs, environm
 	}
 
 	// imports component
-	mainImportsComponent := getMainAndImportsComponent(goModPath, migrationsDir)
+	mainImportsComponent := getMainAndImportsComponent(goModPath, migrationsDir, environment)
 	mainBuilder.Write(mainImportsComponent)
 
 	// Up component
@@ -108,18 +120,31 @@ func genMainAfterWipe(goModPath, wd, migrationsDir string, FS afero.Fs, environm
 	return mainBuilder, nil
 }
 
-func getMainAndImportsComponent(goModPath, migrationsDir string) []byte {
+func getMainAndImportsComponent(goModPath, migrationsDir, environment string) []byte {
 
-	return []byte(`// This file is auto generated. DO NOT EDIT!
+	if environment == "" {
+		return []byte(`// This file is auto generated. DO NOT EDIT!
 	package main
 	
 	import (
 		"flag"
 		"fmt"
 		"os"` +
-		"\n\"" +
-		goModPath + "/" + migrationsDir + "/scripts\"\n" +
-		")")
+			"\n\"" +
+			goModPath + "/" + migrationsDir + "/scripts\"\n" +
+			")")
+	} else {
+		return []byte(`// This file is auto generated. DO NOT EDIT!
+	package main
+	
+	import (
+		"flag"
+		"fmt"
+		"os"` +
+			"\n\"" +
+			goModPath + "/" + migrationsDir + "/environments/" + environment + "/scripts\"\n" +
+			")")
+	}
 }
 
 func getMigrateComponent(m pkg.Migration, up bool) []byte {

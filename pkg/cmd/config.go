@@ -40,15 +40,31 @@ func RunSetConfig(cmd *cobra.Command, FS afero.Fs, wd string) error {
 			fmt.Fprintf(cmd.OutOrStdout(), color.YellowString("No environment configured yet.\nTry initializing one with `metana init --env "+env+"`\n"))
 			return nil
 		}
+		for i, e := range mc.Environments {
+			if e.Name == env {
+				if dir != "" {
+					e.Dir = dir
+				}
+				if store != "" {
+					e.Store = store
+				}
+				mc.Environments[i] = e
+			}
+		}
+		if dir != "" {
+			fmt.Fprintf(cmd.OutOrStdout(), color.YellowString(" ! Make sure you rename your exising environments directory to `"+dir+"`\n"))
+		}
 		err = config.SetEnvironmentMetanaConfig(mc, env, store, FS, wd)
 		if err != nil {
 			return err
 		}
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Set config\n"))
 		return nil
 	}
 
 	if dir != "" {
 		mc.Dir = dir
+		fmt.Fprintf(cmd.OutOrStdout(), color.YellowString(" ! Make sure you rename your exising migrations directory to `"+dir+"`\n"))
 	}
 
 	if store != "" {
@@ -59,6 +75,8 @@ func RunSetConfig(cmd *cobra.Command, FS afero.Fs, wd string) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Set config\n"))
 
 	return nil
 }

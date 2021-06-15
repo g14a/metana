@@ -68,7 +68,7 @@ func Test_Create_Environment(t *testing.T) {
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			FS := afero.NewMemMapFs()
-			FS.MkdirAll("/Users/g14a/metana/schema-mig/scripts", 0755)
+			FS.MkdirAll("/Users/g14a/metana/schema-mig/environments/dev/scripts", 0755)
 			err := RunInit(cmd, FS, "/Users/g14a/metana")
 			assert.NoError(t, err)
 			cmd.SetOut(&buf)

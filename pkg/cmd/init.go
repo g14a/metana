@@ -25,7 +25,10 @@ func RunInit(cmd *cobra.Command, FS afero.Fs, wd string) error {
 		return err
 	}
 
-	mc, _ := config.GetMetanaConfig(FS, wd)
+	mc, err := config.GetMetanaConfig(FS, wd)
+	if err != nil {
+		return err
+	}
 	// Priority range is explicit, then config, then migrations
 	var finalDir string
 
@@ -33,21 +36,38 @@ func RunInit(cmd *cobra.Command, FS afero.Fs, wd string) error {
 
 	switch {
 	case environment != "":
-		if dir == "" && mc != nil && mc.Dir != "" {
-			dir = mc.Dir
-			finalDir = dir
-			setMc.Environments = mc.Environments
-		} else if dir != "" {
-			finalDir = dir
-		} else {
+		if dir == "" && mc.Dir == "" {
 			finalDir = "migrations"
+		} else {
+			finalDir = mc.Dir
 		}
-		envExists := environments.CheckExistingEnvironment(FS, wd, dir, environment)
+		envExists := environments.CheckExistingEnvironment(FS, wd, finalDir, environment)
 		if envExists {
 			fmt.Fprintf(cmd.OutOrStdout(), color.YellowString("Environment `"+environment+"` already exists\n"))
 			return nil
 		}
-		environments.CheckExistingMigrationSetup(FS, wd)
+		if dir == "" && mc != nil && mc.Dir != "" {
+			finalDir = mc.Dir
+			setMc.Environments = append(mc.Environments, config.Environment{
+				Name:  environment,
+				Dir:   environment,
+				Store: "",
+			})
+		} else if dir != "" && mc != nil {
+			finalDir = dir
+			setMc.Environments = append(setMc.Environments, config.Environment{
+				Name:  environment,
+				Dir:   environment,
+				Store: "",
+			})
+		} else {
+			finalDir = "migrations"
+			setMc.Environments = append(setMc.Environments, config.Environment{
+				Name:  environment,
+				Dir:   environment,
+				Store: "",
+			})
+		}
 		setMc.Dir = finalDir
 		err := config.SetEnvironmentMetanaConfig(setMc, environment, "", FS, wd)
 		if err != nil {

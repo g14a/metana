@@ -14,8 +14,8 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage your local metana config in .metana.yml",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return nil
 	},
 }
 
@@ -33,7 +33,7 @@ var setConfigCmd = &cobra.Command{
 
 func init() {
 	setConfigCmd.Flags().StringP("store", "s", "", "Set your store")
-	setConfigCmd.Flags().StringP("dir", "d", "migrations", "Set your migrations directory")
+	setConfigCmd.Flags().StringP("dir", "d", "", "Set your migrations directory")
 	setConfigCmd.Flags().StringP("env", "e", "", "Set config for your environment")
 
 	configCmd.AddCommand(setConfigCmd)

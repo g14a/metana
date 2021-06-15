@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/g14a/metana/pkg/core/environments"
+
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg"
 	"github.com/g14a/metana/pkg/config"
@@ -42,6 +44,11 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 		finalDir = mc.Dir
 	} else {
 		finalDir = "migrations"
+	}
+
+	if environment != "" && !environments.CheckExistingEnvironment(FS, wd, finalDir, environment) {
+		fmt.Fprintf(cmd.OutOrStdout(), color.YellowString("No environment configured yet.\nTry initializing one with `metana init --env "+environment+"`\n"))
+		return nil
 	}
 
 	exists, err := gen2.MigrationExists(wd, finalDir, args[0], FS, environment)
