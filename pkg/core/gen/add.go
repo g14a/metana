@@ -2,9 +2,11 @@ package gen
 
 import (
 	"bytes"
+	"github.com/g14a/metana/pkg"
 	"go/format"
 	"strings"
 	"text/template"
+	"unicode"
 
 	"github.com/spf13/afero"
 
@@ -15,69 +17,54 @@ import (
 
 func Regen(opts RegenOpts) error {
 	lower := strcase.ToLowerCamel(opts.MigrationName)
-	var input []byte
-	if opts.Environment == "" {
-		inputBytes, err := afero.ReadFile(opts.FS, opts.MigrationsDir+"/main.go")
-		if err != nil {
-			return err
-		}
-		input = inputBytes
-	} else {
-		inputBytes, err := afero.ReadFile(opts.FS, opts.MigrationsDir+"/environments/"+opts.Environment+"/main.go")
-		if err != nil {
-			return err
-		}
-		input = inputBytes
-	}
-
-	lines := strings.Split(string(input), "\n")
-
-	var firstReturn bool
-	timeStamp := strings.TrimLeft(strings.Split(opts.Filename, "-")[0], "scripts/")
 
 	addMigrationTemplate := template.New("add")
 
-	nm := tpl2.NewMigration{
+	var migrationsToCreate []tpl2.NewMigration
+
+	for _, m := range opts.Migrations {
+		migrationName := strings.TrimLeftFunc(m.Name, func(r rune) bool {
+			return unicode.IsNumber(r) || r == '-'
+		})
+		ts := strings.TrimRightFunc(m.Name, func(r rune) bool {
+			return !unicode.IsNumber(r)
+		})
+		migrationsToCreate = append(migrationsToCreate, tpl2.NewMigration{
+			Lower:         strcase.ToLowerCamel(strings.TrimRight(migrationName, ".go")),
+			MigrationName: strings.TrimRight(migrationName, ".go"),
+			Timestamp:     ts,
+			Filename:      m.Name,
+		})
+	}
+
+	timeStamp := strings.TrimLeft(strings.Split(opts.Filename, "-")[0], "scripts/")
+
+	migrationsToCreate = append(migrationsToCreate, tpl2.NewMigration{
 		Lower:         lower,
 		MigrationName: opts.MigrationName,
 		Timestamp:     timeStamp,
 		Filename:      opts.Filename,
+	})
+
+	addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl2.NewAddMigrationTemplate()))
+	if errAdd != nil {
+		return errAdd
 	}
 
-	for i, line := range lines {
-		if !firstReturn && strings.Contains(line, "return nil") {
-			var tplBuffer bytes.Buffer
-			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl2.AddMigrationTemplate(true)))
-			if errAdd != nil {
-				return errAdd
-			}
-			err := addMigrationTemplate.Execute(&tplBuffer, nm)
-			if err != nil {
-				return err
-			}
+	var tplBuffer bytes.Buffer
 
-			lines[i] = tplBuffer.String()
-			firstReturn = true
-		} else if strings.Contains(line, "func MigrateDown") {
-			var tplBuffer bytes.Buffer
-			addMigrationTemplate, errAdd := addMigrationTemplate.Parse(string(tpl2.AddMigrationTemplate(false)))
-			if errAdd != nil {
-				return errAdd
-			}
-			err := addMigrationTemplate.Execute(&tplBuffer, nm)
-			if err != nil {
-				return err
-			}
-			if opts.FirstMigration {
-				tplBuffer.WriteString("\nreturn nil")
-			}
-			lines[i+1] = tplBuffer.String()
-		}
+	params := Params{
+		Pwd:    opts.GoModPath,
+		Dir:    opts.MigrationsDir,
+		Create: migrationsToCreate,
 	}
 
-	output := strings.Join(lines, "\n")
+	err := addMigrationTemplate.Execute(&tplBuffer, params)
+	if err != nil {
+		return err
+	}
 
-	fmtOutput, err := format.Source([]byte(output))
+	fmtOutput, err := format.Source(tplBuffer.Bytes())
 	if err != nil {
 		return err
 	}
@@ -103,5 +90,13 @@ type RegenOpts struct {
 	Filename       string
 	FirstMigration bool
 	Environment    string
+	GoModPath      string
+	Migrations     []pkg.Migration
 	FS             afero.Fs
+}
+
+type Params struct {
+	Pwd    string
+	Dir    string
+	Create []tpl2.NewMigration
 }

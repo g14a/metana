@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"github.com/g14a/metana/pkg/core/environments"
@@ -94,12 +95,24 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 		trimmedFile = strings.TrimPrefix(fileName, finalDir+"/environments/"+environment+"/scripts/")
 	}
 
+	goModPath, err := exec.Command("go", "list", "-m").Output()
+	if err != nil {
+		return err
+	}
+
+	goModPathString := strings.TrimSpace(string(goModPath))
+	if goModPathString == "" {
+		color.Yellow("No go module found")
+	}
+
 	regenOpts := gen2.RegenOpts{
 		MigrationsDir:  finalDir,
 		MigrationName:  strcase.ToCamel(args[0]),
 		Filename:       trimmedFile,
 		FirstMigration: firstMigration,
 		Environment:    environment,
+		GoModPath:      goModPathString,
+		Migrations:     migrations,
 		FS:             FS,
 	}
 

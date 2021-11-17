@@ -30,7 +30,6 @@ func Run(opts MigrationOptions) (string, error) {
 		}
 	}
 
-	fmt.Println(opts.Wd + "/" + opts.MigrationsDir + "/environments/" + opts.Environment)
 	migrationsRun := exec.Command("go", migrationArgs...)
 	migrationsRun.Env = append(os.Environ(), envKeys...)
 	if opts.Environment == "" {

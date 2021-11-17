@@ -35,6 +35,7 @@ func TestRegen(t *testing.T) {
 		FirstMigration: true,
 		Environment:    "",
 		FS:             FS,
+		GoModPath:      "/Users/g14a/metana",
 	}
 
 	err = Regen(rOpts)
