@@ -4,58 +4,39 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
-	"log"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
 
-	"github.com/g14a/metana/pkg/core"
-
 	"github.com/g14a/metana/pkg"
-
-	"github.com/spf13/afero"
-
-	tpl2 "github.com/g14a/metana/pkg/core/tpl"
-
+	"github.com/g14a/metana/pkg/core"
+	"github.com/g14a/metana/pkg/core/tpl"
 	"github.com/iancoleman/strcase"
+	"github.com/spf13/afero"
 )
 
 func CreateMigrationFile(opts CreateMigrationOpts) (string, error) {
-	nm := tpl2.NewMigration{
-		MigrationName: strcase.ToCamel(opts.File),
-		Timestamp:     strconv.Itoa(int(time.Now().Unix())),
-		FirstChar:     string(opts.File[0]),
-	}
-
-	var fileName string
-	if opts.Environment == "" {
-		fileName = fmt.Sprintf(opts.MigrationsDir+"/scripts/%s-%s.go", nm.Timestamp, nm.MigrationName)
-	} else {
-		fileName = fmt.Sprintf(opts.MigrationsDir+"/environments/"+opts.Environment+"/scripts/%s-%s.go", nm.Timestamp, nm.MigrationName)
-	}
-
-	mainFile, err := opts.FS.Create(fileName)
-	if err != nil {
-		return "", err
-	}
-
-	defer func(mainFile afero.File) {
-		err := mainFile.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(mainFile)
+	timestamp := strconv.Itoa(int(time.Now().Unix()))
+	migrationName := strcase.ToCamel(opts.File)
+	fileName := fmt.Sprintf("%s/scripts/%s_%s.go", opts.MigrationsDir, timestamp, opts.File)
 
 	upBuilder, downBuilder := core.ParseCustomTemplate(opts.Wd, opts.CustomTmpl, opts.FS)
 
+	// Use standalone template
 	mainTemplate := template.Must(
-		template.New("root").
-			Parse(string(tpl2.MigrationTemplate(upBuilder, downBuilder))))
+		template.New("standalone").
+			Parse(string(tpl.StandaloneMigrationTemplate(upBuilder, downBuilder))),
+	)
 
-	buff := new(bytes.Buffer)
-	err = mainTemplate.Execute(buff, nm)
-	if err != nil {
+	templateData := map[string]string{
+		"MigrationName": migrationName,
+		"Timestamp":     timestamp,
+		"Filename":      fmt.Sprintf("%s_%s.go", timestamp, opts.File),
+	}
+
+	var buff bytes.Buffer
+	if err := mainTemplate.Execute(&buff, templateData); err != nil {
 		return "", err
 	}
 
@@ -64,85 +45,17 @@ func CreateMigrationFile(opts CreateMigrationOpts) (string, error) {
 		return "", err
 	}
 
-	err = afero.WriteFile(opts.FS, fileName, fmtBytes, 0644)
-	if err != nil {
+	if err := afero.WriteFile(opts.FS, fileName, fmtBytes, 0644); err != nil {
 		return "", err
 	}
 
 	return fileName, nil
 }
 
-func CreateInitConfig(migrationsDir, goModPath string, FS afero.Fs, environment string) error {
-	var mrFile afero.File
-
-	if environment == "" {
-		migrationRunFile, err := FS.Create(migrationsDir + "/main.go")
-		if err != nil {
-			return err
-		}
-		mrFile = migrationRunFile
-	} else {
-		migrationRunFile, err := FS.Create(migrationsDir + "/environments/" + environment + "/main.go")
-		if err != nil {
-			return err
-		}
-		mrFile = migrationRunFile
-	}
-
-	defer func(migrationRunFile afero.File) {
-		err := migrationRunFile.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(mrFile)
-
-	migrationRunTemplate := template.Must(
-		template.New("main").
-			Parse(string(tpl2.InitMigrationRunTemplate())))
-
-	var params map[string]interface{}
-
-	if environment == "" {
-		params = map[string]interface{}{
-			"pwd": goModPath,
-			"dir": migrationsDir,
-		}
-	} else {
-		params = map[string]interface{}{
-			"pwd": goModPath,
-			"dir": migrationsDir + "/environments/" + environment,
-		}
-	}
-
-	buff := new(bytes.Buffer)
-	err := migrationRunTemplate.Execute(buff, params)
-	if err != nil {
-		return err
-	}
-
-	fmtBytes, err := format.Source(buff.Bytes())
-	if err != nil {
-		return err
-	}
-	if environment == "" {
-		err = afero.WriteFile(FS, migrationsDir+"/main.go", fmtBytes, 0644)
-		if err != nil {
-			return err
-		}
-	} else {
-		err = afero.WriteFile(FS, migrationsDir+"/environments/"+environment+"/main.go", fmtBytes, 0644)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func MigrationExists(wd, migrationsDir, migrationName string, FS afero.Fs, environment string) (bool, error) {
+func MigrationExists(wd, migrationsDir, migrationName string, FS afero.Fs) (bool, error) {
 	camelCaseMigration := strcase.ToCamel(migrationName)
 
-	migrations, err := pkg.GetMigrations(wd, migrationsDir, FS, environment)
+	migrations, err := pkg.GetMigrations(wd, migrationsDir, FS)
 	if err != nil {
 		return false, err
 	}
@@ -165,6 +78,5 @@ type CreateMigrationOpts struct {
 	MigrationsDir string
 	File          string
 	CustomTmpl    string
-	Environment   string
 	FS            afero.Fs
 }

@@ -9,25 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateInitConfig(t *testing.T) {
-	FS := afero.NewMemMapFs()
-
-	os.Chdir("/Users/g14a/metana")
-
-	FS.MkdirAll("/Users/g14a/metana/migrations", 0755)
-	FS.MkdirAll("/Users/g14a/metana/migrations/scripts", 0755)
-
-	err := CreateInitConfig("migrations", "github.com/g14a/metana", FS, "")
-	assert.Equal(t, true, err == nil)
-
-	bytes, err := afero.ReadFile(FS, "migrations/main.go")
-	assert.Equal(t, true, err == nil)
-
-	expectedLines := getExpectedLinesInit()
-
-	pkg.ExpectLines(t, string(bytes), expectedLines...)
-}
-
 func TestMigrationExists(t *testing.T) {
 
 	FS := afero.NewMemMapFs()
@@ -86,7 +67,7 @@ func TestMigrationExists(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		exists, err := MigrationExists("/Users/g14a/metana", tt.inputMigrationsDir, tt.inputMigrationName, tt.FS, tt.Environment)
+		exists, err := MigrationExists("/Users/g14a/metana", tt.inputMigrationsDir, tt.inputMigrationName, tt.FS)
 		assert.Equal(t, tt.Exists, exists)
 		assert.Equal(t, true, err == nil)
 	}
@@ -103,7 +84,6 @@ func TestCreateMigrationFile(t *testing.T) {
 		MigrationsDir: "migrations",
 		File:          "initSchema",
 		CustomTmpl:    "",
-		Environment:   "",
 		FS:            FS,
 	}
 

@@ -2,7 +2,6 @@ package store
 
 import (
 	"testing"
-	"time"
 
 	"github.com/g14a/metana/pkg/types"
 	"github.com/stretchr/testify/assert"
@@ -10,40 +9,42 @@ import (
 
 func TestProcessLogs(t *testing.T) {
 	tests := []struct {
-		input       string
-		wantedTrack types.Track
-		wantedNum   int
+		input      string
+		wantNum    int
+		wantTitles []string
 	}{
 		{
-			input: "1621081055-InitSchema.go\n1621084125-AddIndexes.go\n1621084135-AddFKeys.go",
-			wantedTrack: types.Track{
-				LastRun:   "1621084135-AddFKeys.go",
-				LastRunTS: 1621084135,
-				Migrations: []types.Migration{
-					{
-						Title:     "1621081055-InitSchema.go",
-						Timestamp: 1621081055,
-					}, {
-						Title:     "1621084125-AddIndexes.go",
-						Timestamp: 1621084125,
-					}, {
-						Title:     "1621084135-AddFKeys.go",
-						Timestamp: 1621084135,
-					},
-				},
+			input:   "1621081055-InitSchema.go\n1621084125-AddIndexes.go\n1621084135-AddFKeys.go",
+			wantNum: 3,
+			wantTitles: []string{
+				"1621081055-InitSchema.go",
+				"1621084125-AddIndexes.go",
+				"1621084135-AddFKeys.go",
 			},
-			wantedNum: 3,
-		}, {}, {
-			input:       "",
-			wantedTrack: types.Track{},
-			wantedNum:   0,
+		},
+		{
+			input:      "",
+			wantNum:    0,
+			wantTitles: nil,
 		},
 	}
 
 	for _, tt := range tests {
-		wantedTrack, num := ProcessLogs(tt.input)
-		assert.Equal(t, tt.wantedNum, num)
-		assert.Equal(t, tt.wantedTrack, wantedTrack)
+		gotTrack, gotNum := ProcessLogs(tt.input)
+
+		assert.Equal(t, tt.wantNum, gotNum)
+		if tt.wantNum == 0 {
+			assert.Empty(t, gotTrack.Migrations)
+			assert.Empty(t, gotTrack.LastRun)
+		} else {
+			assert.Equal(t, tt.wantTitles[len(tt.wantTitles)-1], gotTrack.LastRun)
+			var gotTitles []string
+			for _, m := range gotTrack.Migrations {
+				gotTitles = append(gotTitles, m.Title)
+				assert.NotEmpty(t, m.ExecutedAt, "ExecutedAt should be set")
+			}
+			assert.Equal(t, tt.wantTitles, gotTitles)
+		}
 	}
 }
 
@@ -51,58 +52,45 @@ func TestTrackToSetDown(t *testing.T) {
 	tests := []struct {
 		inputTrack  types.Track
 		inputNum    int
-		wantedTrack types.Track
+		wantTitles  []string
+		wantLastRun string
 	}{
 		{
 			inputTrack: types.Track{
-				LastRun:   "1621095067-Abc.go",
-				LastRunTS: int(time.Now().Unix()),
+				LastRun: "1621095067-Abc.go",
 				Migrations: []types.Migration{
-					{
-						Title:     "1621095067-Abc.go",
-						Timestamp: 1621095067,
-					},
+					{Title: "1621095067-Abc.go", ExecutedAt: "now"},
 				},
 			},
 			inputNum:    1,
-			wantedTrack: types.Track{},
+			wantTitles:  nil,
+			wantLastRun: "",
 		},
 		{
 			inputTrack: types.Track{
-				LastRun:   "1621097000-InitSchema.go",
-				LastRunTS: int(time.Now().Unix()),
+				LastRun: "1621097000-InitSchema.go",
 				Migrations: []types.Migration{
-					{
-						Title:     "1621095067-Abc.go",
-						Timestamp: 1621095067,
-					}, {
-						Title:     "1621096992-Random.go",
-						Timestamp: 1621096992,
-					}, {
-						Title:     "1621096995-AddIndexes.go",
-						Timestamp: 1621096995,
-					}, {
-						Title:     "1621097000-InitSchema.go",
-						Timestamp: 1621097000,
-					},
+					{Title: "1621095067-Abc.go", ExecutedAt: "now"},
+					{Title: "1621096992-Random.go", ExecutedAt: "now"},
+					{Title: "1621096995-AddIndexes.go", ExecutedAt: "now"},
+					{Title: "1621097000-InitSchema.go", ExecutedAt: "now"},
 				},
 			},
 			inputNum: 3,
-			wantedTrack: types.Track{
-				LastRun:   "1621095067-Abc.go",
-				LastRunTS: 1621095067,
-				Migrations: []types.Migration{
-					{
-						Title:     "1621095067-Abc.go",
-						Timestamp: 1621095067,
-					},
-				},
+			wantTitles: []string{
+				"1621095067-Abc.go",
 			},
+			wantLastRun: "1621095067-Abc.go",
 		},
 	}
 
 	for _, tt := range tests {
-		resultTrack := TrackToSetDown(tt.inputTrack, tt.inputNum)
-		assert.Equal(t, tt.wantedTrack, resultTrack)
+		got := TrackToSetDown(tt.inputTrack, tt.inputNum)
+		var gotTitles []string
+		for _, m := range got.Migrations {
+			gotTitles = append(gotTitles, m.Title)
+		}
+		assert.Equal(t, tt.wantTitles, gotTitles)
+		assert.Equal(t, tt.wantLastRun, got.LastRun)
 	}
 }

@@ -30,7 +30,6 @@ var createCmd = &cobra.Command{
 func init() {
 	createCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	createCmd.Flags().StringP("template", "t", "", "Specify a custom Go template with Up and Down functions")
-	createCmd.Flags().StringP("env", "e", "", "Specify an environment to create the migration")
 	rootCmd.AddCommand(createCmd)
 
 	// Here you will define your flags and configuration settings.

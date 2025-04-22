@@ -1,218 +1,73 @@
 package tpl
 
-func MigrationTemplate(customUp, customDown string) []byte {
-	finalUpComponent := `
-		fmt.Println("{{ .MigrationName }} up")
-		return nil`
+// StandaloneMigrationTemplate returns the Go source code for a standalone migration file.
+// This file is compiled and executed during migrations using `go run`.
+// The output must include "__COMPLETE__: <filename>" on success for Metana to track it.
+func StandaloneMigrationTemplate(customUp, customDown string) []byte {
+	upBody := `fmt.Println("{{ .MigrationName }} up")`
+	downBody := `fmt.Println("{{ .MigrationName }} down")`
 
 	if customUp != "" {
-		finalUpComponent = customUp
+		upBody = customUp
 	}
-
-	finalDownComponent := `
-		fmt.Println("{{ .MigrationName }} down")
-		return nil`
-
 	if customDown != "" {
-		finalDownComponent = customDown
+		downBody = customDown
 	}
 
-	return []byte(`package scripts
+	return []byte(`//go:build ignore
+// +build ignore
 
-	import (
-		"fmt"
-	)
-	
-	type {{ .MigrationName }}Migration struct {
-		Timestamp int
-		Filename  string
-		MigrationName string
-	}
-	
-	func ({{ .FirstChar }} *{{ .MigrationName }}Migration) Up() error {` +
-		finalUpComponent + `
-	}
-	
-	func ({{ .FirstChar }} *{{ .MigrationName }}Migration) Down() error {` +
-		finalDownComponent + `
-	}
-`)
-}
+// ⚠️ AUTO-GENERATED FILE. DO NOT IMPORT THIS INTO YOUR MAIN APPLICATION.
+// ⚠️ ONLY modify the 'up()' and 'down()' functions to write your migration logic.
 
-func InitMigrationRunTemplate() []byte {
-	return []byte(`// This file is auto generated. DO NOT EDIT!
-	package main
-	
-	import (
-		"flag"
-		"fmt"
-		"os"
-
-		"{{ .pwd }}/{{ .dir }}/scripts"
-	)
-	
-	func MigrateUp(upUntil string, lastRunTS int) (err error) {
-		return nil
-	}
-	
-	func MigrateDown(downUntil string, lastRunTS int) (err error) {
-		return nil
-	}
-	
-	func main() {
-		upCmd := flag.NewFlagSet("up", flag.ExitOnError)
-		downCmd := flag.NewFlagSet("down", flag.ExitOnError)
-	
-		var upUntil, downUntil string
-		var lastRunTS int
-		upCmd.StringVar(&upUntil, "until", "", "")
-		upCmd.IntVar(&lastRunTS, "last-run-ts", 0, "")
-		downCmd.StringVar(&downUntil, "until", "", "")
-		downCmd.IntVar(&lastRunTS, "last-run-ts", 0, "")
-	
-		switch os.Args[1] {
-		case "up":
-			err := upCmd.Parse(os.Args[2:])
-			if err != nil {
-				return
-			}
-		case "down":
-			err := downCmd.Parse(os.Args[2:])
-			if err != nil {
-				return
-			}
-		}
-	
-		if upCmd.Parsed() {
-			err := MigrateUp(upUntil, lastRunTS)
-			if err != nil {
-				fmt.Fprintf(os.Stdout, err.Error())
-			}
-		}
-	
-		if downCmd.Parsed() {
-			err := MigrateDown(downUntil, lastRunTS)
-			if err != nil {
-				fmt.Fprintf(os.Stdout, err.Error())
-			}
-		}
-	}
-`)
-}
-
-func NewAddMigrationTemplate() []byte {
-	return []byte(`// This file is auto generated. DO NOT EDIT!
 package main
 
 import (
 	"flag"
 	"fmt"
 	"os"
-
-	"{{ .Pwd }}/{{ .Dir }}/scripts"
+	"runtime/debug"
 )
 
-func MigrateUp(upUntil string, lastRunTS int) (err error) {
-        {{ range $m := .Create }}
-        {{ $m.Lower }}Migration := &scripts.{{ $m.MigrationName }}Migration{}
-        	{{ $m.Lower }}Migration.Timestamp = {{ $m.Timestamp }}
-        	{{ $m.Lower }}Migration.Filename = "{{ $m.Filename }}"
-        	{{ $m.Lower }}Migration.MigrationName = "{{ $m.MigrationName }}"
-
-        	if lastRunTS < {{ $m.Lower }}Migration.Timestamp {
-        		fmt.Printf("  >>> Migrating up: %s\n", {{ $m.Lower }}Migration.Filename)
-        		err{{ $m.MigrationName }} := {{ $m.Lower }}Migration.Up()
-
-        		if err{{ $m.MigrationName }} != nil {
-        			fmt.Errorf("%w", err{{ $m.MigrationName }})
-        		}
-        		fmt.Fprintf(os.Stderr, "{{ $m.Filename }}\n")
-        	}
-
-        	if upUntil == "{{ $m.MigrationName }}" {
-        		if lastRunTS == {{ $m.Lower }}Migration.Timestamp {
-        			return
-        		}
-        		fmt.Printf("  >>> Migrated up until: %s\n", {{ $m.Lower }}Migration.Filename)
-        		return
-        	}
-		{{ end }}
-		return nil
+// ✅ UP migration logic.
+// If this returns an error, Metana will auto-trigger the DOWN rollback for this migration.
+func up() error {
+	` + upBody + `
+	return nil
 }
 
-func MigrateDown(downUntil string, lastRunTS int) (err error) {
-		{{ range $m := .Create }}
-        {{ $m.Lower }}Migration := &scripts.{{ $m.MigrationName }}Migration{}
-		{{ $m.Lower }}Migration.Timestamp = {{ $m.Timestamp }}
-		{{ $m.Lower }}Migration.Filename = "{{ $m.Filename }}"
-		{{ $m.Lower }}Migration.MigrationName = "{{ $m.MigrationName }}"
-
-		if lastRunTS >= {{ $m.Lower }}Migration.Timestamp {
-			fmt.Printf("  >>> Migrating down: %s\n", {{ $m.Lower }}Migration.Filename)
-			err{{ $m.MigrationName }} := {{ $m.Lower }}Migration.Down()
-
-			if err{{ $m.MigrationName }} != nil {
-				fmt.Errorf("%w", err{{ $m.MigrationName }})
-			}
-			fmt.Fprintf(os.Stderr, "{{ $m.Filename }}\n")
-		}
-
-		if downUntil == "{{ $m.MigrationName }}" {
-			if lastRunTS == {{ $m.Lower }}Migration.Timestamp {
-				return
-			}
-			fmt.Printf("  >>> Migrated down until: %s\n", {{ $m.Lower }}Migration.Filename)
-			return
-		}
-		{{ end }}
-        return nil
+// ✅ DOWN (rollback) logic.
+// This will be triggered if 'up()' fails during execution.
+func down() error {
+	` + downBody + `
+	return nil
 }
 
+// 🚫 DO NOT MODIFY.
+// Handles flag parsing, error propagation, and execution tracking.
 func main() {
-	upCmd := flag.NewFlagSet("up", flag.ExitOnError)
-	downCmd := flag.NewFlagSet("down", flag.ExitOnError)
+	mode := flag.String("mode", "up", "migration mode: up or down")
+	flag.Parse()
 
-	var upUntil, downUntil string
-	var lastRunTS int
-	upCmd.StringVar(&upUntil, "until", "", "")
-	upCmd.IntVar(&lastRunTS, "last-run-ts", 0, "")
-	downCmd.StringVar(&downUntil, "until", "", "")
-	downCmd.IntVar(&lastRunTS, "last-run-ts", 0, "")
-
-	switch os.Args[1] {
+	var err error
+	switch *mode {
 	case "up":
-		err := upCmd.Parse(os.Args[2:])
-		if err != nil {
-			return
-		}
+		err = up()
 	case "down":
-		err := downCmd.Parse(os.Args[2:])
-		if err != nil {
-			return
-		}
+		err = down()
+	default:
+		fmt.Fprintln(os.Stderr, "invalid mode: must be 'up' or 'down'")
+		os.Exit(1)
 	}
 
-	if upCmd.Parsed() {
-		err := MigrateUp(upUntil, lastRunTS)
-		if err != nil {
-			fmt.Fprintf(os.Stdout, err.Error())
-		}
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		debug.PrintStack()
+		os.Exit(1)
 	}
 
-	if downCmd.Parsed() {
-		err := MigrateDown(downUntil, lastRunTS)
-		if err != nil {
-			fmt.Fprintf(os.Stdout, err.Error())
-		}
-	}
-}`)
+	// ✅ This success marker is used by Metana to track applied migrations.
+	fmt.Printf("__COMPLETE__[%s]: %s\n", *mode, "{{ .Filename }}")
 }
-
-type NewMigration struct {
-	Lower         string
-	MigrationName string
-	Timestamp     string
-	Filename      string
-	MigrationsDir string
-	FirstChar     string
+`)
 }

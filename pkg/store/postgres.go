@@ -50,12 +50,3 @@ func (p PGDB) CreateTable() error {
 
 	return nil
 }
-
-func (p PGDB) Wipe(FS afero.Fs) error {
-	_, err := p.db.Model(&types.Track{}).Exec(`TRUNCATE migrations`)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

@@ -39,11 +39,6 @@ func init() {
 	downCmd.Flags().StringP("env-file", "e", ".env", "Specify file which contains env keys")
 	downCmd.Flags().StringP("env", "", "", "Specify environment to run downward migration")
 	downCmd.RegisterFlagCompletionFunc("until", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		environment, err := cmd.Flags().GetString("env")
-		if err != nil {
-			return nil, 0
-		}
-
 		FS := afero.NewOsFs()
 
 		wd, err := os.Getwd()
@@ -61,7 +56,7 @@ func init() {
 			finalDir = "migrations"
 		}
 
-		migrations, err := pkg.GetMigrations(wd, finalDir, FS, environment)
+		migrations, err := pkg.GetMigrations(wd, finalDir, FS)
 		if err != nil {
 			return nil, 0
 		}

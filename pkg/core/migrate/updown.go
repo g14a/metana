@@ -6,79 +6,118 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
-
-	"github.com/joho/godotenv"
+	"path/filepath"
+	"sort"
+	"strings"
 
 	"github.com/fatih/color"
+	"github.com/g14a/metana/pkg/store"
+	"github.com/joho/godotenv"
+	"github.com/spf13/afero"
 )
 
 func Run(opts MigrationOptions) (string, error) {
-	migrationArgs := GetMigrationArgs(opts)
+	scriptsDir := filepath.Join(opts.Wd, opts.MigrationsDir, "scripts")
+	files, err := filepath.Glob(filepath.Join(scriptsDir, "*.go"))
+	if err != nil {
+		return "", err
+	}
 
+	sort.Strings(files)
+
+	// Read executed migrations from store
+	executed := make(map[string]bool)
+	if !opts.DryRun {
+		sh, err := store.GetStoreViaConn(opts.StoreConn, opts.MigrationsDir, afero.NewOsFs(), opts.Wd)
+		if err == nil {
+			track, err := sh.Load(afero.NewOsFs())
+			if err == nil {
+				for _, m := range track.Migrations {
+					executed[m.Title] = true
+				}
+			}
+		}
+	}
+
+	// Load env if specified
 	var envKeys []string
 	if opts.EnvFile != "" {
-		_, err := os.Stat(opts.Wd + "/" + opts.EnvFile)
-		if !os.IsNotExist(err) {
-			envMap, err := godotenv.Read(opts.Wd + "/" + opts.EnvFile)
-			if err != nil {
-				return "", err
-			}
+		if envMap, err := godotenv.Read(filepath.Join(opts.Wd, opts.EnvFile)); err == nil {
 			for k, v := range envMap {
 				envKeys = append(envKeys, fmt.Sprintf("%s=%s", k, v))
 			}
 		}
 	}
 
-	migrationsRun := exec.Command("go", migrationArgs...)
-	migrationsRun.Env = append(os.Environ(), envKeys...)
-	if opts.Environment == "" {
-		migrationsRun.Dir = opts.Wd + "/" + opts.MigrationsDir
-	} else {
-		migrationsRun.Dir = opts.Wd + "/" + opts.MigrationsDir + "/environments/" + opts.Environment
+	var allOutput strings.Builder
+
+	for _, file := range files {
+		base := filepath.Base(file)
+		migrationName := strings.TrimSuffix(strings.SplitN(base, "_", 2)[1], ".go")
+
+		// Idempotency
+		if opts.Up && executed[base] {
+			continue
+		}
+		if !opts.Up && !executed[base] {
+			continue
+		}
+
+		runMigration := func(mode string) error {
+			args := []string{"run", file, "-mode", mode}
+			cmd := exec.Command("go", args...)
+			cmd.Env = append(os.Environ(), envKeys...)
+			cmd.Dir = opts.Wd
+
+			var stderr bytes.Buffer
+			cmd.Stderr = &stderr
+
+			stdoutPipe, err := cmd.StdoutPipe()
+			if err != nil {
+				return fmt.Errorf("stdout error: %w", err)
+			}
+
+			if err := cmd.Start(); err != nil {
+				return fmt.Errorf("start error: %w", err)
+			}
+
+			scanner := bufio.NewScanner(stdoutPipe)
+			for scanner.Scan() {
+				line := scanner.Text()
+				color.Cyan("%s", line)
+				allOutput.WriteString(line + "\n")
+			}
+
+			if err := cmd.Wait(); err != nil {
+				return fmt.Errorf("execution error: %v\n%s", err, stderr.String())
+			}
+			return nil
+		}
+
+		if opts.Up {
+			upErr := runMigration("up")
+			if upErr != nil {
+				color.Red("Migration %s failed, attempting rollback...\n", base)
+				downErr := runMigration("down")
+				if downErr != nil {
+					return allOutput.String(), fmt.Errorf("rollback of %s also failed: %v", base, downErr)
+				}
+				return allOutput.String(), fmt.Errorf("migration %s failed: %v", base, upErr)
+			}
+		} else {
+			if err := runMigration("down"); err != nil {
+				return allOutput.String(), fmt.Errorf("migration %s failed: %v", base, err)
+			}
+		}
+
+		// Stop at --until
+		if opts.Until != "" && migrationName == opts.Until {
+			color.Yellow(" >>> Reached --until: %s. Stopping further migrations.\n", opts.Until)
+			break
+		}
 	}
 
-	var errBuf bytes.Buffer
-	migrationsRun.Stderr = &errBuf
-
-	stdout, err := migrationsRun.StdoutPipe()
-	if err != nil {
-		return "", err
-	}
-	err = migrationsRun.Start()
-	if err != nil {
-		return "", err
-	}
-
-	reader := bufio.NewReader(stdout)
-	line, err := reader.ReadString('\n')
-	for err == nil {
-		color.Cyan("%v", line)
-		line, err = reader.ReadString('\n')
-	}
-
-	return errBuf.String(), nil
-}
-
-func GetMigrationArgs(opts MigrationOptions) []string {
-	var migrationArgs []string
-
-	migrationArgs = append(migrationArgs, "run", "main.go")
-
-	if opts.Up {
-		migrationArgs = append(migrationArgs, "up")
-	} else {
-		migrationArgs = append(migrationArgs, "down")
-	}
-
-	if opts.Until != "" {
-		migrationArgs = append(migrationArgs, "--until", opts.Until)
-	}
-
-	lastRunTSString := strconv.Itoa(opts.LastRunTS)
-	migrationArgs = append(migrationArgs, "--last-run-ts", lastRunTSString)
-
-	return migrationArgs
+	return allOutput.String(), nil
 }
 
 type MigrationOptions struct {
@@ -90,5 +129,4 @@ type MigrationOptions struct {
 	StoreConn     string
 	DryRun        bool
 	EnvFile       string
-	Environment   string
 }

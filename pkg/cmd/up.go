@@ -2,73 +2,45 @@ package cmd
 
 import (
 	"fmt"
-
-	"github.com/g14a/metana/pkg/config"
-	"github.com/spf13/cobra"
+	"sort"
 
 	"github.com/fatih/color"
+	"github.com/g14a/metana/pkg/config"
 	migrate2 "github.com/g14a/metana/pkg/core/migrate"
 	"github.com/g14a/metana/pkg/store"
 	"github.com/g14a/metana/pkg/types"
 	"github.com/spf13/afero"
+	"github.com/spf13/cobra"
 )
 
 func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
-
-	dir, err := cmd.Flags().GetString("dir")
-	if err != nil {
-		return err
-	}
-
-	storeConn, err := cmd.Flags().GetString("store")
-	if err != nil {
-		return err
-	}
-
-	until, err := cmd.Flags().GetString("until")
-	if err != nil {
-		return err
-	}
-
-	dryRun, err := cmd.Flags().GetBool("dry")
-	if err != nil {
-		return err
-	}
-
-	envFile, err := cmd.Flags().GetString("env-file")
-	if err != nil {
-		return err
-	}
-
-	env, err := cmd.Flags().GetString("env")
-	if err != nil {
-		return err
-	}
+	// Flags
+	dir, _ := cmd.Flags().GetString("dir")
+	storeConn, _ := cmd.Flags().GetString("store")
+	until, _ := cmd.Flags().GetString("until")
+	dryRun, _ := cmd.Flags().GetBool("dry")
+	envFile, _ := cmd.Flags().GetString("env-file")
 
 	mc, _ := config.GetMetanaConfig(FS, wd)
 
-	// Priority range is explicit, then config, then migrations
-	var finalDir string
-
+	// Determine migration dir
+	finalDir := "migrations"
 	if dir != "" {
 		finalDir = dir
-	} else if mc != nil && mc.Dir != "" && dir == "" {
+	} else if mc != nil && mc.Dir != "" {
 		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ .metana.yml found\n"))
 		finalDir = mc.Dir
-	} else {
-		finalDir = "migrations"
 	}
 
-	var finalStoreConn string
+	// Determine store connection string
+	finalStoreConn := ""
 	if storeConn != "" {
 		finalStoreConn = storeConn
-	} else if mc != nil && mc.StoreConn != "" && storeConn == "" {
+	} else if mc != nil && mc.StoreConn != "" {
 		finalStoreConn = mc.StoreConn
 	}
 
-	var existingTrack types.Track
-	var storeHouse store.Store
-
+	// Setup migration options
 	opts := migrate2.MigrationOptions{
 		Until:         until,
 		MigrationsDir: finalDir,
@@ -77,11 +49,15 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		StoreConn:     finalStoreConn,
 		DryRun:        dryRun,
 		EnvFile:       envFile,
-		Environment:   env,
 	}
 
+	var (
+		existingTrack types.Track
+		storeHouse    store.Store
+	)
+
 	if !dryRun {
-		sh, err := store.GetStoreViaConn(finalStoreConn, finalDir, FS, wd, env)
+		sh, err := store.GetStoreViaConn(finalStoreConn, finalDir, FS, wd)
 		if err != nil {
 			return err
 		}
@@ -90,34 +66,50 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 			return err
 		}
 		storeHouse = sh
-		opts.LastRunTS = existingTrack.LastRunTS
-	} else {
-		existingTrack.LastRunTS = 0
-		opts.LastRunTS = 0
 	}
 
 	output, err := migrate2.Run(opts)
-	if err != nil {
-		return err
-	}
 
-	if !opts.DryRun {
-		track, _ := store.ProcessLogs(output)
+	track, _ := store.ProcessLogs(output)
+
+	if !dryRun && len(track.Migrations) > 0 {
+		// NOTE: Even if a migration fails, we persist the successfully run migrations (e.g., A, B)
+		// to avoid rerunning them in the next execution. This ensures idempotency.
 
 		existingTrack.LastRun = track.LastRun
-		existingTrack.LastRunTS = track.LastRunTS
-		existingTrack.Migrations = append(existingTrack.Migrations, track.Migrations...)
 
-		if len(track.Migrations) > 0 {
-			err := storeHouse.Set(existingTrack, FS)
-			if err != nil {
-				return err
-			}
+		// Merge with existing (deduped by Title)
+		existingMap := make(map[string]types.Migration)
+		for _, m := range existingTrack.Migrations {
+			existingMap[m.Title] = m
 		}
-		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString("  >>> migration : complete\n"))
+		for _, m := range track.Migrations {
+			existingMap[m.Title] = m
+		}
 
-		return nil
+		// Sort merged result by filename
+		merged := make([]types.Migration, 0, len(existingMap))
+		for _, m := range existingMap {
+			merged = append(merged, m)
+		}
+		sort.Slice(merged, func(i, j int) bool {
+			return merged[i].Title < merged[j].Title
+		})
+
+		existingTrack.Migrations = merged
+
+		// Save to store
+		if err := storeHouse.Set(existingTrack, FS); err != nil {
+			return err
+		}
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), color.WhiteString("  >>> dry run migration : complete\n"))
-	return nil
+
+	if dryRun {
+		fmt.Fprintf(cmd.OutOrStdout(), color.WhiteString("  >>> dry run migration : complete\n"))
+	} else {
+		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString("  >>> migration : complete\n"))
+	}
+
+	// Finally, return the original migration error if any
+	return err
 }

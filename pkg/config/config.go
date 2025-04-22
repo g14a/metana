@@ -58,13 +58,6 @@ func SetEnvironmentMetanaConfig(mc *MetanaConfig, env, store string, FS afero.Fs
 }
 
 type MetanaConfig struct {
-	Dir          string        `yaml:"dir"`
-	StoreConn    string        `yaml:"store"`
-	Environments []Environment `yaml:"environments"`
-}
-
-type Environment struct {
-	Name  string `yaml:"name"`
-	Dir   string `yaml:"dir"`
-	Store string `yaml:"store"`
+	Dir       string `yaml:"dir"`
+	StoreConn string `yaml:"store"`
 }

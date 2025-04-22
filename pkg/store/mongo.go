@@ -38,12 +38,3 @@ func (m MongoDb) Load(FS afero.Fs) (types.Track, error) {
 
 	return track, nil
 }
-
-func (m MongoDb) Wipe(FS afero.Fs) error {
-	_, err := m.coll.DeleteMany(m.ctx, bson.M{})
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

@@ -24,9 +24,11 @@ var upCmd = &cobra.Command{
 
 		err := cmd2.RunUp(cmd, args, FS, wd)
 		if err != nil {
-			return err
+			// Prevent Cobra from printing help on execution errors
+			cmd.SilenceUsage = true
+			cmd.SilenceErrors = true
 		}
-		return nil
+		return err
 	},
 }
 
@@ -40,11 +42,6 @@ func init() {
 	upCmd.Flags().StringP("env", "", "", "Specify environment to run upward migration")
 
 	upCmd.RegisterFlagCompletionFunc("until", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		environment, err := cmd.Flags().GetString("env")
-		if err != nil {
-			return nil, 0
-		}
-
 		FS := afero.NewOsFs()
 
 		wd, err := os.Getwd()
@@ -62,7 +59,7 @@ func init() {
 			finalDir = "migrations"
 		}
 
-		migrations, err := pkg.GetMigrations(wd, finalDir, FS, environment)
+		migrations, err := pkg.GetMigrations(wd, finalDir, FS)
 		if err != nil {
 			return nil, 0
 		}

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
+	"time"
 
 	"github.com/spf13/afero"
 
@@ -20,10 +20,9 @@ import (
 type Store interface {
 	Set(track types.Track, FS afero.Fs) error
 	Load(FS afero.Fs) (types.Track, error)
-	Wipe(FS afero.Fs) error
 }
 
-func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string, environment string) (Store, error) {
+func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string) (Store, error) {
 
 	if strings.HasPrefix(connString, "@") {
 		connString = strings.TrimPrefix(connString, "@")
@@ -72,31 +71,26 @@ func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string, envi
 
 	var jsonFile afero.File
 	var err error
-	if environment == "" {
-		jsonFile, err = FS.OpenFile(wd+"/"+dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		jsonFile, err = FS.OpenFile(wd+"/"+dir+"/environments/"+environment+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			return nil, err
-		}
+	jsonFile, err = FS.OpenFile(wd+"/"+dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, err
 	}
 
 	return File{file: jsonFile}, nil
 }
 
 func TrackToSetDown(track types.Track, num int) types.Track {
-	if len(track.Migrations) == num {
-		track.LastRun = track.Migrations[len(track.Migrations)-num].Title
-		track.LastRunTS = track.Migrations[len(track.Migrations)-num].Timestamp
-	} else {
-		track.LastRun = track.Migrations[len(track.Migrations)-num-1].Title
-		track.LastRunTS = track.Migrations[len(track.Migrations)-num-1].Timestamp
+	if len(track.Migrations) == 0 || num <= 0 || num > len(track.Migrations) {
+		return types.Track{}
 	}
-	track.Migrations = track.Migrations[:len(track.Migrations)-num]
-	if len(track.Migrations) == 0 {
+
+	newLen := len(track.Migrations) - num
+	track.Migrations = track.Migrations[:newLen]
+
+	if newLen > 0 {
+		last := track.Migrations[newLen-1]
+		track.LastRun = last.Title
+	} else {
 		return types.Track{}
 	}
 
@@ -107,22 +101,25 @@ func ProcessLogs(logs string) (types.Track, int) {
 	track := types.Track{}
 	lines := strings.Split(logs, "\n")
 	num := 0
+
 	for _, line := range lines {
-		if len(line) > 0 {
-			migration := types.Migration{}
-			track.LastRun = line
-			migration.Title = line
-			line = strings.TrimSuffix(line, ".go")
-			migArr := strings.Split(line, "-")
-			timestamp, err := strconv.Atoi(migArr[0])
-			if err != nil {
-				log.Fatal(err)
-			}
-			track.LastRunTS = timestamp
-			migration.Timestamp = timestamp
-			track.Migrations = append(track.Migrations, migration)
-			num++
+		line = strings.TrimSpace(line)
+
+		// Only consider up migrations for tracking
+		if !strings.HasPrefix(line, "__COMPLETE__[up]:") {
+			continue
 		}
+
+		filename := strings.TrimSpace(strings.TrimPrefix(line, "__COMPLETE__[up]:"))
+
+		migration := types.Migration{
+			Title:      filename,
+			ExecutedAt: time.Now().Format("02-01-2006 15:04"),
+		}
+
+		track.Migrations = append(track.Migrations, migration)
+		track.LastRun = filename
+		num++
 	}
 
 	return track, num
