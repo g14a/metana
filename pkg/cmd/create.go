@@ -12,6 +12,8 @@ import (
 )
 
 func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
+	time.Sleep(1 * time.Second)
+
 	if len(args) == 0 {
 		return fmt.Errorf("missing migration name")
 	}
@@ -40,8 +42,6 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 	if err != nil {
 		return fmt.Errorf("failed to create migration: %w\nTry initializing with `metana init`", err)
 	}
-
-	time.Sleep(1 * time.Second)
 
 	fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ Created %s/%s\n", wd, fileName))
 	return nil

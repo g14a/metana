@@ -6,8 +6,9 @@ type Migration struct {
 }
 
 type Track struct {
-	LastRun    string      `json:"LastRun"`
-	Migrations []Migration `json:"Migrations"`
+	tableName  struct{}    `pg:"migrations"`
+	LastRun    string      `pg:"last_run" json:"LastRun"`
+	Migrations []Migration `pg:"migrations" json:"Migrations"`
 }
 
 type Migrator interface {

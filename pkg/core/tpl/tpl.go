@@ -66,7 +66,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// ✅ This success marker is used by Metana to track applied migrations.
 	fmt.Printf("__COMPLETE__[%s]: %s\n", *mode, "{{ .Filename }}")
 }
 `)

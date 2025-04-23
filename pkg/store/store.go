@@ -3,15 +3,13 @@ package store
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/spf13/afero"
-
 	"github.com/g14a/metana/pkg/types"
 	"github.com/go-pg/pg/v10"
+	"github.com/spf13/afero"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	mconnString "go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
@@ -22,105 +20,99 @@ type Store interface {
 	Load(FS afero.Fs) (types.Track, error)
 }
 
-func GetStoreViaConn(connString string, dir string, FS afero.Fs, wd string) (Store, error) {
-
-	if strings.HasPrefix(connString, "@") {
-		connString = strings.TrimPrefix(connString, "@")
-		connString = os.Getenv(connString)
-	}
+func GetStoreViaConn(connStr, dir string, fs afero.Fs, wd string) (Store, error) {
+	connStr = resolveEnvVar(connStr)
 
 	switch {
-	case strings.Contains(connString, "postgres://"):
-		pgOptions, err := pg.ParseURL(connString)
-		if err != nil {
-			log.Println("")
-			return nil, fmt.Errorf("couldn't parse postgres connection string, %w", err)
-		}
-
-		db := pg.Connect(pgOptions)
-
-		_, err = db.Exec("SELECT 1")
-		if err != nil {
-			return nil, fmt.Errorf("could not connect to your PostgreSQL DB, ERROR: %w", err)
-		}
-
-		p := PGDB{db: db}
-		err = p.CreateTable()
-		if err != nil {
-			return nil, fmt.Errorf("could not create migrations table in postgres")
-		}
-
-		return p, nil
-	case strings.Contains(connString, "mongodb"):
-		ctx := context.TODO()
-		cs, err := mconnString.ParseAndValidate(connString)
-		if err != nil {
-			return nil, err
-		}
-		clientOptions := options.Client().ApplyURI(connString)
-		client, err := mongo.Connect(ctx, clientOptions)
-		if err != nil {
-			return nil, fmt.Errorf("could not connect to MongoDB, ERROR: %w", err)
-		}
-		err = client.Ping(ctx, nil)
-		if err != nil {
-			return nil, err
-		}
-		return MongoDb{coll: *client.Database(cs.Database).Collection("migrations")}, nil
+	case strings.Contains(connStr, "postgres://"):
+		return setupPostgres(connStr)
+	case strings.Contains(connStr, "mongodb"):
+		return setupMongo(connStr)
+	default:
+		return setupFileStore(fs, filepath(wd, dir, "migrate.json"))
 	}
+}
 
-	var jsonFile afero.File
-	var err error
-	jsonFile, err = FS.OpenFile(wd+"/"+dir+"/migrate.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+func resolveEnvVar(conn string) string {
+	if strings.HasPrefix(conn, "@") {
+		return os.Getenv(strings.TrimPrefix(conn, "@"))
+	}
+	return conn
+}
+
+func setupPostgres(connStr string) (Store, error) {
+	opts, err := pg.ParseURL(connStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid postgres URL: %w", err)
+	}
+	db := pg.Connect(opts)
+	if _, err := db.Exec("SELECT 1"); err != nil {
+		return nil, fmt.Errorf("postgres connection failed: %w", err)
+	}
+	p := PGDB{db: db}
+	if err := p.CreateTable(); err != nil {
+		return nil, fmt.Errorf("failed to create migrations table: %w", err)
+	}
+	return p, nil
+}
+
+func setupMongo(connStr string) (Store, error) {
+	cs, err := mconnString.ParseAndValidate(connStr)
 	if err != nil {
 		return nil, err
 	}
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connStr))
+	if err != nil {
+		return nil, fmt.Errorf("mongo connection failed: %w", err)
+	}
+	if err := client.Ping(context.TODO(), nil); err != nil {
+		return nil, err
+	}
+	return MongoDb{coll: *client.Database(cs.Database).Collection("migrations")}, nil
+}
 
-	return File{file: jsonFile}, nil
+func setupFileStore(fs afero.Fs, path string) (Store, error) {
+	file, err := fs.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	return File{file: file}, nil
+}
+
+func filepath(parts ...string) string {
+	return strings.Join(parts, "/")
 }
 
 func TrackToSetDown(track types.Track, num int) types.Track {
-	if len(track.Migrations) == 0 || num <= 0 || num > len(track.Migrations) {
+	if len(track.Migrations) < num || num <= 0 {
 		return types.Track{}
 	}
-
-	newLen := len(track.Migrations) - num
-	track.Migrations = track.Migrations[:newLen]
-
-	if newLen > 0 {
-		last := track.Migrations[newLen-1]
-		track.LastRun = last.Title
-	} else {
+	track.Migrations = track.Migrations[:len(track.Migrations)-num]
+	if len(track.Migrations) == 0 {
 		return types.Track{}
 	}
-
+	track.LastRun = track.Migrations[len(track.Migrations)-1].Title
 	return track
 }
 
 func ProcessLogs(logs string) (types.Track, int) {
 	track := types.Track{}
-	lines := strings.Split(logs, "\n")
-	num := 0
+	count := 0
 
-	for _, line := range lines {
+	for _, line := range strings.Split(logs, "\n") {
 		line = strings.TrimSpace(line)
-
-		// Only consider up migrations for tracking
 		if !strings.HasPrefix(line, "__COMPLETE__[up]:") {
 			continue
 		}
 
-		filename := strings.TrimSpace(strings.TrimPrefix(line, "__COMPLETE__[up]:"))
-
-		migration := types.Migration{
-			Title:      filename,
+		filename := strings.TrimPrefix(line, "__COMPLETE__[up]:")
+		m := types.Migration{
+			Title:      strings.TrimSpace(filename),
 			ExecutedAt: time.Now().Format("02-01-2006 15:04"),
 		}
-
-		track.Migrations = append(track.Migrations, migration)
-		track.LastRun = filename
-		num++
+		track.Migrations = append(track.Migrations, m)
+		track.LastRun = m.Title
+		count++
 	}
-
-	return track, num
+	return track, count
 }
