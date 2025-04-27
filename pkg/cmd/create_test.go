@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"bytes"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/g14a/metana/pkg"
@@ -10,51 +12,111 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Create(t *testing.T) {
+func Test_Create_Default(t *testing.T) {
+	t.Parallel()
+
+	tempDir := t.TempDir()
+	FS := afero.NewOsFs()
+
+	// Step 1: Initialize migrations first
+	initCmd := &cobra.Command{
+		Use: "init",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return RunInit(cmd, FS, tempDir)
+		},
+	}
+	initCmd.Flags().StringP("dir", "d", "", "")
+
+	rootCmd := NewMetanaCommand()
+	rootCmd.AddCommand(initCmd)
+
+	_, err := pkg.ExecuteCommand(rootCmd, "init")
+	assert.NoError(t, err)
+
+	// Step 2: Now create a migration
 	var buf bytes.Buffer
-	metanaCmd := NewMetanaCommand()
 	createCmd := &cobra.Command{
 		Use:  "create",
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			FS := afero.NewMemMapFs()
-			FS.MkdirAll("/Users/g14a/metana/migration/scripts", 0755)
-			err := RunInit(cmd, FS, "/Users/g14a/metana")
-			assert.NoError(t, err)
 			cmd.SetOut(&buf)
-			return RunCreate(cmd, args, FS, "/Users/g14a/metana")
+			return RunCreate(cmd, args, FS, tempDir)
 		},
 	}
-	createCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
-	createCmd.Flags().StringP("template", "t", "", "Specify a custom Go template with Up and Down functions")
+	createCmd.Flags().StringP("dir", "d", "", "")
+	createCmd.Flags().StringP("template", "t", "", "")
 
-	metanaCmd.AddCommand(createCmd)
-	_, err := pkg.ExecuteCommand(metanaCmd, "create", "abc")
+	rootCmd = NewMetanaCommand()
+	rootCmd.AddCommand(createCmd)
+
+	_, err = pkg.ExecuteCommand(rootCmd, "create", "abc")
 	assert.NoError(t, err)
-	pkg.ExpectLines(t, buf.String(), []string{`✓ .metana.yml found`, `✓ Created \/Users\/g14a\/metana\/migrations\/scripts\/[0-9]*-Abc.go`, ` ✓ Updated \/Users\/g14a\/metana\/migrations\/*main.go`}...)
+
+	// Step 3: Validate that migration file exists
+	files, err := afero.ReadDir(FS, filepath.Join(tempDir, "migrations", "scripts"))
+	assert.NoError(t, err)
+
+	found := false
+	for _, f := range files {
+		if strings.Contains(strings.ToLower(f.Name()), "abc") && filepath.Ext(f.Name()) == ".go" {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found)
 }
 
-func Test_Create_dir(t *testing.T) {
+func Test_Create_WithDirFlag(t *testing.T) {
+	t.Parallel()
+
+	tempDir := t.TempDir()
+	FS := afero.NewOsFs()
+
+	// Step 1: Initialize migrations with custom dir
+	initCmd := &cobra.Command{
+		Use: "init",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.Flags().Set("dir", "schema-mig")
+			return RunInit(cmd, FS, tempDir)
+		},
+	}
+	initCmd.Flags().StringP("dir", "d", "", "")
+
+	rootCmd := NewMetanaCommand()
+	rootCmd.AddCommand(initCmd)
+
+	_, err := pkg.ExecuteCommand(rootCmd, "init", "--dir=schema-mig")
+	assert.NoError(t, err)
+
+	// Step 2: Now create a migration
 	var buf bytes.Buffer
-	metanaCmd := NewMetanaCommand()
 	createCmd := &cobra.Command{
 		Use:  "create",
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			FS := afero.NewMemMapFs()
-			FS.MkdirAll("/Users/g14a/metana/migration/scripts", 0755)
-			err := RunInit(cmd, FS, "/Users/g14a/metana")
-			assert.NoError(t, err)
 			cmd.SetOut(&buf)
-			return RunCreate(cmd, args, FS, "/Users/g14a/metana")
+			return RunCreate(cmd, args, FS, tempDir)
 		},
 	}
-	createCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
-	createCmd.Flags().StringP("template", "t", "", "Specify a custom Go template with Up and Down functions")
-	createCmd.Flags().StringP("env", "e", "", "Specify an environment to create the migration")
+	createCmd.Flags().StringP("dir", "d", "", "")
+	createCmd.Flags().StringP("template", "t", "", "")
 
-	metanaCmd.AddCommand(createCmd)
-	_, err := pkg.ExecuteCommand(metanaCmd, "create", "abc", "--dir=schema-mig")
+	rootCmd = NewMetanaCommand()
+	rootCmd.AddCommand(createCmd)
+
+	_, err = pkg.ExecuteCommand(rootCmd, "create", "abc", "--dir=schema-mig")
 	assert.NoError(t, err)
-	pkg.ExpectLines(t, buf.String(), []string{` ✓ Created \/Users\/g14a\/metana\/schema-mig\/scripts\/[0-9]*-Abc.go`, ` ✓ Updated \/Users\/g14a\/metana\/schema-mig\/*main.go`}...)
+
+	// Step 3: Validate that migration file exists in schema-mig/scripts
+	files, err := afero.ReadDir(FS, filepath.Join(tempDir, "schema-mig", "scripts"))
+	assert.NoError(t, err)
+
+	found := false
+	for _, f := range files {
+		if strings.Contains(strings.ToLower(f.Name()), "abc") && filepath.Ext(f.Name()) == ".go" {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found)
 }

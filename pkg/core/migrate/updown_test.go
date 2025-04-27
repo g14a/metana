@@ -24,7 +24,7 @@ func createMigrationFile(t *testing.T, dir, name string) string {
 		"Filename":      filename,
 	}
 
-	migTpl := tpl.StandaloneMigrationTemplate("", "")
+	migTpl := tpl.StandaloneMigrationTemplate()
 	tmpl := template.Must(template.New("mig").Parse(string(migTpl)))
 
 	var buf bytes.Buffer
@@ -64,7 +64,6 @@ func TestRunUpDown_WithFileStore(t *testing.T) {
 		MigrationsDir: ".",
 		Wd:            dir,
 		StoreConn:     "",
-		EnvFile:       "",
 	}
 
 	// Run full up

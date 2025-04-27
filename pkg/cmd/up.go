@@ -19,7 +19,6 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	storeConn, _ := cmd.Flags().GetString("store")
 	until, _ := cmd.Flags().GetString("until")
 	dryRun, _ := cmd.Flags().GetBool("dry")
-	envFile, _ := cmd.Flags().GetString("env-file")
 
 	mc, _ := config.GetMetanaConfig(FS, wd)
 
@@ -48,37 +47,27 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		Up:            true,
 		StoreConn:     finalStoreConn,
 		DryRun:        dryRun,
-		EnvFile:       envFile,
 	}
 
-	var (
-		existingTrack types.Track
-		storeHouse    store.Store
-	)
-
-	if !dryRun {
+	// Always run migrations (dry or not)
+	output, err := migrate2.Run(opts)
+	track, _ := store.ProcessLogs(output)
+	
+	// Only persist to store if not a dry run
+	if !dryRun && len(track.Migrations) > 0 {
 		sh, err := store.GetStoreViaConn(finalStoreConn, finalDir, FS, wd)
 		if err != nil {
 			return err
 		}
-		existingTrack, err = sh.Load(FS)
+
+		existingTrack, err := sh.Load(FS)
 		if err != nil {
 			return err
 		}
-		storeHouse = sh
-	}
-
-	output, err := migrate2.Run(opts)
-
-	track, _ := store.ProcessLogs(output)
-
-	if !dryRun && len(track.Migrations) > 0 {
-		// NOTE: Even if a migration fails, we persist the successfully run migrations (e.g., A, B)
-		// to avoid rerunning them in the next execution. This ensures idempotency.
 
 		existingTrack.LastRun = track.LastRun
 
-		// Merge with existing (deduped by Title)
+		// Merge migrations (deduplicated by Title)
 		existingMap := make(map[string]types.Migration)
 		for _, m := range existingTrack.Migrations {
 			existingMap[m.Title] = m
@@ -98,8 +87,7 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 
 		existingTrack.Migrations = merged
 
-		// Save to store
-		if err := storeHouse.Set(existingTrack, FS); err != nil {
+		if err := sh.Set(existingTrack, FS); err != nil {
 			return err
 		}
 	}
@@ -110,6 +98,5 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString("  >>> migration : complete\n"))
 	}
 
-	// Finally, return the original migration error if any
 	return err
 }

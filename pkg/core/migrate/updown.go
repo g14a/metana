@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/store"
-	"github.com/joho/godotenv"
 	"github.com/spf13/afero"
 )
 
@@ -23,9 +21,12 @@ func Run(opts MigrationOptions) (string, error) {
 		return "", err
 	}
 
+	if len(files) == 0 {
+		return "", fmt.Errorf("no migrations found in %s", scriptsDir)
+	}
+
 	sort.Strings(files)
 
-	// Read executed migrations from store
 	executed := make(map[string]bool)
 	if !opts.DryRun {
 		sh, err := store.GetStoreViaConn(opts.StoreConn, opts.MigrationsDir, afero.NewOsFs(), opts.Wd)
@@ -39,34 +40,25 @@ func Run(opts MigrationOptions) (string, error) {
 		}
 	}
 
-	// Load env if specified
-	var envKeys []string
-	if opts.EnvFile != "" {
-		if envMap, err := godotenv.Read(filepath.Join(opts.Wd, opts.EnvFile)); err == nil {
-			for k, v := range envMap {
-				envKeys = append(envKeys, fmt.Sprintf("%s=%s", k, v))
-			}
-		}
-	}
-
 	var allOutput strings.Builder
 
 	for _, file := range files {
 		base := filepath.Base(file)
 		migrationName := strings.TrimSuffix(strings.SplitN(base, "_", 2)[1], ".go")
 
-		// Idempotency
-		if opts.Up && executed[base] {
-			continue
-		}
-		if !opts.Up && !executed[base] {
-			continue
+		// In non-dry run mode, skip migrations based on idempotency
+		if !opts.DryRun {
+			if opts.Up && executed[base] {
+				continue
+			}
+			if !opts.Up && !executed[base] {
+				continue
+			}
 		}
 
 		runMigration := func(mode string) error {
 			args := []string{"run", file, "-mode", mode}
 			cmd := exec.Command("go", args...)
-			cmd.Env = append(os.Environ(), envKeys...)
 			cmd.Dir = opts.Wd
 
 			var stderr bytes.Buffer
@@ -110,7 +102,6 @@ func Run(opts MigrationOptions) (string, error) {
 			}
 		}
 
-		// Stop at --until
 		if opts.Until != "" && migrationName == opts.Until {
 			color.Yellow(" >>> Reached --until: %s. Stopping further migrations.\n", opts.Until)
 			break
@@ -128,5 +119,4 @@ type MigrationOptions struct {
 	Up            bool
 	StoreConn     string
 	DryRun        bool
-	EnvFile       string
 }

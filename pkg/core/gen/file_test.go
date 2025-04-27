@@ -83,7 +83,6 @@ func TestCreateMigrationFile(t *testing.T) {
 		Wd:            "/Users/g14a/metana",
 		MigrationsDir: "migrations",
 		File:          "initSchema",
-		CustomTmpl:    "",
 		FS:            FS,
 	}
 

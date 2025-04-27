@@ -1,80 +1,106 @@
 package cmd
 
 import (
-	"bytes"
+	"path/filepath"
 	"testing"
 
 	"github.com/g14a/metana/pkg"
 	"github.com/spf13/afero"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
-func Test_Init(t *testing.T) {
-	var buf bytes.Buffer
-	metanaCmd := NewMetanaCommand()
+func Test_Init_DefaultDir(t *testing.T) {
+	t.Parallel()
+
+	FS := afero.NewMemMapFs()
+	tempDir := t.TempDir()
+
+	cmd := NewMetanaCommand()
 	initCmd := &cobra.Command{
 		Use: "init",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			FS := afero.NewMemMapFs()
-			cmd.SetOut(&buf)
-			return RunInit(cmd, FS, "/Users/g14a/metana")
+			return RunInit(cmd, FS, tempDir)
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
-	initCmd.Flags().StringP("env", "e", "", "Specify the environment to initialize migration")
+	cmd.AddCommand(initCmd)
 
-	metanaCmd.AddCommand(initCmd)
-	_, err := pkg.ExecuteCommand(metanaCmd, "init")
+	_, err := pkg.ExecuteCommand(cmd, "init")
 	assert.NoError(t, err)
-	assert.Equal(t, " ✓ Created /Users/g14a/metana/migrations/main.go\n", buf.String())
+
+	// ✅ Check that migrations/scripts folder exists
+	exists, err := afero.DirExists(FS, filepath.Join(tempDir, "migrations", "scripts"))
+	assert.NoError(t, err)
+	assert.True(t, exists)
+
+	// ✅ Check .metana.yml is created
+	exists, err = afero.Exists(FS, filepath.Join(tempDir, ".metana.yml"))
+	assert.NoError(t, err)
+	assert.True(t, exists)
 }
 
-func Test_Init_dir(t *testing.T) {
-	var buf bytes.Buffer
-	metanaCmd := NewMetanaCommand()
+func Test_Init_CustomDirFlag(t *testing.T) {
+	t.Parallel()
+
+	FS := afero.NewMemMapFs()
+	tempDir := t.TempDir()
+
+	cmd := NewMetanaCommand()
 	initCmd := &cobra.Command{
 		Use: "init",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			FS := afero.NewMemMapFs()
-			cmd.SetOut(&buf)
-			return RunInit(cmd, FS, "/Users/g14a/metana")
+			return RunInit(cmd, FS, tempDir)
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
-	initCmd.Flags().StringP("env", "e", "", "Specify the environment to initialize migration")
+	cmd.AddCommand(initCmd)
 
-	metanaCmd.AddCommand(initCmd)
-	_, err := pkg.ExecuteCommand(metanaCmd, "init", "--dir=schema-mig")
+	_, err := pkg.ExecuteCommand(cmd, "init", "--dir=schema-mig")
 	assert.NoError(t, err)
-	assert.Equal(t, " ✓ Created /Users/g14a/metana/schema-mig/main.go\n", buf.String())
+
+	// ✅ Check that schema-mig/scripts folder exists
+	exists, err := afero.DirExists(FS, filepath.Join(tempDir, "schema-mig", "scripts"))
+	assert.NoError(t, err)
+	assert.True(t, exists)
+
+	// ✅ Check .metana.yml is created
+	exists, err = afero.Exists(FS, filepath.Join(tempDir, ".metana.yml"))
+	assert.NoError(t, err)
+	assert.True(t, exists)
 }
 
-func Test_Init_config(t *testing.T) {
-	var buf bytes.Buffer
-	metanaCmd := NewMetanaCommand()
+func Test_Init_WithExistingConfig(t *testing.T) {
+	t.Parallel()
+
+	FS := afero.NewMemMapFs()
+	tempDir := t.TempDir()
+
+	// Create .metana.yml manually
+	err := afero.WriteFile(FS, filepath.Join(tempDir, ".metana.yml"), []byte("dir: schema-mig\nstore: \n"), 0644)
+	assert.NoError(t, err)
+
+	cmd := NewMetanaCommand()
 	initCmd := &cobra.Command{
 		Use: "init",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			FS := afero.NewMemMapFs()
-			cmd.SetOut(&buf)
-			afero.WriteFile(FS, "/Users/g14a/metana/.metana.yml", []byte("dir: schema-mig\nstore: \n"), 0644)
-			return RunInit(cmd, FS, "/Users/g14a/metana")
+			return RunInit(cmd, FS, tempDir)
 		},
 	}
 	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
-	initCmd.Flags().StringP("env", "e", "", "Specify the environment to initialize migration")
+	cmd.AddCommand(initCmd)
 
-	metanaCmd.AddCommand(initCmd)
-	_, err := pkg.ExecuteCommand(metanaCmd, "init")
+	_, err = pkg.ExecuteCommand(cmd, "init")
 	assert.NoError(t, err)
-	pkg.ExpectLines(t, buf.String(), []string{`✓ .metana.yml found`, ` ✓ Created \/Users\/g14a\/metana\/schema-mig\/*main.go`}...)
+
+	// ✅ Check schema-mig/scripts folder created from config
+	exists, err := afero.DirExists(FS, filepath.Join(tempDir, "schema-mig", "scripts"))
+	assert.NoError(t, err)
+	assert.True(t, exists)
 }
 
 func NewMetanaCommand() *cobra.Command {
-	metanaCmd := cobra.Command{
+	return &cobra.Command{
 		Use: "metana",
 	}
-	return &metanaCmd
 }

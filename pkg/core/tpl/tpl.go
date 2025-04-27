@@ -3,16 +3,9 @@ package tpl
 // StandaloneMigrationTemplate returns the Go source code for a standalone migration file.
 // This file is compiled and executed during migrations using `go run`.
 // The output must include "__COMPLETE__: <filename>" on success for Metana to track it.
-func StandaloneMigrationTemplate(customUp, customDown string) []byte {
+func StandaloneMigrationTemplate() []byte {
 	upBody := `fmt.Println("{{ .MigrationName }} up")`
 	downBody := `fmt.Println("{{ .MigrationName }} down")`
-
-	if customUp != "" {
-		upBody = customUp
-	}
-	if customDown != "" {
-		downBody = customDown
-	}
 
 	return []byte(`//go:build ignore
 // +build ignore

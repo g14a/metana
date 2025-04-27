@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/g14a/metana/pkg"
-	"github.com/g14a/metana/pkg/core"
 	"github.com/g14a/metana/pkg/core/tpl"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/afero"
@@ -21,12 +20,10 @@ func CreateMigrationFile(opts CreateMigrationOpts) (string, error) {
 	migrationName := strcase.ToCamel(opts.File)
 	fileName := fmt.Sprintf("%s/scripts/%s_%s.go", opts.MigrationsDir, timestamp, opts.File)
 
-	upBuilder, downBuilder := core.ParseCustomTemplate(opts.Wd, opts.CustomTmpl, opts.FS)
-
 	// Use standalone template
 	mainTemplate := template.Must(
 		template.New("standalone").
-			Parse(string(tpl.StandaloneMigrationTemplate(upBuilder, downBuilder))),
+			Parse(string(tpl.StandaloneMigrationTemplate())),
 	)
 
 	templateData := map[string]string{
@@ -77,6 +74,5 @@ type CreateMigrationOpts struct {
 	Wd            string
 	MigrationsDir string
 	File          string
-	CustomTmpl    string
 	FS            afero.Fs
 }

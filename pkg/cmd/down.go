@@ -17,7 +17,6 @@ func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 	storeConn, _ := cmd.Flags().GetString("store")
 	until, _ := cmd.Flags().GetString("until")
 	dryRun, _ := cmd.Flags().GetBool("dry")
-	envFile, _ := cmd.Flags().GetString("env-file")
 
 	mc, _ := config.GetMetanaConfig(FS, wd)
 
@@ -65,7 +64,6 @@ func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		Up:            false,
 		StoreConn:     finalStoreConn,
 		DryRun:        dryRun,
-		EnvFile:       envFile,
 	}
 
 	output, err := migrate2.Run(opts)

@@ -19,7 +19,6 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 	}
 
 	dir, _ := cmd.Flags().GetString("dir")
-	templateFile, _ := cmd.Flags().GetString("template")
 
 	mc, _ := config.GetMetanaConfig(FS, wd)
 	finalDir := resolveMigrationsDir(dir, mc)
@@ -34,7 +33,6 @@ func RunCreate(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error 
 		Wd:            wd,
 		MigrationsDir: finalDir,
 		File:          args[0],
-		CustomTmpl:    templateFile,
 		FS:            FS,
 	}
 

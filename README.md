@@ -26,7 +26,6 @@ An abstract task migration tool written in Go for Go services. Database and non 
     * [Create](https://github.com/g14a/metana#create) 👌 
     * [Up](https://github.com/g14a/metana#up) ⬆️
     * [Down](https://github.com/g14a/metana#down) ⬇️
-    * [Wipe](https://github.com/g14a/metana#wipe) 💅
     * [List](https://github.com/g14a/metana#list) 
 * [Features](https://github.com/g14a/metana#features)
     * [Custom directory to store migrations](https://github.com/g14a/metana#custom-directory-to-store-migrations)
@@ -34,14 +33,7 @@ An abstract task migration tool written in Go for Go services. Database and non 
     * [Store and Track your migrations in your favourite database](https://github.com/g14a/metana#store-and-track-your-migrations-in-your-favourite-database)
     * [Dry Run Migrations](https://github.com/g14a/metana#dry-run-migrations)
     * [Custom Config](https://github.com/g14a/metana#custom-config)
-    * [Wipe out stale migrations](https://github.com/g14a/metana#wipe-out-stale-migrations)
-    * [Custom Templates for Migrations](https://github.com/g14a/metana#add-custom-templates-for-migrations)
-    * [Shell Completions](https://github.com/g14a/metana#shell-completions)
-    * [Secrets and Environment Keys](https://github.com/g14a/metana#secrets-and-environment-keys-while-running-migrations)
-    * [Managing Environments](https://github.com/g14a/metana#environments)
-        * [Create a migration in an environment](https://github.com/g14a/metana#create-a-migration-in-a-specific-environment-with-the-same---env-flag)
-        * [Run migrations in an environment](https://github.com/g14a/metana#run-migrationsboth-up-and-down-in-an-environment)
-        * [Config for Environments](https://github.com/g14a/metana#config-for-environments)
+    * [Automatic Rollback on Migration Failure](https://github.com/g14a/metana#automatic-rollback-on-migration-failure)
     
 # Use case
 
@@ -59,8 +51,8 @@ go get github.com/g14a/metana
 ## **Mac**
 
 ```shell
-homebrew tap g14a/homebrew-metana
-homebrew install metana
+brew tap g14a/homebrew-metana
+brew install metana
 ```
 ## **Linux**
 
@@ -81,25 +73,20 @@ cd metana
 go install
 ```
 
-## **Docker**
-```shell
-docker pull g14a/metana
-docker run g14a/metana
-```
-
 # Usage
 
 After installation, let's just hit metana on the terminal.
 
 ```shell
 $ metana
-
-An abstract migration tool for all types of migrations
+An abstract migration tool for Go services
 
 Usage:
+  metana [flags]
   metana [command]
 
 Available Commands:
+  completion  Generate shell completion script
   config      Manage your local metana config in .metana.yml
   create      Create a migration in Go
   down        Run downward migrations
@@ -107,8 +94,6 @@ Available Commands:
   init        Initialize a migrations directory
   list        List existing migrations
   up          Run upward migrations
-  wipe        Wipe out old stale migration files and track in your store
-
 
 Flags:
       --config string   config gen (default is $HOME/.metana.yaml)
@@ -124,7 +109,7 @@ Use "metana [command] --help" for more information about a command.
 
 ```shell
 $ metana init
- ✓ Created /Users/g14a/metana/migrations/main.go
+Successfully initialized migration setup in migrations
 ```
 
 By default it will create a `migrations` folder if no such folder exists. If it does, it adds the `main.go` file into the same.
@@ -141,11 +126,11 @@ metana init --dir /path/to/folder
 
 ```shell
 $ metana create initSchema
- ✓ Created /Users/g14a/metana/migrations/1614532908-Sample.go
- ✓ Updated /Users/g14a/metana/migrations/main.go
+ ✓ .metana.yml found
+ ✓ Created /Users/gowtham.munukutla/metana/migrations/scripts/1745742878_initSchema.go
 ```
 
-Head over to your `1614532908-InitSchema.go` to edit your script. Remember to not change any function signature.
+Head over to your `1745742878_initSchema.go` to edit your script. Remember to not change any function signature.
 
 ## **`Up`**
 
@@ -153,13 +138,11 @@ Head over to your `1614532908-InitSchema.go` to edit your script. Remember to no
 
 ```shell
 $ metana up
-
-  >>> Migrating up: 1619942687-InitSchema.go
+ ✓ .metana.yml found
 InitSchema up
-
-  >>> Migrating up: 1619942704-AddIndexes.go
-AddIndexes up
-
+__COMPLETE__[up]: 1745742878_initSchema.go
+InitSchema2 up
+__COMPLETE__[up]: 1745742917_initSchema2.go
   >>> migration : complete
 ```
 
@@ -169,41 +152,26 @@ AddIndexes up
 
 ```shell
 $ metana down
-
-  >>> Migrating down: 1619942704-AddIndexes.go
-  AddIndexes down
-
-  >>> Migrating down: 1619942687-InitSchema.go
-  InitSchema down
-
+ ✓ .metana.yml found
+InitSchema down
+__COMPLETE__[down]: 1745742878_initSchema.go
+InitSchema2 down
+__COMPLETE__[down]: 1745742917_initSchema2.go
   >>> migration : complete
-```
-
-## **`Wipe`**
-
-`wipe` removes stale(already executed) migration files and track in your store to keep things clean.
-
-```shell
-$ metana wipe 
-                                                                            
-? Wiping will delete stale migration files. Continue? Yes
 ```
 
 ## **`List`**
 
-`list` lists all the migrations present in your migrations folder along with the last modified time.
+`list` lists all the migrations present in your migrations folder along with the last executed time.
 
 ```shell
 $ metana list
-
-  +----------------------------------+------------------+
-  |            MIGRATION             |  LAST MODIFIED   |
-  +----------------------------------+------------------+
-  | 1619943670-InitSchema.go         | 02-05-2021 13:51 |
-  | 1619943677-AddIndexes.go         | 02-05-2021 13:51 |
-  | 1619943874-AddFKeys.go           | 02-05-2021 13:54 |
-  | 1619943888-AddBoilerPlateRows.go | 02-05-2021 13:54 |
-  +----------------------------------+------------------+
++---------------------------+------------------+
+|         MIGRATION         |   EXECUTED AT    |
++---------------------------+------------------+
+| 1745742878_initSchema.go  | 27-04-2025 14:06 |
+| 1745742917_initSchema2.go | 27-04-2025 14:06 |
++---------------------------+------------------+
 ```
 
 # Features
@@ -213,19 +181,16 @@ $ metana list
 Specify a custom directory when creating and running upward or downward migrations using the `--dir` flag. Be default it is set to `"migrations"`
 
 ```shell
-$ metana init --dir schema-mig
- ✓ Created /Users/g14a/metana/schema-mig/main.go
+$ metana init --dir custom-migration-directory
+Successfully initialized migration setup in custom-migration-directory
 
-$ metana create initSchema --dir schema-mig
- ✓ Created /Users/g14a/metana/schema-mig/scripts/1619943164-InitSchema.go
- ✓ Updated /Users/g14a/metana/schema-mig/main.go
+$ metana create initSchema --dir custom-migration-directory
+ ✓ Created /Users/gowtham.munukutla/metana/custom-migration-directory/scripts/1745743111_initSchema.go
  
-$ metana up --dir schema-mig
-  >>> Migrating up: 1619943670-InitSchema.go
+$ metana up --dir custom-migration-directory
 InitSchema up
-
+__COMPLETE__[up]: 1745743111_initSchema.go
   >>> migration : complete
-
 ```
 
 ## **Run a migration until a certain point**
@@ -234,53 +199,29 @@ Run upward and downward migrations until(and including) a certain migration with
 
 ```shell
 
-$ metana create initSchema                                                                
- ✓ Created /Users/g14a/metana/migrations/scripts/1619942687-InitSchema.go
- ✓ Updated /Users/g14a/metana/migrations/main.go
+$ metana create initSchema                                                  ✓ .metana.yml found
+ ✓ Created /Users/gowtham.munukutla/metana/migrations/scripts/1745743242_initSchema.go
  
 $ Create more migration scripts...
 
 $ metana list
 
-  +----------------------------------+------------------+
-  |            MIGRATION             |  LAST MODIFIED   |
-  +----------------------------------+------------------+
-  | 1619943670-InitSchema.go         | 02-05-2021 13:51 |
-  | 1619943677-AddIndexes.go         | 02-05-2021 13:51 |
-  | 1619943874-AddFKeys.go           | 02-05-2021 13:54 |
-  | 1619943888-AddBoilerPlateRows.go | 02-05-2021 13:54 |
-  +----------------------------------+------------------+
++---------------------------+------------------+
+|         MIGRATION         |   EXECUTED AT    |
++---------------------------+------------------+
+| 1745743242_initSchema.go  |                  |
+| 1745743245_initSchema2.go |                  |
+| 1745743247_initSchema3.go |                  |
++---------------------------+------------------+
 
-$ metana up --until AddFkeys                                                                
-
-  >>> Migrating up: 1619942687-InitSchema.go
+$ metana up --until initSchema2                                                 ✓ .metana.yml found
 InitSchema up
-
-  >>> Migrating up: 1619942704-AddIndexes.go
-AddIndexes up
-
-  >>> Migrated up until: 1619942704-AddIndexes.go
-
+__COMPLETE__[up]: 1745743242_initSchema.go
+InitSchema2 up
+__COMPLETE__[up]: 1745743245_initSchema2.go
+ >>> Reached --until: initSchema2. Stopping further migrations.
   >>> migration : complete
-
-$ metana down --until AddIndexes
-  
-  >>> Migrating down: 1619943888-AddBoilerPlateRows.go
-AddBoilerPlateRows down
-
-  >>> Migrating down: 1619943874-AddFKeys.go
-AddFKeys down
-
-  >>> Migrating down: 1619943677-AddIndexes.go
-AddIndexes down
-
-  >>> Migrated down until: 1619943677-AddIndexes.go
-
-  >>> migration : complete
-
 ```
-
-Notice the capitalized format when passing to `--until`.
 
 ## **Store and track your migrations in your favourite database**
 
@@ -304,25 +245,25 @@ You can dry run your migrations using the explicit `--dry` option. This option d
 
 ```shell
 $ metana up --dry
-
-  >>> Migrating up: 1619942687-InitSchema.go
+ ✓ .metana.yml found
 InitSchema up
-
-  >>> Migrating up: 1619942704-AddIndexes.go
-AddIndexes up
-
+__COMPLETE__[up]: 1745743242_initSchema.go
+InitSchema2 up
+__COMPLETE__[up]: 1745743245_initSchema2.go
+InitSchema3 up
+__COMPLETE__[up]: 1745743247_initSchema3.go
   >>> dry run migration : complete
 ```
 
 ```shell
 $ metana down --dry
-
-  >>> Migrating down: 1619942704-AddIndexes.go
-AddIndexes down
-
-  >>> Migrating down: 1619942687-InitSchema.go
+ ✓ .metana.yml found
 InitSchema down
-
+__COMPLETE__[down]: 1745743242_initSchema.go
+InitSchema2 down
+__COMPLETE__[down]: 1745743245_initSchema2.go
+InitSchema3 down
+__COMPLETE__[down]: 1745743247_initSchema3.go
   >>> dry run migration : complete
 ```
 
@@ -371,204 +312,33 @@ Priority order of config:
 2. `.metana.yml` if it exists.
 3. Default values of flags.
 
+## **Automatic Rollback on Migration Failure**
 
-## **Wipe out stale migrations**
+Metana automatically handles rollback during upward migrations (`metana up`)
 
-Wipe out stale(already executed) migration files and update your store with the `wipe` command.
+If an **upward migration** (`up`) fails while being run, Metana will immediately **trigger the downward migration** (`down`) of that **same migration file** to rollback the changes and restore consistency.
 
-```shell
-$ metana wipe
+You don't have to manually clean up — rollback is automatic. But you still have implement the logic of the downward migration.
 
-Wipe out old stale migration files and track in your store
-
-Usage:
-  metana wipe [flags]
-
-Flags:
-  -d, --dir string     Specify custom migrations directory
-  -h, --help           help for wipe
-  -s, --store string   Specify a connection url to track migrations
-  -y, --yes            Proceed at all costs i.e by pass the prompt
-
-Global Flags:
-      --config string   config gen (default is $HOME/.metana.yaml)
-```
-
-Pass the ``-y`` flag to bypass the prompt during script.
-
-Even the `wipe` command takes configuration from your `.metana.yml` file one exists.
-Otherwise the priority order is considered while wiping.
-
-## **Add Custom templates for Migrations**
-
-With the latest version of metana you can add create a custom template Go program
-and create migration scripts with that.
-
-Your template should be a valid Go program(atleast syntactically) and needs
-to have an `Up()` and a `Down()` function returning an error.
-Spaces between the function name and the returning error are taken care of.
-The contents of your `Up()` and `Down()` will be copied into the migration script.
-
-So the following signatures are valid for now:
-
-- `func Up() error {}`
-- `func Up() (err error) {}`
-- `func Down() error {}`
-- `func Down() (err error) {}`
-
-Create a migration with a template with the `--template` flag:
+**Example:**
 
 ```shell
-metana create addIndexes --template ../path/to/template.go
-```
-
-## **Shell Completions**
-
-You can get enable shell completions to metana by doing
-
-```shell
-metana completion --help
-```
-
-and selecting your shell.
-
-```shell
-$ metana completion --help
-
-To load completions:
-
-Bash:
-
-  $ source <(metana completion bash)
-
-  # To load completions for each session, execute once:
-  
-  # Linux:
-  $ metana completion bash > /etc/bash_completion.d/metana
-  
-  # macOS:
-  $ metana completion bash > /usr/local/etc/bash_completion.d/metana
-
-Zsh:
-
-  # If shell completion is not already enabled in your environment,
-  # you will need to enable it.  You can execute the following once:
-
-  $ echo "autoload -U compinit; compinit" >> ~/.zshrc
-
-  # To load completions for each session, execute once:
-  $ metana completion zsh > "${fpath[1]}/_metana"
-
-  # You will need to start a new shell for this setup to take effect.
-
-fish:
-
-  $ metana completion fish | source
-
-  # To load completions for each session, execute once:
-  $ metana completion fish > ~/.config/fish/completions/metana.fish
-
-PowerShell:
-
-  PS> metana completion powershell | Out-String | Invoke-Expression
-
-  # To load completions for every new session, run:
-  PS> metana completion powershell > metana.ps1
-  # and source this file from your PowerShell profile.
-
-Usage:
-  metana completion [bash|zsh|fish|powershell]
-
-Flags:
-  -h, --help   help for completion
-
-Global Flags:
-      --config string   config gen (default is $HOME/.metana.yaml)
-```
-
-## Secrets and Environment keys while running migrations
-
-Now you can run upward and downward migrations and specify your `.env` files.
-
-Use the `--env-file` flag to do so. By default the value is set to `.env`.
-
-```shell
-$ metana up --env-file dev.env
+$ metana up
  ✓ .metana.yml found
-  >>> Migrating up: 1623502023-InitSchema.go
-
 InitSchema up
-
+__COMPLETE__[up]: 1745748076_initSchema.go
+Migration 1745748078_initSchema2.go failed, attempting rollback...
+InitSchema2 down
+__COMPLETE__[down]: 1745748078_initSchema2.go
   >>> migration : complete
-
+2025/04/27 15:32:05 migration 1745748078_initSchema2.go failed: execution error: exit status 1
+error: simulated error
+goroutine 1 [running]:
+runtime/debug.Stack()
+        /Users/gowtham.munukutla/.gvm/gos/go1.21/src/runtime/debug/stack.go:24 +0x64
+runtime/debug.PrintStack()
+        /Users/gowtham.munukutla/.gvm/gos/go1.21/src/runtime/debug/stack.go:16 +0x1c
+main.main()
+        /Users/gowtham.munukutla/metana/migrations/scripts/1745748078_initSchema2.go:48 +0x1d8
+exit status 1
 ```
-
-# Environments
-With metana, you can manage your multiple environments in your migrations setup.
-
-You can manage your deployments like `dev`, `staging`, and `production` etc.
-
-It is recommended that you either manage environments, or the traditional `metana init` way.
-
-To initialize a environment, run `metana init` with the `--env` flag. 
-
-All environments need to be unique.
-
-### Initialize an environment `dev`.
-
-```shell
-$ metana init --env dev
- ✓ Created /Users/g14a/metana/migrations/environments/dev/main.go
-$ metana init --env dev
- Environment `dev` already exists
-```
-
-### Create a migration in a specific environment with the same `--env` flag.
-
-```shell
-$ metana create initSchema --env dev
- ✓ .metana.yml found
- ✓ Created /Users/g14a/metana/migrations/environments/dev/scripts/1623502023-InitSchema.go
- ✓ Updated /Users/g14a/metana/migrations/environments/dev/main.go
-```
-
-```shell
-$ metana create initSchema --env staging
- ✓ .metana.yml found
- ✓ Created /Users/g14a/metana/migrations/environments/staging/scripts/1623502023-InitSchema.go
- ✓ Updated /Users/g14a/metana/migrations/environments/staging/main.go
-```
-
-### Run migrations(both up and down) in an environment
-
-```shell
-$ metana up --env dev
-
- ✓ .metana.yml found
-  >>> Migrating up: 1623502023-InitSchema.go
-
-InitSchema up
-
-  >>> migration : complete
-
-```
-
-All the other flags like `--dry`, `--until`, `--dir` work with environments seamlessly.
-
-### Config for environments
-
-You can specify your environment configuration in the same `.metana.yml` file.
-
-```yaml
-dir: migrations
-store: ""
-environments:
-- name: dev
-  store: "dev store"
-- name: staging
-  store: "staging store"
-- name: prod
-  store: "prod store"
-```
-
-The `name` field of the config should be the same as the environment directory inside `/environments/`.
