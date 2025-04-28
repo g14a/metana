@@ -36,8 +36,8 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Build metana binary
-        run: go build -o metana .
+      - name: Install Metana binary
+        run: go install ./...
 
       - name: Make test scripts executable
         run: chmod +x tests/*.sh
@@ -47,7 +47,7 @@ jobs:
           POSTGRES_TEST_URL: ${{ secrets.POSTGRES_TEST_URL }}
           MONGO_TEST_URL: ${{ secrets.MONGO_TEST_URL }}
         run: |
-          ./tests/test_init.sh
-          ./tests/test_create.sh
-          ./tests/test_list.sh
+          ./tests/tests_init.sh
+          ./tests/tests_create.sh
+          ./tests/tests_list.sh
 
