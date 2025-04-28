@@ -7,7 +7,7 @@ release:
   name_template: Metana {{ .Version }}
   github:
     owner: g14a
-    name: homebrew-metana
+    name: metana
 
 builds:
   - env: [CGO_ENABLED=0]
@@ -22,6 +22,9 @@ builds:
 
 brews:
   - name: metana 
+    repository: 
+      owner: g14a
+      name: metana
     homepage: https://github.com/g14a/metana
     description: An abstract migration tool written in Go for Go services.
 
