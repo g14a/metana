@@ -19,7 +19,7 @@ function create_temp_dir() {
 
 function run_metana_init() {
   echo "🚀 Running metana init..."
-  metana init --dir "$TEMP_DIR/migrations"
+  (cd "$TEMP_DIR" && metana init)   # 👈 cd into temp dir, init normally
 }
 
 function create_migrations() {
@@ -34,7 +34,7 @@ function create_migrations() {
 
 function run_metana_list_and_validate_empty_executed() {
   echo "📋 Running metana list (before running migrations)..."
-  
+
   LIST_OUTPUT=$(cd "$TEMP_DIR" && metana list)
 
   if echo "$LIST_OUTPUT" | grep -q "initSchema" && echo "$LIST_OUTPUT" | grep -q "initSchema2"; then

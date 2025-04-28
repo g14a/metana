@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	fp "path/filepath"
 	"strings"
 	"time"
 
@@ -29,7 +30,7 @@ func GetStoreViaConn(connStr, dir string, fs afero.Fs, wd string) (Store, error)
 	case strings.Contains(connStr, "mongodb"):
 		return setupMongo(connStr)
 	default:
-		return setupFileStore(fs, filepath(wd, dir, "migrate.json"))
+		return setupFileStore(fs, fp.Join(wd, dir, "migrate.json"))
 	}
 }
 
@@ -77,10 +78,6 @@ func setupFileStore(fs afero.Fs, path string) (Store, error) {
 		return nil, err
 	}
 	return File{file: file}, nil
-}
-
-func filepath(parts ...string) string {
-	return strings.Join(parts, "/")
 }
 
 func TrackToSetDown(track types.Track, num int) types.Track {

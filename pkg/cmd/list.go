@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/g14a/metana/pkg"
 	"github.com/g14a/metana/pkg/config"
 	"github.com/g14a/metana/pkg/store"
@@ -18,6 +20,7 @@ func RunList(cmd *cobra.Command, wd string, fs afero.Fs) error {
 
 	st, err := store.GetStoreViaConn(finalStore, finalDir, fs, wd)
 	if err != nil {
+		fmt.Println("⚠️ Warning: store could not be initialized:", err)
 		st = nil
 	}
 
