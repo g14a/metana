@@ -5,6 +5,9 @@ release:
   prerelease: auto
   draft: true
   name_template: Metana {{ .Version }}
+  github:
+    owner: g14a
+    name: homebrew-metana
 
 builds:
   - env: [CGO_ENABLED=0]
@@ -23,9 +26,6 @@ builds:
 
 brews:
   - name: metana 
-    tap:
-      owner: g14a
-      name: homebrew-metana
     homepage: https://github.com/g14a/metana
     description: An abstract migration tool written in Go for Go services.
 
@@ -38,3 +38,5 @@ nfpms:
       - deb
       - rpm
       - apk
+      - termux.deb
+      - archlinux
