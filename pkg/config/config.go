@@ -2,58 +2,50 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/afero"
-
 	"gopkg.in/yaml.v2"
 )
 
 func GetMetanaConfig(FS afero.Fs, wd string) (*MetanaConfig, error) {
-	var MetanaConfigInstance MetanaConfig
+	var config MetanaConfig
 
-	_, err := FS.Stat(wd + "/.metana.yml")
+	configPath := filepath.Join(wd, ".metana.yml")
+	_, err := FS.Stat(configPath)
 	if os.IsNotExist(err) {
-		return &MetanaConfigInstance, nil
+		return &config, nil
+	}
+	if err != nil {
+		return nil, err
 	}
 
+	data, err := afero.ReadFile(FS, configPath)
 	if err != nil {
 		return nil, err
 	}
-	yamlFile, err := afero.ReadFile(FS, wd+"/.metana.yml")
+
+	err = yaml.Unmarshal(data, &config)
 	if err != nil {
 		return nil, err
 	}
-	err = yaml.Unmarshal(yamlFile, &MetanaConfigInstance)
-	if err != nil {
-		return nil, err
-	}
-	return &MetanaConfigInstance, nil
+
+	return &config, nil
 }
 
 func SetMetanaConfig(mc *MetanaConfig, FS afero.Fs, wd string) error {
-	b, err := yaml.Marshal(&mc)
+	data, err := yaml.Marshal(mc)
 	if err != nil {
 		return err
 	}
 
-	err = afero.WriteFile(FS, wd+"/.metana.yml", b, 0644)
+	configPath := filepath.Join(wd, ".metana.yml")
+
+	err = afero.WriteFile(FS, configPath, data, 0644)
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func SetEnvironmentMetanaConfig(mc *MetanaConfig, env, store string, FS afero.Fs, wd string) error {
-	b, err := yaml.Marshal(&mc)
-	if err != nil {
-		return err
-	}
-
-	err = afero.WriteFile(FS, wd+"/.metana.yml", b, 0644)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

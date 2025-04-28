@@ -57,7 +57,7 @@ func init() {
 			finalDir = "migrations"
 		}
 
-		migrations, err := pkg.GetMigrations(wd, finalDir, FS)
+		migrations, err := pkg.GetMigrations(finalDir, FS)
 		if err != nil {
 			return nil, 0
 		}

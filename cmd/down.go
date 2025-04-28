@@ -37,7 +37,6 @@ func init() {
 	downCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
 	downCmd.Flags().Bool("dry", false, "Specify if the downward migration is a dry run {true | false}")
 	downCmd.Flags().StringP("env-file", "e", ".env", "Specify file which contains env keys")
-	downCmd.Flags().StringP("env", "", "", "Specify environment to run downward migration")
 	downCmd.RegisterFlagCompletionFunc("until", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		FS := afero.NewOsFs()
 
@@ -56,7 +55,7 @@ func init() {
 			finalDir = "migrations"
 		}
 
-		migrations, err := pkg.GetMigrations(wd, finalDir, FS)
+		migrations, err := pkg.GetMigrations(finalDir, FS)
 		if err != nil {
 			return nil, 0
 		}

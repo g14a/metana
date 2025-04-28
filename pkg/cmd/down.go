@@ -5,68 +5,55 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/config"
-	migrate2 "github.com/g14a/metana/pkg/core/migrate"
+	"github.com/g14a/metana/pkg/core/migrate"
 	"github.com/g14a/metana/pkg/store"
 	"github.com/g14a/metana/pkg/types"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
-func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
-	dir, _ := cmd.Flags().GetString("dir")
-	storeConn, _ := cmd.Flags().GetString("store")
+func RunDown(cmd *cobra.Command, args []string, fs afero.Fs, wd string) error {
+	dirFlag, _ := cmd.Flags().GetString("dir")
+	storeFlag, _ := cmd.Flags().GetString("store")
 	until, _ := cmd.Flags().GetString("until")
 	dryRun, _ := cmd.Flags().GetBool("dry")
 
-	mc, _ := config.GetMetanaConfig(FS, wd)
+	mc, _ := config.GetMetanaConfig(fs, wd)
+	finalDir := resolveDir(dirFlag, mc)
+	finalStore := resolveStore(storeFlag, mc)
 
-	// Resolve finalDir
-	finalDir := "migrations"
-	if dir != "" {
-		finalDir = dir
-	} else if mc != nil && mc.Dir != "" {
-		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ .metana.yml found\n"))
-		finalDir = mc.Dir
-	}
+	finalDir = cleanFinalDir(wd, finalDir)
 
-	// Resolve store connection
-	finalStoreConn := ""
-	if storeConn != "" {
-		finalStoreConn = storeConn
-	} else if mc != nil && mc.StoreConn != "" {
-		finalStoreConn = mc.StoreConn
-	}
-
-	var existingTrack types.Track
+	var track types.Track
 	var storeHouse store.Store
 
 	if !dryRun {
-		sh, err := store.GetStoreViaConn(finalStoreConn, finalDir, FS, wd)
+		sh, err := store.GetStoreViaConn(finalStore, finalDir, fs, wd)
 		if err != nil {
 			return err
 		}
-		existingTrack, err = sh.Load(FS)
+		track, err = sh.Load(fs)
 		if err != nil {
 			return err
 		}
 		storeHouse = sh
 	}
 
-	if len(existingTrack.Migrations) == 0 && !dryRun {
+	if len(track.Migrations) == 0 && !dryRun {
 		fmt.Fprintf(cmd.OutOrStdout(), color.YellowString("at least one upward migration needed\n"))
 		return nil
 	}
 
-	opts := migrate2.MigrationOptions{
+	opts := migrate.MigrationOptions{
 		Until:         until,
 		MigrationsDir: finalDir,
 		Wd:            wd,
 		Up:            false,
-		StoreConn:     finalStoreConn,
+		StoreConn:     finalStore,
 		DryRun:        dryRun,
 	}
 
-	output, err := migrate2.Run(opts)
+	output, err := migrate.Run(opts)
 	if err != nil {
 		return err
 	}
@@ -76,13 +63,10 @@ func RunDown(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		return nil
 	}
 
-	// Count how many __COMPLETE__ lines we got
 	_, num := store.ProcessLogs(output)
+	newTrack := store.TrackToSetDown(track, num)
 
-	// Update track and remove `num` most recent migrations
-	track := store.TrackToSetDown(existingTrack, num)
-	err = storeHouse.Set(track, FS)
-	if err != nil {
+	if err := storeHouse.Set(newTrack, fs); err != nil {
 		return err
 	}
 

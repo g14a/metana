@@ -6,11 +6,12 @@ on:
     paths:
       - 'cmd/**'
       - 'pkg/**'
+      - 'tests/**'
   pull_request:
     branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -35,29 +36,18 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Run tests
+      - name: Build metana binary
+        run: go build -o metana .
+
+      - name: Make test scripts executable
+        run: chmod +x tests/*.sh
+
+      - name: Run shell test scripts
         env:
           POSTGRES_TEST_URL: ${{ secrets.POSTGRES_TEST_URL }}
           MONGO_TEST_URL: ${{ secrets.MONGO_TEST_URL }}
         run: |
-          go test -v $(go list ./... | grep -v /migrations)
+          ./tests/test_init.sh
+          ./tests/test_create.sh
+          ./tests/test_list.sh
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: g14a/metana:latest

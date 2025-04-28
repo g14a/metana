@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -12,11 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RunInit(cmd *cobra.Command, FS afero.Fs, wd string) error {
-	dir, _ := cmd.Flags().GetString("dir")
-
-	// Load existing config or create new
-	mc, err := config.GetMetanaConfig(FS, wd)
+func RunInit(cmd *cobra.Command, fs afero.Fs, wd string) error {
+	dirFlag, _ := cmd.Flags().GetString("dir")
+	mc, err := config.GetMetanaConfig(fs, wd)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -24,34 +21,24 @@ func RunInit(cmd *cobra.Command, FS afero.Fs, wd string) error {
 		mc = &config.MetanaConfig{}
 	}
 
-	// Resolve finalDir: CLI > config > default
-	finalDir := "migrations"
-	if dir != "" {
-		finalDir = dir
-	} else if mc.Dir != "" {
-		finalDir = mc.Dir
-	}
+	finalDir := resolveDir(dirFlag, mc)
 	mc.Dir = finalDir
 
-	// Create scripts directory
-	if err := FS.MkdirAll(fmt.Sprintf("%s/scripts", finalDir), 0755); err != nil {
+	if err := mkdirScripts(fs, finalDir); err != nil {
+		return err
+	}
+	if err := config.SetMetanaConfig(mc, fs, wd); err != nil {
 		return err
 	}
 
-	// Save updated config
-	if err := config.SetMetanaConfig(mc, FS, wd); err != nil {
-		return err
-	}
-
-	// Determine Go module path
 	goModPath, err := exec.Command("go", "list", "-m").Output()
 	if err != nil {
 		return err
 	}
-	goMod := strings.TrimSpace(string(goModPath))
-	if goMod == "" {
+	if strings.TrimSpace(string(goModPath)) == "" {
 		color.Yellow("No go module found")
 	}
+
 	color.Green("Successfully initialized migration setup in %s", finalDir)
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/format"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -18,7 +19,8 @@ import (
 func CreateMigrationFile(opts CreateMigrationOpts) (string, error) {
 	timestamp := strconv.Itoa(int(time.Now().Unix()))
 	migrationName := strcase.ToCamel(opts.File)
-	fileName := fmt.Sprintf("%s/scripts/%s_%s.go", opts.MigrationsDir, timestamp, opts.File)
+
+	relativeFilePath := filepath.Join(opts.MigrationsDir, "scripts", fmt.Sprintf("%s_%s.go", timestamp, opts.File))
 
 	// Use standalone template
 	mainTemplate := template.Must(
@@ -42,17 +44,17 @@ func CreateMigrationFile(opts CreateMigrationOpts) (string, error) {
 		return "", err
 	}
 
-	if err := afero.WriteFile(opts.FS, fileName, fmtBytes, 0644); err != nil {
+	if err := afero.WriteFile(opts.FS, relativeFilePath, fmtBytes, 0644); err != nil {
 		return "", err
 	}
 
-	return fileName, nil
+	return relativeFilePath, nil
 }
 
 func MigrationExists(wd, migrationsDir, migrationName string, FS afero.Fs) (bool, error) {
 	camelCaseMigration := strcase.ToCamel(migrationName)
 
-	migrations, err := pkg.GetMigrations(wd, migrationsDir, FS)
+	migrations, err := pkg.GetMigrations(migrationsDir, FS)
 	if err != nil {
 		return false, err
 	}

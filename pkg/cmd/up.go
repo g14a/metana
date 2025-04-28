@@ -6,68 +6,48 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/g14a/metana/pkg/config"
-	migrate2 "github.com/g14a/metana/pkg/core/migrate"
+	"github.com/g14a/metana/pkg/core/migrate"
 	"github.com/g14a/metana/pkg/store"
 	"github.com/g14a/metana/pkg/types"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
-func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
-	// Flags
-	dir, _ := cmd.Flags().GetString("dir")
-	storeConn, _ := cmd.Flags().GetString("store")
+func RunUp(cmd *cobra.Command, args []string, fs afero.Fs, wd string) error {
+	dirFlag, _ := cmd.Flags().GetString("dir")
+	storeFlag, _ := cmd.Flags().GetString("store")
 	until, _ := cmd.Flags().GetString("until")
 	dryRun, _ := cmd.Flags().GetBool("dry")
 
-	mc, _ := config.GetMetanaConfig(FS, wd)
+	mc, _ := config.GetMetanaConfig(fs, wd)
+	finalDir := resolveDir(dirFlag, mc)
+	finalStore := resolveStore(storeFlag, mc)
 
-	// Determine migration dir
-	finalDir := "migrations"
-	if dir != "" {
-		finalDir = dir
-	} else if mc != nil && mc.Dir != "" {
-		fmt.Fprintf(cmd.OutOrStdout(), color.GreenString(" ✓ .metana.yml found\n"))
-		finalDir = mc.Dir
-	}
+	finalDir = cleanFinalDir(wd, finalDir)
 
-	// Determine store connection string
-	finalStoreConn := ""
-	if storeConn != "" {
-		finalStoreConn = storeConn
-	} else if mc != nil && mc.StoreConn != "" {
-		finalStoreConn = mc.StoreConn
-	}
-
-	// Setup migration options
-	opts := migrate2.MigrationOptions{
+	opts := migrate.MigrationOptions{
 		Until:         until,
 		MigrationsDir: finalDir,
 		Wd:            wd,
 		Up:            true,
-		StoreConn:     finalStoreConn,
+		StoreConn:     finalStore,
 		DryRun:        dryRun,
 	}
 
-	// Always run migrations (dry or not)
-	output, err := migrate2.Run(opts)
+	output, err := migrate.Run(opts)
 	track, _ := store.ProcessLogs(output)
-	
-	// Only persist to store if not a dry run
+
 	if !dryRun && len(track.Migrations) > 0 {
-		sh, err := store.GetStoreViaConn(finalStoreConn, finalDir, FS, wd)
+		sh, err := store.GetStoreViaConn(finalStore, finalDir, fs, wd)
 		if err != nil {
 			return err
 		}
 
-		existingTrack, err := sh.Load(FS)
+		existingTrack, err := sh.Load(fs)
 		if err != nil {
 			return err
 		}
 
-		existingTrack.LastRun = track.LastRun
-
-		// Merge migrations (deduplicated by Title)
 		existingMap := make(map[string]types.Migration)
 		for _, m := range existingTrack.Migrations {
 			existingMap[m.Title] = m
@@ -76,8 +56,7 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 			existingMap[m.Title] = m
 		}
 
-		// Sort merged result by filename
-		merged := make([]types.Migration, 0, len(existingMap))
+		var merged []types.Migration
 		for _, m := range existingMap {
 			merged = append(merged, m)
 		}
@@ -86,8 +65,9 @@ func RunUp(cmd *cobra.Command, args []string, FS afero.Fs, wd string) error {
 		})
 
 		existingTrack.Migrations = merged
+		existingTrack.LastRun = track.LastRun
 
-		if err := sh.Set(existingTrack, FS); err != nil {
+		if err := sh.Set(existingTrack, fs); err != nil {
 			return err
 		}
 	}

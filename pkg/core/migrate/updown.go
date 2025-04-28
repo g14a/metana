@@ -15,7 +15,13 @@ import (
 )
 
 func Run(opts MigrationOptions) (string, error) {
-	scriptsDir := filepath.Join(opts.Wd, opts.MigrationsDir, "scripts")
+	var scriptsDir string
+	if filepath.IsAbs(opts.MigrationsDir) {
+		scriptsDir = filepath.Join(opts.MigrationsDir, "scripts")
+	} else {
+		scriptsDir = filepath.Join(opts.Wd, opts.MigrationsDir, "scripts")
+	}
+
 	files, err := filepath.Glob(filepath.Join(scriptsDir, "*.go"))
 	if err != nil {
 		return "", err

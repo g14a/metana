@@ -1,9 +1,12 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch: # Manual trigger via GitHub UI
+    inputs:
+      release_tag:
+        description: 'Release tag (e.g., v1.0.0)'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -32,6 +35,11 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+
+      - name: Set Git Tag
+        run: |
+          git tag ${{ github.event.inputs.release_tag }}
+          git push origin ${{ github.event.inputs.release_tag }}
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
