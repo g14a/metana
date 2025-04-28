@@ -6,9 +6,6 @@ release:
   draft: true
   name_template: Metana {{ .Version }}
 
-changelog:
-  skip: true  # ❌ REMOVE this line completely, GoReleaser v2 does not support skip: true
-
 builds:
   - env: [CGO_ENABLED=0]
     ldflags:
