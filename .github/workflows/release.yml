@@ -16,13 +16,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: '1.21'
 
@@ -38,13 +38,16 @@ jobs:
 
       - name: Set Git Tag
         run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ github.event.inputs.release_tag }}
           git push origin ${{ github.event.inputs.release_tag }}
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
-          version: latest
-          args: release --rm-dist
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GH_GORELEASER_TOKEN }}
