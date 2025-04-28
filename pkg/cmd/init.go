@@ -27,7 +27,7 @@ func RunInit(cmd *cobra.Command, fs afero.Fs, wd string) error {
 	if err := mkdirScripts(fs, finalDir); err != nil {
 		return err
 	}
-	if err := config.SetMetanaConfig(mc, fs, wd); err != nil {
+	if err := config.SetMetanaConfig(mc, fs, finalDir); err != nil {
 		return err
 	}
 

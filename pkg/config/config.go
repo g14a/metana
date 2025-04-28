@@ -8,6 +8,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type MetanaConfig struct {
+	Dir       string `yaml:"dir"`
+	StoreConn string `yaml:"store"`
+}
+
+// GetMetanaConfig loads .metana.yml from wd or its parent
 func GetMetanaConfig(FS afero.Fs, wd string) (*MetanaConfig, error) {
 	var config MetanaConfig
 
@@ -33,13 +39,16 @@ func GetMetanaConfig(FS afero.Fs, wd string) (*MetanaConfig, error) {
 	return &config, nil
 }
 
-func SetMetanaConfig(mc *MetanaConfig, FS afero.Fs, wd string) error {
+func SetMetanaConfig(mc *MetanaConfig, FS afero.Fs, migrationsDir string) error {
 	data, err := yaml.Marshal(mc)
 	if err != nil {
 		return err
 	}
 
-	configPath := filepath.Join(wd, ".metana.yml")
+	// Assume migrationsDir is migrations or schema-mig
+	parentDir := filepath.Dir(migrationsDir)
+
+	configPath := filepath.Join(parentDir, ".metana.yml")
 
 	err = afero.WriteFile(FS, configPath, data, 0644)
 	if err != nil {
@@ -47,9 +56,4 @@ func SetMetanaConfig(mc *MetanaConfig, FS afero.Fs, wd string) error {
 	}
 
 	return nil
-}
-
-type MetanaConfig struct {
-	Dir       string `yaml:"dir"`
-	StoreConn string `yaml:"store"`
 }
