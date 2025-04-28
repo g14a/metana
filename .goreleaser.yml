@@ -9,6 +9,12 @@ release:
     owner: g14a
     name: homebrew-metana
 
+upx:
+  enabled: true
+  goos: [linux]
+  goarch: [arm, amd64]
+  compress: best
+
 builds:
   - env: [CGO_ENABLED=0]
     ldflags:
@@ -19,9 +25,6 @@ builds:
     goarch:
       - amd64
       - arm64
-    hooks:
-      post:
-        - upx "{{ .Path }}"
 
 brews:
   - name: metana 
