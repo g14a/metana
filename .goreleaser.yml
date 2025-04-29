@@ -25,14 +25,11 @@ brews:
     homepage: https://github.com/g14a/metana
     description: An abstract migration tool written in Go for Go services.
     license: "Apache-2.0"
-    github:
-      owner: g14a
-      name: metana
     repository:
       owner: g14a
       name: homebrew-metana
       branch: main
-    folder: Formula
+    directory: Formula
     install: |
       bin.install "metana"
     test: |
