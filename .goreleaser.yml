@@ -21,12 +21,25 @@ builds:
       - arm64
 
 brews:
-  - name: metana 
-    repository: 
-      owner: g14a
-      name: homebrew-metana
+  - name: metana
     homepage: https://github.com/g14a/metana
     description: An abstract migration tool written in Go for Go services.
+    license: "Apache-2.0"
+    github:
+      owner: g14a
+      name: metana
+    repository:
+      owner: g14a
+      name: homebrew-metana
+      branch: main
+    folder: Formula
+    install: |
+      bin.install "metana"
+    test: |
+      system "#{bin}/metana", "--help"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
 
 nfpms:
   - maintainer: Gowtham Munukutla <gowtham.m81197@gmail.com>

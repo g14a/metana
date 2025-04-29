@@ -19,10 +19,13 @@ var rootCmd = &cobra.Command{
 	Use:   "metana",
 	Short: "A brief description of your application",
 	Long:  `An abstract migration tool for Go services`,
-	Args:  cobra.ExactArgs(1),
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) {},
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			cmd.Help()
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
