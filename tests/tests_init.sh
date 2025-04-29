@@ -15,11 +15,12 @@ function check_metana_binary() {
 function create_temp_dir() {
   TEMP_DIR=$(mktemp -d)
   echo "✅ Created temp directory: $TEMP_DIR"
+  cd $TEMP_DIR
 }
 
 function run_metana_init_default() {
-  echo "🚀 Running metana init (default dir)..."
-  metana init --dir "$TEMP_DIR/migrations"
+  echo "🚀 Running metana init..."
+  metana init
 }
 
 function validate_default_migrations_structure() {
@@ -30,34 +31,7 @@ function validate_default_migrations_structure() {
     exit 1
   fi
 
-  if [ ! -f "$TEMP_DIR/.metana.yml" ]; then
-    echo "❌ .metana.yml not created!"
-    exit 1
-  fi
-
-  echo "✅ Default migrations/scripts and .metana.yml are present."
-}
-
-function run_metana_init_custom_dir() {
-  CUSTOM_DIR="$TEMP_DIR/schema-migrations"
-  echo "🚀 Running metana init with --dir=$CUSTOM_DIR..."
-  metana init --dir "$CUSTOM_DIR"
-}
-
-function validate_custom_migrations_structure() {
-  echo "🔍 Validating custom migrations structure..."
-
-  if [ ! -d "$CUSTOM_DIR/scripts" ]; then
-    echo "❌ Custom migrations/scripts directory not created!"
-    exit 1
-  fi
-
-  if [ ! -f "$TEMP_DIR/.metana.yml" ]; then
-    echo "❌ .metana.yml not created for custom dir!"
-    exit 1
-  fi
-
-  echo "✅ Custom migrations/scripts and .metana.yml are present."
+  echo "✅ Default migrations/scripts present."
 }
 
 function main() {
@@ -68,11 +42,6 @@ function main() {
   echo "▶️  Testing default init..."
   run_metana_init_default
   validate_default_migrations_structure
-
-  echo "==============================="
-  echo "▶️  Testing init with custom --dir..."
-  run_metana_init_custom_dir
-  validate_custom_migrations_structure
 
   echo "==============================="
   echo "🎉 ALL INIT tests passed successfully!"

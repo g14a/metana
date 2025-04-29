@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/g14a/metana/pkg/config"
 	"github.com/g14a/metana/pkg/core/gen"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -18,9 +17,7 @@ func RunCreate(cmd *cobra.Command, args []string, fs afero.Fs, wd string) error 
 		return fmt.Errorf("missing migration name")
 	}
 
-	dirFlag, _ := cmd.Flags().GetString("dir")
-	mc, _ := config.GetMetanaConfig(fs, wd)
-	finalDir := resolveDir(dirFlag, mc)
+	finalDir := resolveDir()
 
 	if exists, _ := gen.MigrationExists(wd, finalDir, args[0], fs); exists {
 		color.Yellow("Migration already exists")

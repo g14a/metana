@@ -3,10 +3,10 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/g14a/metana/pkg"
-	"github.com/g14a/metana/pkg/config"
 
 	cmd2 "github.com/g14a/metana/pkg/cmd"
 	"github.com/spf13/afero"
@@ -34,7 +34,6 @@ var upCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(upCmd)
-	upCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	upCmd.Flags().StringP("until", "u", "", "Migrate up until a specific point\n")
 	upCmd.Flags().StringP("store", "s", "", "Specify a connection url to track migrations")
 	upCmd.Flags().Bool("dry", false, "Specify if the upward migration is a dry run {true | false}")
@@ -47,19 +46,11 @@ func init() {
 			return nil, 0
 		}
 
-		mc, _ := config.GetMetanaConfig(FS, wd)
+		finalDir := "migrations"
 
-		var finalDir string
-
-		if mc != nil && mc.Dir != "" {
-			finalDir = mc.Dir
-		} else {
-			finalDir = "migrations"
-		}
-
-		migrations, err := pkg.GetMigrations(finalDir, FS)
+		migrations, err := pkg.GetMigrations(filepath.Join(wd, finalDir), FS)
 		if err != nil {
-			return nil, 0
+			return nil, cobra.ShellCompDirectiveError
 		}
 
 		var names []string
@@ -71,13 +62,4 @@ func init() {
 
 		return names, cobra.ShellCompDirectiveDefault
 	})
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// upCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// upCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

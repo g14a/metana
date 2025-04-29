@@ -26,8 +26,7 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	listCmd.Flags().StringP("dir", "d", "", "Specify migrations dir")
-	listCmd.Flags().StringP("env", "e", "", "List migrations in an environment")
+	listCmd.Flags().StringP("store", "s", "", "Specify a connection URL to track migrations")
 
 	rootCmd.AddCommand(listCmd)
 

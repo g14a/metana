@@ -3,26 +3,18 @@ package cmd
 import (
 	"path/filepath"
 
-	"github.com/g14a/metana/pkg/config"
 	"github.com/spf13/afero"
 )
 
-func resolveDir(dirFlag string, mc *config.MetanaConfig) string {
-	if dirFlag != "" {
-		return dirFlag
-	}
-	if mc != nil && mc.Dir != "" {
-		return mc.Dir
-	}
+// resolveDir simply returns the CLI flag if set, otherwise default "migrations"
+func resolveDir() string {
 	return "migrations"
 }
 
-func resolveStore(storeFlag string, mc *config.MetanaConfig) string {
+// resolveStore simply returns the CLI store flag if set, otherwise empty
+func resolveStore(storeFlag string) string {
 	if storeFlag != "" {
 		return storeFlag
-	}
-	if mc != nil && mc.StoreConn != "" {
-		return mc.StoreConn
 	}
 	return ""
 }

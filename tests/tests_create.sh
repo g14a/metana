@@ -15,11 +15,12 @@ function check_metana_binary() {
 function create_temp_dir() {
   TEMP_DIR=$(mktemp -d)
   echo "✅ Created temp directory: $TEMP_DIR"
+  cd $TEMP_DIR
 }
 
-function run_metana_init() {
-  echo "🚀 Running metana init (default)..."
-  metana init --dir "$TEMP_DIR/migrations"
+function run_metana_init_default() {
+  echo "🚀 Running metana init..."
+  metana init
 }
 
 function validate_migrations_structure() {
@@ -30,12 +31,7 @@ function validate_migrations_structure() {
     exit 1
   fi
 
-  if [ ! -f "$TEMP_DIR/.metana.yml" ]; then
-    echo "❌ .metana.yml not created!"
-    exit 1
-  fi
-
-  echo "✅ migrations/scripts and .metana.yml are present."
+  echo "✅ migrations/scripts present."
 }
 
 function run_metana_create_default_dir() {
@@ -53,42 +49,18 @@ function run_metana_create_default_dir() {
   echo "✅ Migration created successfully in default migrations dir: $CREATED_FILE"
 }
 
-function run_metana_create_custom_dir() {
-  echo "🚀 Running metana create initSchema2 (custom dir)..."
-
-  CUSTOM_DIR="$TEMP_DIR/custom_migrations"
-  mkdir -p "$CUSTOM_DIR/scripts"
-
-  echo -e "dir: custom_migrations\nstore: ''" > "$TEMP_DIR/.metana.yml"
-
-  (cd "$TEMP_DIR" && metana create initSchema2 --dir custom_migrations)
-
-  CREATED_CUSTOM_FILE=$(find "$CUSTOM_DIR/scripts" -type f -name "*_initSchema2.go" || true)
-
-  if [ -z "$CREATED_CUSTOM_FILE" ]; then
-    echo "❌ Migration file for initSchema2 not created in custom migrations dir!"
-    exit 1
-  fi
-
-  echo "✅ Migration created successfully in custom migrations dir: $CREATED_CUSTOM_FILE"
-}
-
 function main() {
   check_metana_binary
   create_temp_dir
 
   echo "==============================="
   echo "▶️  Testing metana init..."
-  run_metana_init
+  run_metana_init_default
   validate_migrations_structure
 
   echo "==============================="
   echo "▶️  Testing metana create in default dir..."
   run_metana_create_default_dir
-
-  echo "==============================="
-  echo "▶️  Testing metana create in custom dir..."
-  run_metana_create_custom_dir
 
   echo "==============================="
   echo "🎉 INIT + CREATE tests passed successfully!"

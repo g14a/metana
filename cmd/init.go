@@ -27,7 +27,6 @@ var initCmd = &cobra.Command{
 }
 
 func init() {
-	initCmd.Flags().StringP("dir", "d", "", "Specify custom migrations directory")
 	rootCmd.AddCommand(initCmd)
 
 	// Here you will define your flags and configuration settings.

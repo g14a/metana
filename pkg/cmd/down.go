@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/g14a/metana/pkg/config"
 	"github.com/g14a/metana/pkg/core/migrate"
 	"github.com/g14a/metana/pkg/store"
 	"github.com/g14a/metana/pkg/types"
@@ -13,14 +12,12 @@ import (
 )
 
 func RunDown(cmd *cobra.Command, args []string, fs afero.Fs, wd string) error {
-	dirFlag, _ := cmd.Flags().GetString("dir")
 	storeFlag, _ := cmd.Flags().GetString("store")
 	until, _ := cmd.Flags().GetString("until")
 	dryRun, _ := cmd.Flags().GetBool("dry")
 
-	mc, _ := config.GetMetanaConfig(fs, wd)
-	finalDir := resolveDir(dirFlag, mc)
-	finalStore := resolveStore(storeFlag, mc)
+	finalDir := resolveDir()
+	finalStore := resolveStore(storeFlag)
 
 	finalDir = cleanFinalDir(wd, finalDir)
 
