@@ -20,7 +20,6 @@ An abstract task migration tool written in Go for Go services. Database and non 
     * [macOS](https://github.com/g14a/metana#mac)
     * [Linux](https://github.com/g14a/metana#linux)
     * [Building from Source](https://github.com/g14a/metana#building-from-source)
-    * [Docker](https://github.com/g14a/metana#docker)
 * [Usage](https://github.com/g14a/metana#usage)
     * [Init](https://github.com/g14a/metana#init) ✅
     * [Create](https://github.com/g14a/metana#create) 👌 
@@ -28,18 +27,16 @@ An abstract task migration tool written in Go for Go services. Database and non 
     * [Down](https://github.com/g14a/metana#down) ⬇️
     * [List](https://github.com/g14a/metana#list) 
 * [Features](https://github.com/g14a/metana#features)
-    * [Custom directory to store migrations](https://github.com/g14a/metana#custom-directory-to-store-migrations)
     * [Run migrations until a certain point](https://github.com/g14a/metana#run-a-migration-until-a-certain-point)
     * [Store and Track your migrations in your favourite database](https://github.com/g14a/metana#store-and-track-your-migrations-in-your-favourite-database)
     * [Dry Run Migrations](https://github.com/g14a/metana#dry-run-migrations)
-    * [Custom Config](https://github.com/g14a/metana#custom-config)
     * [Automatic Rollback on Migration Failure](https://github.com/g14a/metana#automatic-rollback-on-migration-failure)
     
 # Use case
 
 The motivation behind creating this tool, is to abstract away the database part. If your task can be completed with Pure Go or via a Go driver of your service, then this is for you. Since it makes use of the Go runtime, you can even perform database migrations like PostgreSQL, Mongo, Redis, Elasticsearch, GCP Buckets etc. You just need to be able to interact with your data store or complete your task using Go.
 
-The main use case is when you won't be able to do everything with SQL or No-SQL syntax. There might be some tasks where you need to aggregate data, iterate over them, and do business related stuff with the retrieved data. All you need to know is Go syntax and write a Go program.
+The main use case is when you won't be able to do everything with SQL or No-SQL syntax. There might be some tasks where you need to aggregate data, iterate over them, and do business related computation. All you need to know is Go syntax and write a Go program.
 
 # Installation
 
@@ -112,22 +109,13 @@ $ metana init
 Successfully initialized migration setup in migrations
 ```
 
-By default it will create a `migrations` folder if no such folder exists. If it does, it adds the `main.go` file into the same.
-
-If you want to initialize migrations in a different directory, you can do so with the `--dir | -d` flag:
-
-```shell
-metana init --dir /path/to/folder
-```
-
 ## **`Create`**
 
 `create` creates a migration script with two functions `Up()` and `Down()` denoting the upward and downward migration of the same.
 
 ```shell
 $ metana create initSchema
- ✓ .metana.yml found
- ✓ Created /Users/gowtham.munukutla/metana/migrations/scripts/1745742878_initSchema.go
+✓ Created migrations/scripts/1746334029_initSchema.go
 ```
 
 Head over to your `1745742878_initSchema.go` to edit your script. Remember to not change any function signature.
@@ -138,7 +126,7 @@ Head over to your `1745742878_initSchema.go` to edit your script. Remember to no
 
 ```shell
 $ metana up
- ✓ .metana.yml found
+
 InitSchema up
 __COMPLETE__[up]: 1745742878_initSchema.go
 InitSchema2 up
@@ -152,7 +140,7 @@ __COMPLETE__[up]: 1745742917_initSchema2.go
 
 ```shell
 $ metana down
- ✓ .metana.yml found
+
 InitSchema down
 __COMPLETE__[down]: 1745742878_initSchema.go
 InitSchema2 down
@@ -176,31 +164,14 @@ $ metana list
 
 # Features
 
-## **Custom directory to store migrations**
-
-Specify a custom directory when creating and running upward or downward migrations using the `--dir` flag. Be default it is set to `"migrations"`
-
-```shell
-$ metana init --dir custom-migration-directory
-Successfully initialized migration setup in custom-migration-directory
-
-$ metana create initSchema --dir custom-migration-directory
- ✓ Created /Users/gowtham.munukutla/metana/custom-migration-directory/scripts/1745743111_initSchema.go
- 
-$ metana up --dir custom-migration-directory
-InitSchema up
-__COMPLETE__[up]: 1745743111_initSchema.go
-  >>> migration : complete
-```
-
 ## **Run a migration until a certain point**
 
 Run upward and downward migrations until(and including) a certain migration with the `--until` flag.
 
 ```shell
 
-$ metana create initSchema                                                  ✓ .metana.yml found
- ✓ Created /Users/gowtham.munukutla/metana/migrations/scripts/1745743242_initSchema.go
+$ metana create initSchema                                                 
+✓ Created migrations/scripts/1746334029_initSchema.go
  
 $ Create more migration scripts...
 
@@ -214,7 +185,7 @@ $ metana list
 | 1745743247_initSchema3.go |                  |
 +---------------------------+------------------+
 
-$ metana up --until initSchema2                                                 ✓ .metana.yml found
+$ metana up --until initSchema2                                                
 InitSchema up
 __COMPLETE__[up]: 1745743242_initSchema.go
 InitSchema2 up
@@ -245,7 +216,7 @@ You can dry run your migrations using the explicit `--dry` option. This option d
 
 ```shell
 $ metana up --dry
- ✓ .metana.yml found
+
 InitSchema up
 __COMPLETE__[up]: 1745743242_initSchema.go
 InitSchema2 up
@@ -257,7 +228,7 @@ __COMPLETE__[up]: 1745743247_initSchema3.go
 
 ```shell
 $ metana down --dry
- ✓ .metana.yml found
+
 InitSchema down
 __COMPLETE__[down]: 1745743242_initSchema.go
 InitSchema2 down
@@ -268,49 +239,6 @@ __COMPLETE__[down]: 1745743247_initSchema3.go
 ```
 
 All the other options like `--dir` and `--until` work along with `--dry`.
-
-## **Custom config**
-
-Set your custom config in your `.metana.yml` file. As of now it supports `dir` and `store` keys.
-
-For eg:
-```
-dir: schema-mig
-store: '@MONGO_URL'
-```
-
-Remember to add it to your git unless you want to miss migrations on deployments.
-
-If your store has a remote database URL you can specify it via '@<url>' syntax and it will automatically be picked up from your environment variables (Remember the single quotes).You don't want to hardcode API Keys and connection URLs in your codebase.
-
-`.metana.yml` is created automatically when you run `metana init` which can be used for subsequent migration operations.
-
-You can either manually add the config on to the `.metana.yml` file or do it via
-
-`metana config set --store @MONGO_URL`
-
-```shell
-$ metana config set --help
-Set your metana config
-
-Usage:
-  metana config set [flags]
-
-Flags:
-  -d, --dir string     Set your migrations directory (default "migrations")
-  -h, --help           help for set
-  -s, --store string   Set your store
-
-```
-
-<span style="color:red">CAUTION: </span>
-If you change the dir flag in your `.metana.yml` after running `metana init`, don't forget to rename your migrations directory to the new directory. Otherwise running migrations would result in failure.
-
-Priority order of config:
-
-1. Flags passed explicitly
-2. `.metana.yml` if it exists.
-3. Default values of flags.
 
 ## **Automatic Rollback on Migration Failure**
 
@@ -324,7 +252,7 @@ You don't have to manually clean up — rollback is automatic. But you still hav
 
 ```shell
 $ metana up
- ✓ .metana.yml found
+
 InitSchema up
 __COMPLETE__[up]: 1745748076_initSchema.go
 Migration 1745748078_initSchema2.go failed, attempting rollback...
