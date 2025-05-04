@@ -6,7 +6,6 @@ on:
     paths:
       - 'cmd/**'
       - 'pkg/**'
-      - 'tests/**'
   pull_request:
     branches: [ main ]
 
