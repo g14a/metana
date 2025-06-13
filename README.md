@@ -20,12 +20,17 @@ An abstract task migration tool written in Go for Go services. Database and non 
     * [macOS](https://github.com/g14a/metana#mac)
     * [Linux](https://github.com/g14a/metana#linux)
     * [Building from Source](https://github.com/g14a/metana#building-from-source)
-* [Usage](https://github.com/g14a/metana#usage)
+* [Usage as CLI](https://github.com/g14a/metana#usage-as-cli)
     * [Init](https://github.com/g14a/metana#init) ✅
     * [Create](https://github.com/g14a/metana#create) 👌 
     * [Up](https://github.com/g14a/metana#up) ⬆️
     * [Down](https://github.com/g14a/metana#down) ⬇️
     * [List](https://github.com/g14a/metana#list) 
+* [Usage as Library](https://github.com/g14a/metana#usage-as-library) 📚
+    * [Quick Start](https://github.com/g14a/metana#quick-start)
+    * [Configuration](https://github.com/g14a/metana#configuration)
+    * [Operations](https://github.com/g14a/metana#operations)
+    * [Result Handling](https://github.com/g14a/metana#result-handling)
 * [Features](https://github.com/g14a/metana#features)
     * [Run migrations until a certain point](https://github.com/g14a/metana#run-a-migration-until-a-certain-point)
     * [Store and Track your migrations in your favourite database](https://github.com/g14a/metana#store-and-track-your-migrations-in-your-favourite-database)
@@ -70,7 +75,7 @@ cd metana
 go install
 ```
 
-# Usage
+# Usage as CLI
 
 After installation, let's just hit metana on the terminal.
 
@@ -270,3 +275,161 @@ main.main()
         /Users/gowtham.munukutla/metana/migrations/scripts/1745748078_initSchema2.go:48 +0x1d8
 exit status 1
 ```
+
+# Usage as Library
+
+📚 **NEW:** Metana can now be used as a library in your Go applications!
+
+Instead of using the CLI, you can import metana into your Go projects and run migrations programmatically. This is useful for applications that need to manage their own migrations or integrate migration management into their startup process.
+
+## Quick Start
+
+```go
+package main
+
+import (
+    "log"
+    "github.com/g14a/metana/pkg/metana"
+)
+
+func main() {
+    // Create a metana client
+    client := metana.NewClient(metana.Config{
+        WorkingDirectory:      ".",
+        MigrationsDirectory:   "migrations",
+        StoreConnectionString: "postgres://user:pass@localhost/db", // optional
+    })
+
+    // Initialize migration setup
+    if result := client.Init(); !result.Success {
+        log.Fatal(result.Error)
+    }
+
+    // Create a migration
+    createResult := client.Create(metana.CreateOptions{
+        Name: "add_users_table",
+    })
+    if !createResult.Success {
+        log.Fatal(createResult.Error)
+    }
+
+    // Run migrations
+    upResult := client.Up(metana.UpOptions{})
+    if !upResult.Success {
+        log.Fatal(upResult.Error)
+    }
+    
+    log.Println("Migration completed successfully!")
+}
+```
+
+## Configuration
+
+The library uses a `Config` struct for configuration:
+
+```go
+type Config struct {
+    // Base directory for migration operations (defaults to current directory)
+    WorkingDirectory string
+    
+    // Directory containing migration files (defaults to "migrations")
+    MigrationsDirectory string
+    
+    // Connection string for tracking migrations (optional)
+    // Supports: postgres://, mongodb://, file-based (default)
+    // Environment variables: @ENV_VAR_NAME
+    StoreConnectionString string
+    
+    // Custom filesystem implementation (optional, uses OS filesystem by default)
+    FileSystem afero.Fs
+}
+```
+
+## Operations
+
+All the CLI operations are available as library methods:
+
+### Initialize
+```go
+result := client.Init()
+```
+
+### Create Migration
+```go
+result := client.Create(metana.CreateOptions{
+    Name: "migration_name",
+})
+```
+
+### Run Upward Migrations
+```go
+result := client.Up(metana.UpOptions{
+    Until:  "migration_name", // optional: stop at specific migration
+    DryRun: false,           // optional: preview without executing
+})
+```
+
+### Run Downward Migrations
+```go
+result := client.Down(metana.DownOptions{
+    Until:  "migration_name", // optional: rollback to specific migration
+    DryRun: false,           // optional: preview without executing
+})
+```
+
+### List Migrations
+```go
+result := client.List(metana.ListOptions{})
+```
+
+## Result Handling
+
+All operations return a `MigrationResult` struct:
+
+```go
+type MigrationResult struct {
+    Success            bool              // Whether operation succeeded
+    Message            string            // Human-readable result message
+    Output             string            // Detailed output from operation
+    Error              error             // Any error that occurred
+    ExecutedMigrations []types.Migration // List of executed migrations
+}
+```
+
+Always check the `Success` field:
+
+```go
+result := client.Up(metana.UpOptions{})
+if !result.Success {
+    log.Printf("Migration failed: %v", result.Error)
+    return
+}
+log.Println("Success:", result.Message)
+```
+
+## Example Application
+
+See the [example/](example/) directory for a complete working example that demonstrates:
+
+- Client initialization
+- Migration creation
+- Listing migrations
+- Running dry-run migrations
+- Error handling
+
+To run the example:
+
+```bash
+cd example
+go run main.go
+```
+
+## Library Documentation
+
+For complete API documentation and advanced usage examples, see:
+
+- [Library API Documentation](pkg/metana/README.md)
+- [Example Usage](pkg/metana/examples.go)
+- [Test Examples](pkg/metana/metana_test.go)
+
+**Compatibility Note:** The library interface maintains full compatibility with all existing CLI features and doesn't affect the CLI functionality.
